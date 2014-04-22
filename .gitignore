@@ -1,0 +1,9 @@
+*.pyc
+log.html
+output.xml
+report.html
+dist/*
+src/edeposit.amqp.ftp.egg-info/*
+docs/_build
+MANIFEST
+*.html
