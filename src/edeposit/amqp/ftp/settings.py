@@ -29,7 +29,7 @@ import os.path
 #: Module's path.
 BASE_PATH = (os.path.dirname(__file__))
 
-#: URL of FTP server
+#: URL of FTP server  # TODO: remove
 URL = "ftp://server.somewhere"
 
 #: username for FTP server
@@ -37,6 +37,11 @@ USERNAME = "username"
 
 #: password for FTP server
 PASSWORD = "pass"
+
+PROFTPD_CONF_PATH = "/etc/proftpd/"
+
+PROFTPD_LOGIN_FILE = "AuthUserFile.conf"
+PROFTPD_GROUP_FILE = "AuthGroupFile.conf"
 
 
 #= user configuration reader ==================================================

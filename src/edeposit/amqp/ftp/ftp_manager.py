@@ -22,6 +22,10 @@ def is_valid_username(username):  # TODO: implement username validation
 def add_user(username):
     assert is_valid_username(username), "Invalid username '%s'!" % (username,)
 
+    # TODO: check, if username is present
+
+    # TODO: check, if this is first time the script is run
+
 
 def remove_user(username):
     pass
