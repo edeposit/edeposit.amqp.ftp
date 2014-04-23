@@ -39,9 +39,11 @@ USERNAME = "username"
 PASSWORD = "pass"
 
 PROFTPD_CONF_PATH = "/etc/proftpd/"
+PROFTPD_CONF_FILE = "proftpd.conf"
 
 PROFTPD_LOGIN_FILE = "AuthUserFile.conf"
 PROFTPD_GROUP_FILE = "AuthGroupFile.conf"
+
 
 
 #= user configuration reader ==================================================

@@ -27,12 +27,24 @@ def add_or_update(data, item, value):
     data = map(lambda x: bytearray(x), data)
 
     # search for the item in raw (ucommented) values
-    
+    conf = filter(lambda x: x.strip() and x.strip().split()[0] == item, data)
 
-    # search for the item in commented values
-    
+    if conf:
+        conf[0][:] = conf[0].strip().split()[0] + " " + value
+    else:
+        # search for the item in commented values
+        comments = filter(
+            lambda x: x.strip().startswith("#") and
+                    len(x.split("#")) >= 2 and
+                    x.split("#")[1].split()[0] == item,
+            data
+        )
 
-    # add item, if not found in raw/commented values
+        if comments:
+            comments[0][:] = comments[0].split("#")[1].split()[0] + " " + value
+        else:
+            # add item, if not found in raw/commented values
+            data.append(item + " " + value)
 
     return "\n".join(map(lambda x: str(x), data))  # convert back to string
 
@@ -57,9 +69,8 @@ if __name__ == '__main__':
     with open(PROFTPD_CONF_PATH + PROFTPD_CONF_FILE) as f:
         data = f.read()
 
-    data = add_or_update(data, "", "")
+    data = add_or_update(data, "AdminControlsEngine", "on")
+
+    print data
 
     # reload_configuration()  # TODO: uncomment
-
-
-
