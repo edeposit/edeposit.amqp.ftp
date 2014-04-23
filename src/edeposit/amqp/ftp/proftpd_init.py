@@ -19,6 +19,17 @@ from __init__ import reload_configuration
 
 #= Functions & objects ========================================================,
 def add_or_update(data, item, value):
+    """
+    Add or update value in configuration file format used by proftpd.
+
+    Args:
+        data (str): Configuration file as string.
+        item (str): What option will be added/updated.
+        value (str): Value of option.
+
+    Returns:
+        (string): updated configuration
+    """
     data = data.splitlines()
 
     # to list of bytearrays (this is useful, because their reference passed to
@@ -36,6 +47,7 @@ def add_or_update(data, item, value):
         comments = filter(
             lambda x: x.strip().startswith("#") and
                     len(x.split("#")) >= 2 and
+                    x.split("#")[1].split() and
                     x.split("#")[1].split()[0] == item,
             data
         )
@@ -47,6 +59,8 @@ def add_or_update(data, item, value):
             data.append(item + " " + value)
 
     return "\n".join(map(lambda x: str(x), data))  # convert back to string
+
+
 
 #= Main program ===============================================================
 if __name__ == '__main__':
@@ -69,8 +83,21 @@ if __name__ == '__main__':
     with open(PROFTPD_CONF_PATH + PROFTPD_CONF_FILE) as f:
         data = f.read()
 
-    data = add_or_update(data, "AdminControlsEngine", "on")
+    # set user file
+    data = add_or_update(
+        data,
+        "AuthUserFile",
+        PROFTPD_CONF_PATH + PROFTPD_LOGIN_FILE
+    )
+    # set group file
+    data = add_or_update(
+        data,
+        "AuthGroupFile",
+        PROFTPD_CONF_PATH + PROFTPD_GROUP_FILE
+    )
+    # allow virtual users
+    data = add_or_update(data, "RequireValidShell", "off")
 
     print data
 
-    # reload_configuration()  # TODO: uncomment
+    reload_configuration()  # TODO: uncomment
