@@ -98,6 +98,4 @@ if __name__ == '__main__':
     # allow virtual users
     data = add_or_update(data, "RequireValidShell", "off")
 
-    print data
-
-    reload_configuration()  # TODO: uncomment
+    reload_configuration()

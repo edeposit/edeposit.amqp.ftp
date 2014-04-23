@@ -12,9 +12,7 @@ Note:
 Example of the configuration file (``$HOME/edeposit/ftp.json``)::
 
     {
-        "URL": "ftp://127.0.0.1",
-        "USERNAME": "edeposit",
-        "PASSWORD": "from edeposit ^-^"
+        "PROFTPD_CONF_PATH": "/home/bystrousak/.ftpdconf/"
     }
 
 Attributes
@@ -29,21 +27,15 @@ import os.path
 #: Module's path.
 BASE_PATH = (os.path.dirname(__file__))
 
-#: URL of FTP server  # TODO: remove
-URL = "ftp://server.somewhere"
-
-#: username for FTP server
-USERNAME = "username"
-
-#: password for FTP server
-PASSWORD = "pass"
-
+#: proftpd configuration directory
 PROFTPD_CONF_PATH = "/etc/proftpd/"
+#: proftpd configuration file (in conf. directory)
 PROFTPD_CONF_FILE = "proftpd.conf"
 
-PROFTPD_LOGIN_FILE = "AuthUserFile.conf"
-PROFTPD_GROUP_FILE = "AuthGroupFile.conf"
-
+#: file where the login informations will be stored
+PROFTPD_LOGIN_FILE = "ftpd.passwd"
+#: file where the group informations will be stored
+PROFTPD_GROUP_FILE = "ftpd.group"
 
 
 #= user configuration reader ==================================================
