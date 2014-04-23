@@ -7,8 +7,7 @@
 import os
 import os.path
 import sys
-
-import sh
+from pwd import getpwnam
 
 from settings import *
 from __init__ import reload_configuration
@@ -61,24 +60,30 @@ def add_or_update(data, item, value):
     return "\n".join(map(lambda x: str(x), data))  # convert back to string
 
 
-
 #= Main program ===============================================================
 if __name__ == '__main__':
     if os.geteuid() != 0:
-        sys.stderr.write("You have to be root to use this program.\n")
+        sys.stderr.write("You have to be root (uid 0) to use this program.\n")
         sys.exit(1)
 
     if not os.path.exists(PROFTPD_CONF_PATH):
         pass  # TODO: create/unpack default configuration
 
+    # create data directory, where the user informations will be stored
+    if not os.path.exists(PROFTPD_DATA_DIRECTORY):
+        os.makedirs(PROFTPD_DATA_DIRECTORY, 0777)
+
     # TODO: check important files (proftpd.conf)
 
     # create user files if they doesn't exists
-    if not os.path.exists(PROFTPD_CONF_PATH + PROFTPD_LOGIN_FILE):
-        open(PROFTPD_CONF_PATH + PROFTPD_LOGIN_FILE, "a").close()
-    if not os.path.exists(PROFTPD_CONF_PATH + PROFTPD_GROUP_FILE):
-        open(PROFTPD_CONF_PATH + PROFTPD_GROUP_FILE, "a").close()
+    login_file = PROFTPD_CONF_PATH + PROFTPD_LOGIN_FILE
+    if not os.path.exists(login_file):
+        open(login_file, "a").close()
 
+    os.chown(login_file, getpwnam('proftpd').pw_uid, -1)
+    os.chmod(login_file, 0400)
+
+    # change important configuration values in protpd conf
     data = ""
     with open(PROFTPD_CONF_PATH + PROFTPD_CONF_FILE) as f:
         data = f.read()
@@ -89,13 +94,11 @@ if __name__ == '__main__':
         "AuthUserFile",
         PROFTPD_CONF_PATH + PROFTPD_LOGIN_FILE
     )
-    # set group file
-    data = add_or_update(
-        data,
-        "AuthGroupFile",
-        PROFTPD_CONF_PATH + PROFTPD_GROUP_FILE
-    )
-    # allow virtual users
+
     data = add_or_update(data, "RequireValidShell", "off")
+    data = add_or_update(data, "DefaultRoot", "~")
+
+    with open(PROFTPD_CONF_PATH + PROFTPD_CONF_FILE, "wt") as f:
+        f.write(data)
 
     reload_configuration()

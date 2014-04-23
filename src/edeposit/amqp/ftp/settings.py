@@ -34,8 +34,9 @@ PROFTPD_CONF_FILE = "proftpd.conf"
 
 #: file where the login informations will be stored
 PROFTPD_LOGIN_FILE = "ftpd.passwd"
-#: file where the group informations will be stored
-PROFTPD_GROUP_FILE = "ftpd.group"
+
+#: path to directory, where the user directories will be created
+PROFTPD_DATA_DIRECTORY = "/home/ftp/"
 
 
 #= user configuration reader ==================================================
