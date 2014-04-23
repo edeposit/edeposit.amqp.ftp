@@ -5,9 +5,7 @@
 # Interpreter version: python 2.7
 #
 #= Imports ====================================================================
-import os
-import sys
-
+from collections import namedtuple
 
 import sh
 
@@ -19,3 +17,11 @@ from settings import *
 #= Functions & objects ========================================================
 def reload_configuration():
     sh.killall("-HUP", "proftpd")
+
+
+class CreateUser(namedtuple("CreateUser", ["username"])):
+    pass
+
+
+class RemoveUser(namedtuple("RemoveUser", ["username"])):
+    pass
