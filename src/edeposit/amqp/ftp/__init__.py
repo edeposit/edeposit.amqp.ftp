@@ -16,12 +16,16 @@ from settings import *
 
 #= Functions & objects ========================================================
 def reload_configuration():
-    sh.killall("-HUP", "proftpd")
+    sh.killall("-HUP", "proftpd", _ok_code=[0, 1])
 
 
-class CreateUser(namedtuple("CreateUser", ["username"])):
+class CreateUser(namedtuple("CreateUser", ["username", "password"])):
     pass
 
 
-class RemoveUser(namedtuple("RemoveUser", ["username"])):
+class RemoveUser(namedtuple("RemoveUser", ["username", "password"])):
+    pass
+
+
+class ChangePassword(namedtuple("ChangePassword", ["username", "password"])):
     pass
