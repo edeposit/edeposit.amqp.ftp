@@ -33,16 +33,17 @@ PROFTPD_CONF_PATH = "/etc/proftpd/"
 #: proftpd log directory
 PROFTPD_LOG_PATH = "/var/log/proftpd/"
 
+#: path to directory, where the user directories will be created
+PROFTPD_DATA_PATH = "/home/ftp/"
+
+
 #: proftpd configuration file (in conf. directory)
-PROFTPD_CONF_FILE = "proftpd.conf"
+PROFTPD_CONF_FILE = "proftpd.conf"  # TODO: prepend PATH var
 
 #: file where the login informations will be stored
 PROFTPD_LOGIN_FILE = "ftpd.passwd"
 
 PROFPD_LOG_FILE = "extended.log"
-
-#: path to directory, where the user directories will be created
-PROFTPD_DATA_PATH = "/home/ftp/"
 
 
 #= user configuration reader ==================================================
