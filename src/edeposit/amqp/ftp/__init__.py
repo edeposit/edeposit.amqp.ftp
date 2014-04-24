@@ -29,3 +29,7 @@ class RemoveUser(namedtuple("RemoveUser", ["username", "password"])):
 
 class ChangePassword(namedtuple("ChangePassword", ["username", "password"])):
     pass
+
+
+class ListRegisteredUsers(nameduple("ListRegisteredUsers")):
+    pass
