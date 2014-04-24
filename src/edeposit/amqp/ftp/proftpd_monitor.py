@@ -4,7 +4,8 @@
 # Interpreter version: python 2.7
 #
 #= Imports ====================================================================
-
+import sh
+import sys
 
 
 #= Variables ==================================================================
@@ -17,4 +18,5 @@
 
 #= Main program ===============================================================
 if __name__ == '__main__':
-    pass
+    with open("/tmp/ftp_uploadedf", "a") as f:
+        f.write(" ".join(sys.argv))
