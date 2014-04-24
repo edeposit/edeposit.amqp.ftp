@@ -3,6 +3,9 @@
 #
 # Interpreter version: python 2.7
 #
+# TODO: log path to settings
+# TODO: default configuration
+#
 #= Imports ====================================================================
 import os
 import os.path
@@ -162,6 +165,7 @@ Include /etc/proftpd/conf.d/
 AuthUserFile /etc/proftpd/ftpd.passwd
 """
 
+
 #= Functions & objects ========================================================,
 def add_or_update(data, item, value):
     """
@@ -201,7 +205,7 @@ def add_or_update(data, item, value):
             comments[0][:] = comments[0].split("#")[1].split()[0] + " " + value
         else:
             # add item, if not found in raw/commented values
-            data.append(item + " " + value)
+            data.append(item + " " + value + "\n")
 
     return "\n".join(map(lambda x: str(x), data))  # convert back to string
 
@@ -221,8 +225,8 @@ if __name__ == '__main__':
             f.write(DEFAULT_PROFTPD_CONF)
 
     # create data directory, where the user informations will be stored
-    if not os.path.exists(PROFTPD_DATA_DIRECTORY):
-        os.makedirs(PROFTPD_DATA_DIRECTORY, 0777)
+    if not os.path.exists(PROFTPD_DATA_PATH):
+        os.makedirs(PROFTPD_DATA_PATH, 0777)
 
     # create user files if they doesn't exists
     login_file = PROFTPD_CONF_PATH + PROFTPD_LOGIN_FILE
@@ -246,6 +250,12 @@ if __name__ == '__main__':
 
     data = add_or_update(data, "RequireValidShell", "off")
     data = add_or_update(data, "DefaultRoot", "~")
+    data = add_or_update(data, "LogFormat", 'paths "%f, %u, %m, %{%s}t"')
+    data = add_or_update(
+        data,
+        "ExtendedLog",
+        PROFTPD_LOG_PATH + PROFPD_LOG_FILE + " WRITE paths"
+    )
 
     with open(PROFTPD_CONF_PATH + PROFTPD_CONF_FILE, "wt") as f:
         f.write(data)
