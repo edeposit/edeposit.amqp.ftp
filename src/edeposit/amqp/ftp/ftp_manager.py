@@ -19,7 +19,7 @@ from __init__ import reload_configuration
 
 #= Variables ==================================================================
 #= Functions & objects ========================================================
-def load_users(path=PROFTPD_CONF_PATH + PROFTPD_LOGIN_FILE):
+def load_users(path=PROFTPD_LOGIN_FILE):
     if not os.path.exists(path):
         return {}
 
@@ -33,7 +33,7 @@ def load_users(path=PROFTPD_CONF_PATH + PROFTPD_LOGIN_FILE):
         line = line.split(":")
 
         assert len(line) == 7, "Bad number of fields in '%s', at line %d!" % (
-            PROFTPD_CONF_PATH + PROFTPD_LOGIN_FILE,
+            PROFTPD_LOGIN_FILE,
             cnt
         )
 
@@ -71,7 +71,7 @@ def add_user(username, password):
         shell="/bin/false",
         uid="2000",         # TODO: parse dynamically?
         stdin=True,         # read password from stdin
-        file=PROFTPD_CONF_PATH + PROFTPD_LOGIN_FILE,
+        file=PROFTPD_LOGIN_FILE,
         _in=password
     )
 
@@ -82,8 +82,8 @@ def add_user(username, password):
     os.chown(home_dir, getpwnam('proftpd').pw_uid, -1)
 
     # make sure, that the access permissions are set as expected by proftpd
-    os.chown(PROFTPD_CONF_PATH + PROFTPD_LOGIN_FILE, getpwnam('proftpd').pw_uid, -1)
-    os.chmod(PROFTPD_CONF_PATH + PROFTPD_LOGIN_FILE, 0400)
+    os.chown(PROFTPD_LOGIN_FILE, getpwnam('proftpd').pw_uid, -1)
+    os.chmod(PROFTPD_LOGIN_FILE, 0400)
 
     reload_configuration()
 

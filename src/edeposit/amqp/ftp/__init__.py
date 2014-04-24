@@ -31,5 +31,5 @@ class ChangePassword(namedtuple("ChangePassword", ["username", "password"])):
     pass
 
 
-class ListRegisteredUsers(nameduple("ListRegisteredUsers")):
+class ListRegisteredUsers(namedtuple("ListRegisteredUsers", [])):
     pass

@@ -5,6 +5,7 @@
 #
 # TODO: log path to settings
 # TODO: default configuration
+# TODO: add nice status printout
 #
 #= Imports ====================================================================
 import os
@@ -221,7 +222,7 @@ if __name__ == '__main__':
 
     # check existence of proftpd.conf
     if not os.path.exists(PROFTPD_CONF_PATH + PROFTPD_CONF_FILE):
-        with open(PROFTPD_CONF_PATH + PROFTPD_CONF_FILE, "w") as f:
+        with open(PROFTPD_CONF_FILE, "w") as f:
             f.write(DEFAULT_PROFTPD_CONF)
 
     # create data directory, where the user informations will be stored
@@ -229,23 +230,22 @@ if __name__ == '__main__':
         os.makedirs(PROFTPD_DATA_PATH, 0777)
 
     # create user files if they doesn't exists
-    login_file = PROFTPD_CONF_PATH + PROFTPD_LOGIN_FILE
-    if not os.path.exists(login_file):
-        open(login_file, "a").close()
+    if not os.path.exists(PROFTPD_LOGIN_FILE):
+        open(PROFTPD_LOGIN_FILE, "a").close()
 
-    os.chown(login_file, getpwnam('proftpd').pw_uid, -1)
-    os.chmod(login_file, 0400)
+    os.chown(PROFTPD_LOGIN_FILE, getpwnam('proftpd').pw_uid, -1)
+    os.chmod(PROFTPD_LOGIN_FILE, 0400)
 
     # change important configuration values in protpd conf
     data = ""
-    with open(PROFTPD_CONF_PATH + PROFTPD_CONF_FILE) as f:
+    with open(PROFTPD_CONF_FILE) as f:
         data = f.read()
 
     # set user file
     data = add_or_update(
         data,
         "AuthUserFile",
-        PROFTPD_CONF_PATH + PROFTPD_LOGIN_FILE
+        PROFTPD_LOGIN_FILE
     )
 
     data = add_or_update(data, "RequireValidShell", "off")
@@ -254,10 +254,10 @@ if __name__ == '__main__':
     data = add_or_update(
         data,
         "ExtendedLog",
-        PROFTPD_LOG_PATH + PROFPD_LOG_FILE + " WRITE paths"
+        PROFPD_LOG_FILE + " WRITE paths"
     )
 
-    with open(PROFTPD_CONF_PATH + PROFTPD_CONF_FILE, "wt") as f:
+    with open(PROFTPD_CONF_FILE, "wt") as f:
         f.write(data)
 
     reload_configuration()
