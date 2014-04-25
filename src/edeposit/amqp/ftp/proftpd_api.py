@@ -118,6 +118,8 @@ def remove_user(username):
     if os.path.exists(home_dir):
         shutil.rmtree(home_dir)
 
+    reload_configuration()
+
 
 def change_password(username, password):
     assert username in _load_users(), "Username '%s' not found!" % username
@@ -130,3 +132,5 @@ def change_password(username, password):
         file=PROFTPD_LOGIN_FILE,
         _in=password
     )
+
+    reload_configuration()
