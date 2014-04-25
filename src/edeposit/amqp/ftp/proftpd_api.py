@@ -7,6 +7,7 @@
 """
 ProFTPD manager used to add/remove users to the FTP server.
 """
+import re
 import os
 import os.path
 import shutil
@@ -20,7 +21,7 @@ from __init__ import reload_configuration
 
 #= Variables ==================================================================
 #= Functions & objects ========================================================
-def load_users(path=PROFTPD_LOGIN_FILE):
+def _load_users(path=PROFTPD_LOGIN_FILE):
     if not os.path.exists(path):
         return {}
 
@@ -52,7 +53,7 @@ def load_users(path=PROFTPD_LOGIN_FILE):
     return users
 
 
-def save_users(users, path=PROFTPD_LOGIN_FILE):
+def _save_users(users, path=PROFTPD_LOGIN_FILE):
     with open(path, "wt") as f:
         for username, data in users.items():
             pass_line = username + ":" + ":".join([
@@ -67,16 +68,16 @@ def save_users(users, path=PROFTPD_LOGIN_FILE):
             f.write(pass_line + "\n")
 
 
-def is_valid_username(username):  # TODO: implement username validation
-    return True
+def _is_valid_username(username):  # TODO: implement username validation
+    return re.search("^[a-zA-Z0-9\.\_\-]*$", username)
 
 
 def add_user(username, password):
-    assert is_valid_username(username), "Invalid format of username '%s'!" % (
+    assert _is_valid_username(username), "Invalid format of username '%s'!" % (
         username,
     )
 
-    assert username not in load_users(), "User is already registered!"  # TODO: own exception?
+    assert username not in _load_users(), "User is already registered!"  # TODO: own exception?
 
     # add new user to the proftpd's passwd file
     home_dir = PROFTPD_DATA_PATH + username
@@ -106,12 +107,12 @@ def add_user(username, password):
 
 
 def remove_user(username):
-    users = load_users()
+    users = _load_users()
 
     assert username in users, "Username '%s' not found!" % username
 
     del users[username]
-    save_users(users)
+    _save_users(users)
 
     home_dir = PROFTPD_DATA_PATH + username
     if os.path.exists(home_dir):
@@ -119,7 +120,7 @@ def remove_user(username):
 
 
 def change_password(username, password):
-    assert username in load_users(), "Username '%s' not found!" % username
+    assert username in _load_users(), "Username '%s' not found!" % username
 
     sh.ftpasswd(
         "--change-password",
@@ -129,11 +130,3 @@ def change_password(username, password):
         file=PROFTPD_LOGIN_FILE,
         _in=password
     )
-
-
-#= Main program ===============================================================
-if __name__ == '__main__':  # TODO: debug only, remove later
-    # add_user("testovaci_uzivatel")
-    # print add_user("xax", "heslo")
-    # remove_user("xux")
-    change_password("xax", "heslicko")
