@@ -6,6 +6,19 @@
 #= Imports ====================================================================
 """
 ProFTPD manager used to add/remove users to the FTP server.
+
+This module manages the ``ftpd.passwd`` file created by ftpasswd_ script from
+profptd_ package.
+
+.. _ftpasswd: http://www.proftpd.org/docs/contrib/ftpasswd.html
+.. _proftpd: http://www.proftpd.org
+
+Warning:
+    This API supposes, that it has permissions to read/write to `ProFTPD`
+    configuration directory and to `root` directory for users.
+
+    You don't have to set the permissions and everything by hand, there is
+    :mod:`proftpd_init` script, which can do it for you automatically.
 """
 import re
 import os
@@ -22,6 +35,17 @@ from __init__ import reload_configuration
 #= Variables ==================================================================
 #= Functions & objects ========================================================
 def _load_users(path=PROFTPD_LOGIN_FILE):
+    """
+    Load users defined passwd-like format file.
+
+    Args:
+        path (str, default settings.PROFTPD_LOGIN_FILE): path of the file,
+            which will be loaded (default :attr:`.PROFTPD_LOGIN_FILE`).
+
+    Returns:
+        (dict): "username": {"pass_hash": "..", "uid": "..", "gid": "..", \
+                "full_name": "..", "home": "..", "shell": ".."}
+    """
     if not os.path.exists(path):
         return {}
 
@@ -54,6 +78,15 @@ def _load_users(path=PROFTPD_LOGIN_FILE):
 
 
 def _save_users(users, path=PROFTPD_LOGIN_FILE):
+    """
+    Save dictionary with user data to passwd-like file.
+
+    Args:
+        users (dict): dictionary with user data. For details look at dict
+                      returned from :func:`_load_users`.
+        path (str, default settings.PROFTPD_LOGIN_FILE): path of the file,
+            which will be loaded (default :attr:`.PROFTPD_LOGIN_FILE`).
+    """
     with open(path, "wt") as f:
         for username, data in users.items():
             pass_line = username + ":" + ":".join([
@@ -68,16 +101,32 @@ def _save_users(users, path=PROFTPD_LOGIN_FILE):
             f.write(pass_line + "\n")
 
 
-def _is_valid_username(username):  # TODO: implement username validation
+def _is_valid_username(username):
+    """
+    Check if username consist from characters "a-zA-Z0-9._-".
+
+    Args:
+        username (str): username.
+    """
     return re.search("^[a-zA-Z0-9\.\_\-]*$", username)
 
 
 def add_user(username, password):
-    assert _is_valid_username(username), "Invalid format of username '%s'!" % (
-        username,
-    )
+    """
+    Add new user.
 
-    assert username not in _load_users(), "User is already registered!"  # TODO: own exception?
+    Adds record to passwd-like file for ProFTPD, creates home directory and
+    sets permissions for important files.
+
+    Args:
+        username (str): ..
+        password (str): ..
+    """
+    assert _is_valid_username(username), \
+            "Invalid format of username '%s'!" % username
+
+    assert username not in _load_users(), \
+            "User '%s' is already registered!" % username
 
     # add new user to the proftpd's passwd file
     home_dir = PROFTPD_DATA_PATH + username
@@ -107,13 +156,21 @@ def add_user(username, password):
 
 
 def remove_user(username):
+    """
+    Remove user, his home directory and so on..
+
+    Args:
+        username (str): ..
+    """
     users = _load_users()
 
     assert username in users, "Username '%s' not found!" % username
 
+    # remove user from passwd file
     del users[username]
     _save_users(users)
 
+    # remove home directory
     home_dir = PROFTPD_DATA_PATH + username
     if os.path.exists(home_dir):
         shutil.rmtree(home_dir)
@@ -121,7 +178,14 @@ def remove_user(username):
     reload_configuration()
 
 
-def change_password(username, password):
+def change_password(username, new_password):
+    """
+    Change password for given `username`.
+
+    Args:
+        username (str): ..
+        new_password (str): ..
+    """
     assert username in _load_users(), "Username '%s' not found!" % username
 
     sh.ftpasswd(
@@ -130,7 +194,7 @@ def change_password(username, password):
         name=username,
         stdin=True,         # tell ftpasswd to read password from stdin
         file=PROFTPD_LOGIN_FILE,
-        _in=password
+        _in=new_password
     )
 
     reload_configuration()
