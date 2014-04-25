@@ -27,9 +27,14 @@ class RemoveUser(namedtuple("RemoveUser", ["username", "password"])):
     pass
 
 
-class ChangePassword(namedtuple("ChangePassword", ["username", "password"])):
+class ChangePassword(namedtuple("ChangePassword", ["username",
+                                                   "new_password"])):
     pass
 
 
 class ListRegisteredUsers(namedtuple("ListRegisteredUsers", [])):
+    pass
+
+
+def reactToAMQPMessage(message, uuid):
     pass
