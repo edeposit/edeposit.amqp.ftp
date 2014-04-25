@@ -5,24 +5,22 @@
 #
 #= Imports ====================================================================
 import sys
+import os.path
+
+import sh
 
 
 #= Variables ==================================================================
-
-
-
 #= Functions & objects ========================================================
-def read_stdin():
-    while True:
+def _read_stdin():
+    line = sys.stdin.readline()
+    while line:
+        yield line
         line = sys.stdin.readline()
 
-        if line:
-            yield line
-        else:
-            break
 
 
-def parse_line(line):
+def _parse_line(line):
     line, timestamp = line.rsplit(",", 1)
     line, command = line.rsplit(",", 1)
     path, username = line.rsplit(",", 1)
@@ -34,10 +32,33 @@ def parse_line(line):
         "path": path,
     }
 
-#= Main program ===============================================================
-if __name__ == '__main__':
-    for line in read_stdin():
-        if "," not in line or "[" in line:
+
+def process_request(parsed):
+    print parsed
+
+
+def process_file(file_iterator):
+    for line in file_iterator:
+        if "," not in line or "[" in line:  # TODO: remove [ check
             continue
 
-        print parse_line(line)
+        parsed = _parse_line(line)
+
+        if not (parsed["command"] in ["STOR", "APPE", "STOU"]):
+            continue
+
+        if not os.path.exists(parsed["path"]):
+            continue
+
+        process_request(parsed)
+
+
+#= Main program ===============================================================
+if __name__ == '__main__':
+    try:
+        if len(sys.argv) > 1:
+            process_file(sh.tail("-f", sys.argv[1], _iter=True))
+        else:
+            process_file(_read_stdin())
+    except KeyboardInterrupt:
+        sys.exit(0)
