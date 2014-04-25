@@ -81,12 +81,12 @@ def add_user(username, password):
     # add new user to the proftpd's passwd file
     home_dir = PROFTPD_DATA_PATH + username
     sh.ftpasswd(
-        passwd=True,
+        passwd=True,        # passwd file, not group file
         name=username,
         home=home_dir,      # chroot in PROFTPD_DATA_PATH
         shell="/bin/false",
         uid="2000",         # TODO: parse dynamically?
-        stdin=True,         # read password from stdin
+        stdin=True,         # tell ftpasswd to read password from stdin
         file=PROFTPD_LOGIN_FILE,
         _in=password
     )
@@ -108,7 +108,8 @@ def add_user(username, password):
 def remove_user(username):
     users = load_users()
 
-    assert username in users, "User is already deleted!"
+    assert username in users, "Username '%s' not found!" % username
+
     del users[username]
     save_users(users)
 
@@ -118,11 +119,21 @@ def remove_user(username):
 
 
 def change_password(username, password):
-    pass
+    assert username in load_users(), "Username '%s' not found!" % username
+
+    sh.ftpasswd(
+        "--change-password",
+        passwd=True,        # passwd file, not group file
+        name=username,
+        stdin=True,         # tell ftpasswd to read password from stdin
+        file=PROFTPD_LOGIN_FILE,
+        _in=password
+    )
 
 
 #= Main program ===============================================================
 if __name__ == '__main__':  # TODO: debug only, remove later
     # add_user("testovaci_uzivatel")
     # print add_user("xax", "heslo")
-    remove_user("xux")
+    # remove_user("xux")
+    change_password("xax", "heslicko")
