@@ -19,7 +19,6 @@ def _read_stdin():
         line = sys.stdin.readline()
 
 
-
 def _parse_line(line):
     line, timestamp = line.rsplit(",", 1)
     line, command = line.rsplit(",", 1)
@@ -33,11 +32,14 @@ def _parse_line(line):
     }
 
 
-def process_request(parsed):
-    print parsed
+def process_request(parsed, callback=None):
+    if not callback:
+        print parsed
+    else:
+        callback(parsed["path"])  # TODO: define the protocol of communication
 
 
-def process_file(file_iterator):
+def process_file(file_iterator, callback=None):
     for line in file_iterator:
         if "," not in line or "[" in line:  # TODO: remove [ check
             continue
@@ -50,7 +52,7 @@ def process_file(file_iterator):
         if not os.path.exists(parsed["path"]):
             continue
 
-        process_request(parsed)
+        process_request(parsed, callback)
 
 
 #= Main program ===============================================================
