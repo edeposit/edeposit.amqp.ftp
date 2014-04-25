@@ -38,12 +38,12 @@ PROFTPD_DATA_PATH = "/home/ftp/"
 
 
 #: proftpd configuration file (in conf. directory)
-PROFTPD_CONF_FILE = "proftpd.conf"  # TODO: prepend PATH var
+PROFTPD_CONF_FILE = PROFTPD_CONF_PATH + "proftpd.conf"  # TODO: prepend PATH var
 
 #: file where the login informations will be stored
-PROFTPD_LOGIN_FILE = "ftpd.passwd"
+PROFTPD_LOGIN_FILE = PROFTPD_CONF_PATH + "ftpd.passwd"
 
-PROFPD_LOG_FILE = "extended.log"
+PROFPD_LOG_FILE = PROFTPD_LOG_PATH + "extended.log"
 
 
 #= user configuration reader ==================================================

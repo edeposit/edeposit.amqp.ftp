@@ -9,6 +9,7 @@ ProFTPD manager used to add/remove users to the FTP server.
 """
 import os
 import os.path
+import shutil
 from pwd import getpwnam
 
 import sh
@@ -51,6 +52,21 @@ def load_users(path=PROFTPD_LOGIN_FILE):
     return users
 
 
+def save_users(users, path=PROFTPD_LOGIN_FILE):
+    with open(path, "wt") as f:
+        for username, data in users.items():
+            pass_line = username + ":" + ":".join([
+                data["pass_hash"],
+                data["uid"],
+                data["gid"],
+                data["full_name"],
+                data["home"],
+                data["shell"]
+            ])
+
+            f.write(pass_line + "\n")
+
+
 def is_valid_username(username):  # TODO: implement username validation
     return True
 
@@ -75,6 +91,7 @@ def add_user(username, password):
         _in=password
     )
 
+    # create home dir if not exists
     if not os.path.exists(home_dir):
         os.makedirs(home_dir, 0777)
 
@@ -83,13 +100,21 @@ def add_user(username, password):
 
     # make sure, that the access permissions are set as expected by proftpd
     os.chown(PROFTPD_LOGIN_FILE, getpwnam('proftpd').pw_uid, -1)
-    os.chmod(PROFTPD_LOGIN_FILE, 0400)
+    os.chmod(PROFTPD_LOGIN_FILE, 0600)
 
     reload_configuration()
 
 
 def remove_user(username):
-    pass
+    users = load_users()
+
+    assert username in users, "User is already deleted!"
+    del users[username]
+    save_users(users)
+
+    home_dir = PROFTPD_DATA_PATH + username
+    if os.path.exists(home_dir):
+        shutil.rmtree(home_dir)
 
 
 def change_password(username, password):
@@ -99,4 +124,5 @@ def change_password(username, password):
 #= Main program ===============================================================
 if __name__ == '__main__':  # TODO: debug only, remove later
     # add_user("testovaci_uzivatel")
-    print add_user("xix", "heslo")
+    # print add_user("xax", "heslo")
+    remove_user("xux")
