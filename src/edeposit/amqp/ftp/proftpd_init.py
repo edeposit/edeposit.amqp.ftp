@@ -250,6 +250,8 @@ if __name__ == '__main__':
 
     data = add_or_update(data, "RequireValidShell", "off")
     data = add_or_update(data, "DefaultRoot", "~")
+
+    # http://www.proftpd.org/docs/modules/mod_log.html
     data = add_or_update(data, "LogFormat", 'paths "%f, %u, %m, %{%s}t"')
     data = add_or_update(
         data,
