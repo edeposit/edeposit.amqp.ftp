@@ -40,7 +40,7 @@ class ImportRequest(namedtuple("ImportRequest", ["username",
     pass
 
 
-class SendEmail(namdtuple("SendEmail", ["username", "subject", "text"])):
+class SendEmail(namedtuple("SendEmail", ["username", "subject", "text"])):
     pass
 
 
