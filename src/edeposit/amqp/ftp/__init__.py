@@ -33,12 +33,21 @@ class ListRegisteredUsers(namedtuple("ListRegisteredUsers", [])):
 
 
 #= Responses ==================================================================
+class ImportRequest(namedtuple("ImportRequest", ["username",
+                                                 "filename",
+                                                 "file",
+                                                 "parsed_data"])):
+    pass
 
+
+class SendEmail(namdtuple("SendEmail", ["username", "subject", "text"])):
+    pass
 
 
 #= Functions & objects ========================================================
 def reload_configuration():
     sh.killall("-HUP", "proftpd", _ok_code=[0, 1])
+
 
 def _instanceof(instance, class_):
     """Check type by matching ``.__name__``."""
