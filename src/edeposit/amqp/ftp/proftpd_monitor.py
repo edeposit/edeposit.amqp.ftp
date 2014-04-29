@@ -4,12 +4,15 @@
 # Interpreter version: python 2.7
 #
 #= Imports ====================================================================
-import sys
+import os
 import os.path
+import sys
 
 import sh
 
 from __init__ import ImportRequest, SendEmail
+from settings import *
+from proftpd_api import set_permissions, create_lock_file
 
 
 #= Variables ==================================================================
@@ -38,20 +41,27 @@ def _parse_line(line):
     }
 
 
-def process_request(parsed):
-    if not os.path.exists(parsed["path"]):
+def recursive_chmod(path, mode=0755):
+    set_permissions(path, mode=mode)
+    if os.path.isfile(path):
         return
 
-    data = ""
-    with open(parsed["path"]) as f:
-        data = f.read()
+    for root, dirs, files in os.walk(path):
+        for fn in files + dirs:
+            set_permissions(os.path.join(root, fn), mode=mode)
 
-    if not data.strip():
-        return SendEmail(
-            username=parsed["username"],
-            subject="Blank export data",
-            text=""
-        )
+
+def process_request(username, path, timestamp):
+    # lock directory to prevent user to write during processing of the batch
+    recursive_chmod(path, 0555)
+
+    for root, dirs, files in os.walk(path):
+        for fn in files + dirs:
+            pass  # TODO: implement file processing
+
+    # unlock directory
+    recursive_chmod(path, 0775)
+    create_lock_file(path + "/" + PROTFPD_LOCK_FILENAME)
 
 
 def process_file(file_iterator):
@@ -61,13 +71,19 @@ def process_file(file_iterator):
 
         parsed = _parse_line(line)
 
-        if not (parsed["command"] in ["STOR", "APPE", "STOU"]):
+        if not parsed["command"].upper() in ["DELE", "DEL"]:
             continue
 
-        if not os.path.exists(parsed["path"]):
+        # don't react to anything else, than trigger in form of deleted
+        # "lock" file
+        if os.path.basename(parsed["path"]) != PROTFPD_LOCK_FILENAME:
             continue
 
-        yield process_request(parsed)
+        yield process_request(
+            username=parsed["username"],
+            path=os.path.dirname(parsed["path"]),
+            timestamp=parsed["timestamp"]
+        )
 
 
 #= Main program ===============================================================
@@ -75,6 +91,10 @@ if __name__ == '__main__':
     try:
         it = None
         if len(sys.argv) > 1:
+            if not os.path.exists(sys.argv[1]):
+                sys.stderr.writeln("'" + sys.argv[1] + "' doesn't exists!\n")
+                sys.exit(1)
+
             it = process_file(sh.tail("-f", sys.argv[1], _iter=True))
         else:
             it = process_file(_read_stdin())
