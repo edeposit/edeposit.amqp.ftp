@@ -5,45 +5,13 @@
 # Interpreter version: python 2.7
 #
 #= Imports ====================================================================
-from collections import namedtuple
-
 import sh
+
+from settings import *
+from structures import *
 
 
 #= Variables ==================================================================
-from settings import *
-
-
-#= Requests ===================================================================
-class AddUser(namedtuple("AddUser", ["username", "password"])):
-    pass
-
-
-class RemoveUser(namedtuple("RemoveUser", ["username", "password"])):
-    pass
-
-
-class ChangePassword(namedtuple("ChangePassword", ["username",
-                                                   "new_password"])):
-    pass
-
-
-class ListRegisteredUsers(namedtuple("ListRegisteredUsers", [])):
-    pass
-
-
-#= Responses ==================================================================
-class ImportRequest(namedtuple("ImportRequest", ["username",
-                                                 "filename",
-                                                 "file",
-                                                 "parsed_data"])):
-    pass
-
-
-class SendEmail(namedtuple("SendEmail", ["username", "subject", "text"])):
-    pass
-
-
 #= Functions & objects ========================================================
 def reload_configuration():
     sh.killall("-HUP", "proftpd", _ok_code=[0, 1])
