@@ -256,10 +256,11 @@ if __name__ == '__main__':
     data = add_or_update(
         data,
         "ExtendedLog",
-        PROFPD_LOG_FILE + " WRITE paths"
+        PROFTPD_LOG_FILE + " WRITE paths"
     )
 
     with open(PROFTPD_CONF_FILE, "wt") as f:
         f.write(data)
 
     reload_configuration()
+

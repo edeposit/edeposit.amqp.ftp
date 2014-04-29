@@ -111,6 +111,27 @@ def _is_valid_username(username):
     return re.search("^[a-zA-Z0-9\.\_\-]*$", username)
 
 
+def _set_valid_permissions(filename, uid=None, gid=None, mode=0775):
+    """
+    Set pemissions for given `filename`.
+
+    Args:
+        filename (str): name of the file/directory
+        uid (int, default proftpd): user ID - if not set, user ID of `proftpd`
+                                    is used
+        gid (int): group ID, if not set, it is not changed
+        mode (int, default 0775): unix access mode
+    """
+    if uid is None:
+        uid = getpwnam('proftpd').pw_uid
+
+    if gid is None:
+        gid = -1
+
+    os.chown(filename, uid, gid)
+    os.chmod(filename, mode)
+
+
 def add_user(username, password):
     """
     Add new user.
@@ -135,8 +156,8 @@ def add_user(username, password):
         name=username,
         home=home_dir,      # chroot in PROFTPD_DATA_PATH
         shell="/bin/false",
-        uid="2000",         # TODO: parse dynamically?
-        gid="2000",
+        uid=PROFTPD_USER_GID,         # TODO: parse dynamically?
+        gid=PROFTPD_USER_GID,
         stdin=True,         # tell ftpasswd to read password from stdin
         file=PROFTPD_LOGIN_FILE,
         _in=password
@@ -146,15 +167,16 @@ def add_user(username, password):
     if not os.path.exists(home_dir):
         os.makedirs(home_dir, 0775)
 
-    # os.chmod(home_dir, 0777)
-    # I am using 2000 GID for all our users - this GID shouldn't be used by
-    # other group!
-    os.chown(home_dir, getpwnam('proftpd').pw_uid, 2000)
-    os.chmod(home_dir, 0775)
+    # I am using PROFTPD_USER_GID (2000) for all our users - this GID shouldn't
+    # be used by other than FTP users!
+    _set_valid_permissions(home_dir, gid=PROFTPD_USER_GID)
+    _set_valid_permissions(PROFTPD_LOGIN_FILE, mode=0600)
 
-    # make sure, that the access permissions are set as expected by proftpd
-    os.chown(PROFTPD_LOGIN_FILE, getpwnam('proftpd').pw_uid, -1)
-    os.chmod(PROFTPD_LOGIN_FILE, 0600)
+    # create "lock" file
+    lock_fn = home_dir + "/" + PROTFPD_LOCK_FILENAME
+    with open(lock_fn, "wt") as f:
+        f.write(PROFTPD_LOCK_FILE_CONTENT)
+    _set_valid_permissions(lock_fn, gid=PROFTPD_USER_GID)
 
     reload_configuration()
 

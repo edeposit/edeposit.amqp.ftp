@@ -43,8 +43,23 @@ PROFTPD_CONF_FILE = PROFTPD_CONF_PATH + "proftpd.conf"  # TODO: prepend PATH var
 #: file where the login informations will be stored
 PROFTPD_LOGIN_FILE = PROFTPD_CONF_PATH + "ftpd.passwd"
 
-PROFPD_LOG_FILE = PROFTPD_LOG_PATH + "extended.log"
+#: file where the extended logs are stored
+PROFTPD_LOG_FILE = PROFTPD_LOG_PATH + "extended.log"
 
+#: filename for the locking mechanism
+PROTFPD_LOCK_FILENAME = "delete_me_to_import_files.txt"
+
+#: text, which will be writen to the PROTFPD_LOCK_FILENAME
+PROFTPD_LOCK_FILE_CONTENT = """Delete this file to start batch import of all \
+files, you've uploaded to the server.
+
+Smazte tento soubor pro zapoceti davkoveho importu vsech souboru, ktere jste
+nahrali na server.
+"""
+
+#: I am using GID 2000 for all our users - this GID shouldn't be used by other
+#: than FTP users!
+PROFTPD_USER_GID = 2000
 
 #= user configuration reader ==================================================
 _ALLOWED = [str, int, float]
