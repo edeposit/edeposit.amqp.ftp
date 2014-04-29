@@ -111,7 +111,7 @@ def _is_valid_username(username):
     return re.search("^[a-zA-Z0-9\.\_\-]*$", username)
 
 
-def _set_valid_permissions(filename, uid=None, gid=None, mode=0775):
+def set_permissions(filename, uid=None, gid=None, mode=0775):
     """
     Set pemissions for given `filename`.
 
@@ -130,6 +130,13 @@ def _set_valid_permissions(filename, uid=None, gid=None, mode=0775):
 
     os.chown(filename, uid, gid)
     os.chmod(filename, mode)
+
+
+def create_lock_file(path):
+    with open(path, "wt") as f:
+        f.write(PROFTPD_LOCK_FILE_CONTENT)
+
+    set_permissions(path, gid=PROFTPD_USER_GID)
 
 
 def add_user(username, password):
@@ -169,14 +176,10 @@ def add_user(username, password):
 
     # I am using PROFTPD_USER_GID (2000) for all our users - this GID shouldn't
     # be used by other than FTP users!
-    _set_valid_permissions(home_dir, gid=PROFTPD_USER_GID)
-    _set_valid_permissions(PROFTPD_LOGIN_FILE, mode=0600)
+    set_permissions(home_dir, gid=PROFTPD_USER_GID)
+    set_permissions(PROFTPD_LOGIN_FILE, mode=0600)
 
-    # create "lock" file
-    lock_fn = home_dir + "/" + PROTFPD_LOCK_FILENAME
-    with open(lock_fn, "wt") as f:
-        f.write(PROFTPD_LOCK_FILE_CONTENT)
-    _set_valid_permissions(lock_fn, gid=PROFTPD_USER_GID)
+    create_lock_file(home_dir + "/" + PROTFPD_LOCK_FILENAME)
 
     reload_configuration()
 
