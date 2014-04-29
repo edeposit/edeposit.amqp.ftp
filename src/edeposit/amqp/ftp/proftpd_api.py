@@ -136,6 +136,7 @@ def add_user(username, password):
         home=home_dir,      # chroot in PROFTPD_DATA_PATH
         shell="/bin/false",
         uid="2000",         # TODO: parse dynamically?
+        gid="2000",
         stdin=True,         # tell ftpasswd to read password from stdin
         file=PROFTPD_LOGIN_FILE,
         _in=password
@@ -143,10 +144,13 @@ def add_user(username, password):
 
     # create home dir if not exists
     if not os.path.exists(home_dir):
-        os.makedirs(home_dir, 0777)
+        os.makedirs(home_dir, 0775)
 
     # os.chmod(home_dir, 0777)
-    os.chown(home_dir, getpwnam('proftpd').pw_uid, -1)
+    # I am using 2000 GID for all our users - this GID shouldn't be used by
+    # other group!
+    os.chown(home_dir, getpwnam('proftpd').pw_uid, 2000)
+    os.chmod(home_dir, 0775)
 
     # make sure, that the access permissions are set as expected by proftpd
     os.chown(PROFTPD_LOGIN_FILE, getpwnam('proftpd').pw_uid, -1)
