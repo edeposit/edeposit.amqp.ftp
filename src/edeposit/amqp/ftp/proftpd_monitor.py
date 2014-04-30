@@ -52,15 +52,37 @@ def recursive_chmod(path, mode=0755):
             set_permissions(os.path.join(root, fn), mode=mode)
 
 
+def _filter_files(paths):
+    return filter(
+        lambda path: os.path.isfile(path),
+        paths
+    )
+
+
 # TODO: create protocol about import
 def process_request(username, path, timestamp):
+    items = []
+
     # lock directory to prevent user to write during processing of the batch
     recursive_chmod(path, 0555)
 
     # pick up pairs in directories
     for root, dirs, files in os.walk(path):
-        for fn in dirs:
-            pass  # TODO: implement file processing
+        for dn in dirs:
+            dn = os.path.join(root, dn)
+            dir_list = map(lambda fn: dn + "/" + fn, os.listdir(dn))
+            files = _filter_files(dir_list)
+
+            # možnosti "párování souborů":
+            #   soubory se stejnym jmenem v jedny slozce -> sparovat na metadata + data a rozdelit do skupin (maji stejny jmeno/zbytek)
+            #   vicero souboru v jedne slozce -> jedny metadata, vic dat
+            #   soubory se stejnym ISBN -> sparovat, at jsou kdekoliv
+
+            # directory doesn't contain subdirectories
+            if len(dir_list) == len(files):
+                pass  # TODO: unlink whole directory
+            else:
+                pass  # TODO: unlink just processed files
 
     # pick up remaining files
     for root, dirs, files in os.walk(path):
@@ -69,7 +91,9 @@ def process_request(username, path, timestamp):
 
     # unlock directory
     recursive_chmod(path, 0775)
-    create_lock_file(path + "/" + PROTFPD_LOCK_FILENAME)
+    # create_lock_file(path + "/" + PROTFPD_LOCK_FILENAME)
+
+    return True
 
 
 def process_file(file_iterator):
