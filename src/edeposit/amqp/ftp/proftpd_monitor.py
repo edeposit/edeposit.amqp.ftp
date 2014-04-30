@@ -46,18 +46,26 @@ def recursive_chmod(path, mode=0755):
     if os.path.isfile(path):
         return
 
+    # recursively change mode of all subdirectories
     for root, dirs, files in os.walk(path):
         for fn in files + dirs:
             set_permissions(os.path.join(root, fn), mode=mode)
 
 
+# TODO: create protocol about import
 def process_request(username, path, timestamp):
     # lock directory to prevent user to write during processing of the batch
     recursive_chmod(path, 0555)
 
+    # pick up pairs in directories
     for root, dirs, files in os.walk(path):
-        for fn in files + dirs:
+        for fn in dirs:
             pass  # TODO: implement file processing
+
+    # pick up remaining files
+    for root, dirs, files in os.walk(path):
+        for fn in files:
+            pass
 
     # unlock directory
     recursive_chmod(path, 0775)
@@ -77,6 +85,10 @@ def process_file(file_iterator):
         # don't react to anything else, than trigger in form of deleted
         # "lock" file
         if os.path.basename(parsed["path"]) != PROTFPD_LOCK_FILENAME:
+            continue
+
+        # old record, which doesn't need to be parsed again
+        if os.path.exists(parsed["path"]):
             continue
 
         yield process_request(
