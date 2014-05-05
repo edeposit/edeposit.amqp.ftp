@@ -5,13 +5,16 @@
 #
 #= Imports ====================================================================
 import os
-import os.path
 import sys
+import shutil
+import os.path
 
 import sh
 
-from __init__ import ImportRequest, SendEmail
+import decoders
 from settings import *
+from structures import *
+from __init__ import ImportRequest, SendEmail
 from proftpd_api import set_permissions, create_lock_file
 
 
@@ -84,7 +87,8 @@ def _same_named(fn, fn_list):
         fn (str): Matching filename.
         fn_list (list): List of filenames.
 
-    Return: (list) filenames from `fn_list`, which has same *name* as `fn`.
+    Return: (list of tuples) filenames from `fn_list`, which has same *name* as
+    `fn` and their indexes in tuple (i, fn).
 
     Name is taken from the filename and it is just the name of the file, without
     suffix and path.
@@ -93,12 +97,22 @@ def _same_named(fn, fn_list):
     """
     fn = _just_name(fn)
 
-    return filter(lambda fn: fn == _just_name(fn), fn_list)
+    return filter(
+        lambda (i, filename): fn == _just_name(filename),
+        enumerate(fn_list)
+    )
+
+
+def _is_meta(fn):
+    if "." not in fn:
+        return False
+    return fn.rsplit(".")[1].lower() in decoders.SUPPORTED_FILES
 
 
 # TODO: create protocol about import
 def process_request(username, path, timestamp):
     items = []
+    error_protocol = []
 
     # lock directory to prevent user to write during processing of the batch
     recursive_chmod(path, 0555)
@@ -109,30 +123,123 @@ def process_request(username, path, timestamp):
             dn = os.path.join(root, dn)
             dir_list = map(lambda fn: dn + "/" + fn, os.listdir(dn))
             files = _filter_files(dir_list)
+            files_len = len(files)  # used later, `files` is modified in process
+            processed_files = []
 
-            # možnosti "párování souborů":
-            #   soubory se stejnym jmenem v jedny slozce -> sparovat na metadata + data a rozdelit do skupin (maji stejny jmeno/zbytek)
-            #   vicero souboru v jedne slozce -> jedny metadata, vic dat
-            #   soubory se stejnym ISBN -> sparovat, at jsou kdekoliv
-            if PROFTPD_SAMEDIR_PAIRING:
-                for fn in files:
+            while len(files):
+                fn = files.pop()
+                others = _same_named(fn, files)
+
+                indexes = map(lambda (i, fn): i, others)
+                others_fn = map(lambda (i, fn): fn, others)
+
+                # remove others from `files`
+                for i in sorted(indexes, reverse=True):
+                    del files[i]
+
+                if len(others_fn) == 1:
+                    metadata = None
+                    ebook = None
+                    o_fn = others_fn[0]
+
+                    if _is_meta(fn) and not _is_meta(o_fn):
+                        metadata, ebook = fn, o_fn
+                    elif not _is_meta(fn) and _is_meta(o_fn):
+                        metadata, ebook = o_fn, fn
+
+                    # both metadata
+                    elif _is_meta(fn) and _is_meta(o_fn):
+                        processed_files.extend([fn, o_fn])
+
+                        for filename in [fn, o_fn]:
+                            with open(filename) as f:
+                                data = f.read()
+                                items.append(
+                                    MetadataFile(
+                                        filename=filename,
+                                        raw_data=data,
+                                        parsed_data=decoders.read_meta(data)
+                                    )
+                                )
+
+                    # both data
+                    else:
+                        processed_files.extend([fn, o_fn])
+                        for filename in [fn, o_fn]:
+                            with open(filename) as f:
+                                data = f.read()
+                                items.append(
+                                    EbookFile(filename=filename, raw_data=data)
+                                )
+
+                    # process pairs
+                    if metadata and ebook:
+                        processed_files.extend([metadata, ebook])
+
+                        with open(metadata) as f:
+                            data = f.read()
+                            metadata = MetadataFile(
+                                filename=metadata,
+                                raw_data=data,
+                                parsed_data=decoders.read_meta(data)
+                            )
+
+                        with open(ebook) as f:
+                            data = f.read()
+                            ebook = EbookFile(
+                                filename=ebook,
+                                raw_data=data,
+                            )
+
+                        items.append(
+                            DataPair(
+                                metadata_file=metadata,
+                                ebook_file=ebook
+                            )
+                        )
+                elif not others_fn:
+                    processed_files.append(fn)
+
+                    with open(fn) as f:
+                        data = f.read()
+                        file_struct = None
+
+                        if _is_meta(fn):
+                            file_struct = MetadataFile(
+                                filename=fn,
+                                raw_data=data,
+                                parsed_data=decoders.read_meta(data)
+                            )
+                        else:
+                            file_struct = EbookFile(
+                                filename=fn,
+                                raw_data=data,
+                            )
+                        items.append(file_struct)
+                else:
+                    others_fn.append(fn)
+                    error_protocol.append(
+                        "Too many files with same name:" +
+                        "\n\t".join(others_fn) + "\n\n---\n"
+                    )
 
             # directory doesn't contain subdirectories
-            if len(dir_list) == len(files):
-                pass  # TODO: unlink whole directory (stored in `dn`)
+            if len(dir_list) == files_len:
+                shutil.rmtree(dn)
             else:
-                pass  # TODO: unlink just processed files
+                for fn in processed_files:
+                    os.remove(fn)
 
-    # pick up remaining files
-    for root, dirs, files in os.walk(path):
-        for fn in files:
-            pass
+    # # pick up remaining files
+    # for root, dirs, files in os.walk(path):
+    #     for fn in files:
+    #         pass
 
     # unlock directory
     recursive_chmod(path, 0775)
     # create_lock_file(path + "/" + PROTFPD_LOCK_FILENAME)
 
-    return True
+    return items
 
 
 def process_file(file_iterator):
