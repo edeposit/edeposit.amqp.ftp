@@ -57,6 +57,9 @@ Smazte tento soubor pro zapoceti davkoveho importu vsech souboru, ktere jste
 nahrali na server.
 """
 
+#: True - will pair files with same filename in same directory
+PROFTPD_SAMEDIR_PAIRING = True
+
 #: I am using GID 2000 for all our users - this GID shouldn't be used by other
 #: than FTP users!
 PROFTPD_USER_GID = 2000
