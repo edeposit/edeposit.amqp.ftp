@@ -53,10 +53,47 @@ def recursive_chmod(path, mode=0755):
 
 
 def _filter_files(paths):
+    """
+    Args:
+        paths (list): list of string paths
+
+    Return (list): paths, which points to files.
+    """
     return filter(
         lambda path: os.path.isfile(path),
         paths
     )
+
+
+def _just_name(fn):
+    """
+    Return: (str) `name` for given `fn`.
+
+    Name is taken from the filename and it is just the name of the file, without
+    suffix and path.
+
+    For example - name of ``/home/bystrousak/config.json`` is just ``config``.
+    """
+    fn = os.path.basename(fn)  # get filename
+    return fn.rsplit(".", 1)[0]  # get name without suffix
+
+
+def _same_named(fn, fn_list):
+    """
+    Args:
+        fn (str): Matching filename.
+        fn_list (list): List of filenames.
+
+    Return: (list) filenames from `fn_list`, which has same *name* as `fn`.
+
+    Name is taken from the filename and it is just the name of the file, without
+    suffix and path.
+
+    For example - name of ``/home/bystrousak/config.json`` is just ``config``.
+    """
+    fn = _just_name(fn)
+
+    return filter(lambda fn: fn == _just_name(fn), fn_list)
 
 
 # TODO: create protocol about import
@@ -77,10 +114,12 @@ def process_request(username, path, timestamp):
             #   soubory se stejnym jmenem v jedny slozce -> sparovat na metadata + data a rozdelit do skupin (maji stejny jmeno/zbytek)
             #   vicero souboru v jedne slozce -> jedny metadata, vic dat
             #   soubory se stejnym ISBN -> sparovat, at jsou kdekoliv
+            if PROFTPD_SAMEDIR_PAIRING:
+                for fn in files:
 
             # directory doesn't contain subdirectories
             if len(dir_list) == len(files):
-                pass  # TODO: unlink whole directory
+                pass  # TODO: unlink whole directory (stored in `dn`)
             else:
                 pass  # TODO: unlink just processed files
 
