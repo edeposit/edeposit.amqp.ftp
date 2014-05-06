@@ -125,17 +125,58 @@ def _safe_parse_meta_file(fn, error_protocol):
     return []
 
 
+def _process_pair(first_fn, second_fn, error_protocol):
+    ebook = None
+    metadata = None
+
+    if _is_meta(first_fn) and not _is_meta(second_fn):    # 1st meta, 2nd data
+        metadata, ebook = first_fn, second_fn
+    elif not _is_meta(first_fn) and _is_meta(second_fn):  # 1st data, 2nd meta
+        metadata, ebook = second_fn, first_fn
+    elif _is_meta(first_fn) and _is_meta(second_fn):      # both metadata
+        return [
+            _safe_parse_meta_file(first_fn, error_protocol),
+            _safe_parse_meta_file(second_fn, error_protocol)
+        ]
+    else:                                                 # both data
+        return [
+            parse_data_file(first_fn),
+            parse_data_file(second_fn)
+        ]
+
+    # process pairs, which were created in first two branches
+    # of the if statement above
+    pair = None
+    try:
+        pair = DataPair(
+            metadata_file=parse_meta_file(metadata),
+            ebook_file=parse_data_file(ebook)
+        )
+    except decoders.MetaParsingException, e:
+        pair = parse_data_file(ebook)
+        error_protocol.append(
+            "Can't parse MetadataFile '%s':\n\t%s\n" % (fn, e.value)
+        )
+
+    return [pair]
+
+
 def _process_directory(dn, files, error_protocol):
     items = []
     files_len = len(files)  # used later, `files` is modified in process
     processed_files = []
 
-    while len(files):
+    if len(files) == 2 and PROFTPD_SAME_DIR_PAIRING:
+        items.extend(_process_pair(files[0], files[1]))
+        processed_files.extend(files)
+        files = []
+
+    while files:
         same_names = []
         fn = files.pop()
 
         # get files with same names (ignore paths and suffixes)
-        if PROFTPD_SAMEDIR_PAIRING:
+        if PROFTPD_SAME_NAME_DIR_PAIRING:
             same_names = _same_named(fn, files)  # returns (index, name)
             indexes = map(lambda (i, fn): i, same_names)  # get indexes
             same_names = map(lambda (i, fn): fn, same_names)  # get names
@@ -145,41 +186,8 @@ def _process_directory(dn, files, error_protocol):
                 del files[i]
 
         if len(same_names) == 1:  # has exactly one file pair
-            ebook = None
-            metadata = None
-            o_fn = same_names[0]
-
-            if _is_meta(fn) and not _is_meta(o_fn):    # 1st meta, 2nd data
-                metadata, ebook = fn, o_fn
-            elif not _is_meta(fn) and _is_meta(o_fn):  # 1st data, 2nd meta
-                metadata, ebook = o_fn, fn
-            elif _is_meta(fn) and _is_meta(o_fn):      # both metadata
-                items.extend(_safe_parse_meta_file(fn, error_protocol))
-                items.extend(_safe_parse_meta_file(o_fn, error_protocol))
-                processed_files.extend([fn, o_fn])
-            else:                                      # both data
-                items.append(parse_data_file(fn))
-                items.append(parse_data_file(o_fn))
-                processed_files.extend([fn, o_fn])
-
-            # process pairs, which were created in first two branches
-            # of the if statement above
-            if metadata and ebook:
-                pair = None
-
-                try:
-                    pair = DataPair(
-                        metadata_file=parse_meta_file(metadata),
-                        ebook_file=parse_data_file(ebook)
-                    )
-                except decoders.MetaParsingException, e:
-                    pair = parse_data_file(ebook)
-                    error_protocol.append(
-                        "Can't parse MetadataFile '%s':\n\t%s\n" % (fn, e.value)
-                    )
-
-                items.append(pair)
-                processed_files.extend([metadata, ebook])
+            items.extend(_process_pair(fn, same_names[0]))
+            processed_files.extend([fn, same_names[0]])
         elif not same_names:  # there is no similar files
             if _is_meta(fn):
                 items.extend(_safe_parse_meta_file(fn, error_protocol))
