@@ -51,17 +51,20 @@ class SendEmail(namedtuple("SendEmail", ["username", "subject", "text"])):
 
 
 #= Functions & objects ========================================================
-def read_meta_file(fn):
+def _read_data(fn):
     with open(fn) as f:
-        data = f.read()
-        return MetadataFile(
-            filename=fn,
-            raw_data=data,
-            parsed_data=decoders.read_meta(data)
-        )
+        return f.read()
 
 
-def read_data_file(fn):
-    with open(fn) as f:
-        data = f.read()
-        return EbookFile(filename=fn, raw_data=data)
+def parse_meta_file(fn):
+    data = _read_data(fn)
+    return MetadataFile(
+        filename=fn,
+        raw_data=data,
+        parsed_data=decoders.parse_meta(data)
+    )
+
+
+def parse_data_file(fn):
+    data = _read_data(fn)
+    return EbookFile(filename=fn, raw_data=data)
