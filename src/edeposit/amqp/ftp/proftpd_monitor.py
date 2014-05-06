@@ -109,20 +109,9 @@ def _is_meta(fn):
     return fn.rsplit(".")[1].lower() in decoders.SUPPORTED_FILES
 
 
-def _read_meta_file(fn):
-    with open(fn) as f:
-        data = f.read()
-        return MetadataFile(
-            filename=fn,
-            raw_data=data,
-            parsed_data=decoders.read_meta(data)
-        )
-
-
-def _read_data_file(fn):
-    with open(fn) as f:
-        data = f.read()
-        return EbookFile(filename=fn, raw_data=data)
+def _remove_files(files):
+    for fn in files:
+        os.remove(fn)
 
 
 # TODO: create protocol about import
@@ -135,7 +124,7 @@ def process_request(username, path, timestamp):
 
     # pick up pairs in directories
     for root, dirs, files in os.walk(path):
-        for dn in dirs:
+        for dn in dirs + [path]:
             dn = os.path.join(root, dn)
             dir_list = map(lambda fn: dn + "/" + fn, os.listdir(dn))
             files = _filter_files(dir_list)
@@ -143,78 +132,74 @@ def process_request(username, path, timestamp):
             processed_files = []
 
             while len(files):
+                same_names = []
                 fn = files.pop()
 
                 # get files with same names (ignore paths and suffixes)
-                same_names = _same_named(fn, files)  # returns (index, name)
-                indexes = map(lambda (i, fn): i, same_names)  # get indexes
-                same_names = map(lambda (i, fn): fn, same_names)  # just names
+                if PROFTPD_SAMEDIR_PAIRING:
+                    same_names = _same_named(fn, files)  # returns (index, name)
+                    indexes = map(lambda (i, fn): i, same_names)  # get indexes
+                    same_names = map(lambda (i, fn): fn, same_names)  # names
 
-                # remove `same_names` from `files` (they are processed in this
-                # pass)
-                for i in sorted(indexes, reverse=True):
-                    del files[i]
+                    # remove `same_names` from `files` (they are processed in
+                    # this # pass)
+                    for i in sorted(indexes, reverse=True):
+                        del files[i]
 
                 if len(same_names) == 1:  # has exactly one file pair
                     ebook = None
                     metadata = None
                     o_fn = same_names[0]
 
-                    if _is_meta(fn) and not _is_meta(o_fn):
+                    if _is_meta(fn) and not _is_meta(o_fn):    # 1 meta, 2 data
                         metadata, ebook = fn, o_fn
-                    elif not _is_meta(fn) and _is_meta(o_fn):
+                    elif not _is_meta(fn) and _is_meta(o_fn):  # 1 data, 2 meta
                         metadata, ebook = o_fn, fn
-                    elif _is_meta(fn) and _is_meta(o_fn):  # both metadata
+                    elif _is_meta(fn) and _is_meta(o_fn):      # both metadata
+                        items.append(read_meta_file(fn))
+                        items.append(read_meta_file(o_fn))
                         processed_files.extend([fn, o_fn])
-                        items.append(_read_meta_file(fn))
-                        items.append(_read_meta_file(o_fn))
-                    else:  # both data
+                    else:                                      # both data
+                        items.append(read_data_file(fn))
+                        items.append(read_data_file(o_fn))
                         processed_files.extend([fn, o_fn])
-                        items.append(_read_data_file(fn))
-                        items.append(_read_data_file(o_fn))
 
-                    # process pairs
+                    # process pairs, which were created in first two branches
+                    # of the if statement above
                     if metadata and ebook:
-                        processed_files.extend([metadata, ebook])
-
                         items.append(
                             DataPair(
-                                metadata_file=_read_meta_file(metadata),
-                                ebook_file=_read_data_file(ebook)
+                                metadata_file=read_meta_file(metadata),
+                                ebook_file=read_data_file(ebook)
                             )
                         )
+                        processed_files.extend([metadata, ebook])
                 elif not same_names:  # there is no similar files
-                    processed_files.append(fn)
-
                     if _is_meta(fn):
-                        items.append(_read_meta_file(fn))
+                        items.append(read_meta_file(fn))
                     else:
-                        items.append(_read_data_file(fn))
+                        items.append(read_data_file(fn))
+                    processed_files.append(fn)
                 else:  # error - there is too many similar files
-                    same_names.append(fn)
-
                     error_protocol.append(
                         "Too many files with same name:" +
                         "\n\t".join(same_names) + "\n\n---\n"
                     )
+                    processed_files.append(fn)
 
-            # directory doesn't contain subdirectories
-            if len(dir_list) == files_len:
-                shutil.rmtree(dn)
+            if len(dir_list) == files_len:  # directory doesn't contain subdirs
+                if dn != path:
+                    shutil.rmtree(dn)
+                else:
+                    _remove_files(processed_files)
             else:
-                for fn in processed_files:
-                    os.remove(fn)
-
-    # # pick up remaining files
-    # for root, dirs, files in os.walk(path):
-    #     for fn in files:
-    #         pass
+                _remove_files(processed_files)
 
     # unlock directory
     recursive_chmod(path, 0775)
     # create_lock_file(path + "/" + PROTFPD_LOCK_FILENAME)
 
-    return items
+    return items  # TODO: ImportRequest
 
 
 def process_file(file_iterator):

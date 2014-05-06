@@ -6,6 +6,8 @@
 #= Imports ====================================================================
 from collections import namedtuple
 
+import decoders
+
 
 #= Requests ===================================================================
 class AddUser(namedtuple("AddUser", ["username", "password"])):
@@ -46,3 +48,20 @@ class DataPair(namedtuple("DataPair", ["metadata_file", "ebook_file"])):
 
 class SendEmail(namedtuple("SendEmail", ["username", "subject", "text"])):
     pass
+
+
+#= Functions & objects ========================================================
+def read_meta_file(fn):
+    with open(fn) as f:
+        data = f.read()
+        return MetadataFile(
+            filename=fn,
+            raw_data=data,
+            parsed_data=decoders.read_meta(data)
+        )
+
+
+def read_data_file(fn):
+    with open(fn) as f:
+        data = f.read()
+        return EbookFile(filename=fn, raw_data=data)
