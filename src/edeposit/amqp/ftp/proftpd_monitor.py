@@ -109,6 +109,22 @@ def _is_meta(fn):
     return fn.rsplit(".")[1].lower() in decoders.SUPPORTED_FILES
 
 
+def _read_meta_file(fn):
+    with open(fn) as f:
+        data = f.read()
+        return MetadataFile(
+            filename=fn,
+            raw_data=data,
+            parsed_data=decoders.read_meta(data)
+        )
+
+
+def _read_data_file(fn):
+    with open(fn) as f:
+        data = f.read()
+        return EbookFile(filename=fn, raw_data=data)
+
+
 # TODO: create protocol about import
 def process_request(username, path, timestamp):
     items = []
@@ -151,71 +167,32 @@ def process_request(username, path, timestamp):
                     elif _is_meta(fn) and _is_meta(o_fn):
                         processed_files.extend([fn, o_fn])
 
-                        for filename in [fn, o_fn]:
-                            with open(filename) as f:
-                                data = f.read()
-                                items.append(
-                                    MetadataFile(
-                                        filename=filename,
-                                        raw_data=data,
-                                        parsed_data=decoders.read_meta(data)
-                                    )
-                                )
+                        items.append(_read_meta_file(fn))
+                        items.append(_read_meta_file(o_fn))
 
                     # both data
                     else:
                         processed_files.extend([fn, o_fn])
-                        for filename in [fn, o_fn]:
-                            with open(filename) as f:
-                                data = f.read()
-                                items.append(
-                                    EbookFile(filename=filename, raw_data=data)
-                                )
+                        items.append(_read_data_file(fn))
+                        items.append(_read_data_file(o_fn))
 
                     # process pairs
                     if metadata and ebook:
                         processed_files.extend([metadata, ebook])
 
-                        with open(metadata) as f:
-                            data = f.read()
-                            metadata = MetadataFile(
-                                filename=metadata,
-                                raw_data=data,
-                                parsed_data=decoders.read_meta(data)
-                            )
-
-                        with open(ebook) as f:
-                            data = f.read()
-                            ebook = EbookFile(
-                                filename=ebook,
-                                raw_data=data,
-                            )
-
                         items.append(
                             DataPair(
-                                metadata_file=metadata,
-                                ebook_file=ebook
+                                metadata_file=_read_meta_file(metadata),
+                                ebook_file=_read_data_file(ebook)
                             )
                         )
                 elif not others_fn:
                     processed_files.append(fn)
 
-                    with open(fn) as f:
-                        data = f.read()
-                        file_struct = None
-
-                        if _is_meta(fn):
-                            file_struct = MetadataFile(
-                                filename=fn,
-                                raw_data=data,
-                                parsed_data=decoders.read_meta(data)
-                            )
-                        else:
-                            file_struct = EbookFile(
-                                filename=fn,
-                                raw_data=data,
-                            )
-                        items.append(file_struct)
+                    items.append(
+                        _read_meta_file(fn) if _is_meta(fn) \
+                                            else _read_data_file(fn)
+                    )
                 else:
                     others_fn.append(fn)
                     error_protocol.append(
