@@ -17,7 +17,14 @@ SUPPORTED_FILES = [
 
 
 #= Functions & objects ========================================================
-def read_meta(fn):
+class MetaParsingException(UserWarning):
+    """docstring for MetaParsingException"""
+    def __init__(self, value):
+        super(MetaParsingException, self).__init__(value)
+        self.value = value
+
+
+def parse_meta(data):
     return "parsed data"
 
 
