@@ -61,7 +61,11 @@ nahrali na server.
 """
 
 #: True - will pair files with same filename in same directory
-PROFTPD_SAMEDIR_PAIRING = True
+PROFTPD_SAME_NAME_DIR_PAIRING = True
+
+#: True - will pair files with different filenames, if there is only two files
+#: in dir
+PROFTPD_SAME_DIR_PAIRING = True
 
 #: I am using GID 2000 for all our users - this GID shouldn't be used by other
 #: than FTP users!
