@@ -182,7 +182,7 @@ def _process_directory(dn, files, error_protocol):
                 processed_files.extend([metadata, ebook])
         elif not same_names:  # there is no similar files
             if _is_meta(fn):
-                items.extend(_safe_parse_meta_file(fn))
+                items.extend(_safe_parse_meta_file(fn, error_protocol))
             else:
                 items.append(parse_data_file(fn))
             processed_files.append(fn)
@@ -201,11 +201,10 @@ def _process_directory(dn, files, error_protocol):
     else:
         _remove_files(processed_files)
 
+    return items
+
 
 # TODO: create protocol about import
-# TODO: unlink blank directories
-# TODO: vydělit ten while do vlastní funkce
-# TODO: error log
 # TODO: párování na základě ISBN
 def process_import_request(username, path, timestamp):
     items = []
@@ -223,9 +222,20 @@ def process_import_request(username, path, timestamp):
 
             items.extend(_process_directory(dn, files, error_protocol))
 
+    # unlink blank directories left by processing files
+    for root, dirs, files in os.walk(path):
+        for dn in dirs:
+            dn = os.path.join(root, dn)
+            if not os.listdir(dn):
+                shutil.rmtree(dn)
+
     # unlock directory
     recursive_chmod(path, 0775)
-    # create_lock_file(path + "/" + PROTFPD_LOCK_FILENAME)
+    # create_lock_file(path + "/" + PROFTPD_LOCK_FILENAME)
+
+    if error_protocol:
+        with open(PROFTPD_USER_ERROR_LOG, "wt") as f:
+            f.write("\n".join(error_protocol))
 
     return items  # TODO: ImportRequest
 
@@ -242,8 +252,10 @@ def process_log(file_iterator):
 
         # don't react to anything else, than trigger in form of deleted
         # "lock" file
-        if os.path.basename(parsed["path"]) != PROTFPD_LOCK_FILENAME:
+        if os.path.basename(parsed["path"]) != PROFTPD_LOCK_FILENAME:
             continue
+
+        # TODO: allow only trigger in home directory (or settings configurable?)
 
         # old record, which doesn't need to be parsed again
         if os.path.exists(parsed["path"]):
