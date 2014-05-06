@@ -144,34 +144,31 @@ def process_request(username, path, timestamp):
 
             while len(files):
                 fn = files.pop()
-                others = _same_named(fn, files)
 
-                indexes = map(lambda (i, fn): i, others)
-                others_fn = map(lambda (i, fn): fn, others)
+                # get files with same names (ignore paths and suffixes)
+                same_names = _same_named(fn, files)  # returns (index, name)
+                indexes = map(lambda (i, fn): i, same_names)  # get indexes
+                same_names = map(lambda (i, fn): fn, same_names)  # just names
 
-                # remove others from `files`
+                # remove `same_names` from `files` (they are processed in this
+                # pass)
                 for i in sorted(indexes, reverse=True):
                     del files[i]
 
-                if len(others_fn) == 1:
-                    metadata = None
+                if len(same_names) == 1:  # has exactly one file pair
                     ebook = None
-                    o_fn = others_fn[0]
+                    metadata = None
+                    o_fn = same_names[0]
 
                     if _is_meta(fn) and not _is_meta(o_fn):
                         metadata, ebook = fn, o_fn
                     elif not _is_meta(fn) and _is_meta(o_fn):
                         metadata, ebook = o_fn, fn
-
-                    # both metadata
-                    elif _is_meta(fn) and _is_meta(o_fn):
+                    elif _is_meta(fn) and _is_meta(o_fn):  # both metadata
                         processed_files.extend([fn, o_fn])
-
                         items.append(_read_meta_file(fn))
                         items.append(_read_meta_file(o_fn))
-
-                    # both data
-                    else:
+                    else:  # both data
                         processed_files.extend([fn, o_fn])
                         items.append(_read_data_file(fn))
                         items.append(_read_data_file(o_fn))
@@ -186,18 +183,19 @@ def process_request(username, path, timestamp):
                                 ebook_file=_read_data_file(ebook)
                             )
                         )
-                elif not others_fn:
+                elif not same_names:  # there is no similar files
                     processed_files.append(fn)
 
-                    items.append(
-                        _read_meta_file(fn) if _is_meta(fn) \
-                                            else _read_data_file(fn)
-                    )
-                else:
-                    others_fn.append(fn)
+                    if _is_meta(fn):
+                        items.append(_read_meta_file(fn))
+                    else:
+                        items.append(_read_data_file(fn))
+                else:  # error - there is too many similar files
+                    same_names.append(fn)
+
                     error_protocol.append(
                         "Too many files with same name:" +
-                        "\n\t".join(others_fn) + "\n\n---\n"
+                        "\n\t".join(same_names) + "\n\n---\n"
                     )
 
             # directory doesn't contain subdirectories
