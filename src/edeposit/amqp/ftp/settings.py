@@ -47,7 +47,10 @@ PROFTPD_LOGIN_FILE = PROFTPD_CONF_PATH + "ftpd.passwd"
 PROFTPD_LOG_FILE = PROFTPD_LOG_PATH + "extended.log"
 
 #: filename for the locking mechanism
-PROTFPD_LOCK_FILENAME = "delete_me_to_import_files.txt"
+PROFTPD_LOCK_FILENAME = "delete_me_to_import_files.txt"
+
+#: filename, where the error protocol is stored
+PROFTPD_USER_ERROR_LOG = "error.log.txt"
 
 #: text, which will be writen to the PROTFPD_LOCK_FILENAME
 PROFTPD_LOCK_FILE_CONTENT = """Delete this file to start batch import of all \
