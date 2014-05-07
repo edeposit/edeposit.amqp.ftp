@@ -67,6 +67,10 @@ PROFTPD_SAME_NAME_DIR_PAIRING = True
 #: in dir
 PROFTPD_SAME_DIR_PAIRING = True
 
+#: True - if the name is ISBN, files will be paired no matter where they are
+#: stored (unless they weren't paired before)
+PROFTPD_ISBN_PAIRING = True
+
 #: I am using GID 2000 for all our users - this GID shouldn't be used by other
 #: than FTP users!
 PROFTPD_USER_GID = 2000
