@@ -213,12 +213,46 @@ def _process_directory(dn, files, error_protocol, dir_size, path):
     return items
 
 
+def index(array, item, key=None):
+    for i, el in enumerate(array):
+        resolved_el = key(el) if key else el
+
+        if resolved_el == item:
+            return i
+
+    return -1
+
+
 def _isbn_pairing(items):
     metas = filter(lambda x: isinstance(x, MetadataFile), items)
     ebooks = filter(lambda x: isinstance(x, EbookFile), items)
 
-    metas = map(lambda x: (x.filename, x), metas)
-    ebooks = map(lambda x: (x.filename, x), ebooks)
+    metas = sorted(metas, key=lambda x: x.filename)
+    ebooks = sorted(ebooks, key=lambda x: x.filename, reverse=True)
+
+    while metas:
+        meta = metas.pop()
+
+        if not is_isbn(meta.filename):
+            continue
+
+        if not ebooks:
+            break
+
+        ebook_index = index(ebooks, meta.filename, key=lambda x: x.filename)
+
+        if ebook_index >= 0:
+            items.append(
+                DataPair(
+                    metadata_file=meta,
+                    ebook_file=ebooks[ebook_index]
+                )
+            )
+            items.remove(meta)
+            items.remove(ebooks[ebook_index])
+            ebooks = ebooks[ebook_index+1:]
+
+    return items
 
 
 # TODO: create protocol about import
@@ -247,6 +281,9 @@ def process_import_request(username, path, timestamp):
                     path
                 )
             )
+
+    if PROFTPD_ISBN_PAIRING:
+        items = _isbn_pairing(items)
 
     # unlink blank directories left by processing files
     for root, dirs, files in os.walk(path):
