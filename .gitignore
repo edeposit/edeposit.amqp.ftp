@@ -7,3 +7,4 @@ src/edeposit.amqp.ftp.egg-info/*
 docs/_build
 MANIFEST
 *.html
+src/edeposit/amqp/ftp/aleph
