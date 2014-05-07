@@ -161,13 +161,13 @@ def _process_pair(first_fn, second_fn, error_protocol):
     return [pair]
 
 
-def _process_directory(dn, files, error_protocol):
+def _process_directory(dn, files, error_protocol, dir_size, path):
     items = []
     files_len = len(files)  # used later, `files` is modified in process
     processed_files = []
 
     if len(files) == 2 and PROFTPD_SAME_DIR_PAIRING:
-        items.extend(_process_pair(files[0], files[1]))
+        items.extend(_process_pair(files[0], files[1], error_protocol))
         processed_files.extend(files)
         files = []
 
@@ -186,7 +186,7 @@ def _process_directory(dn, files, error_protocol):
                 del files[i]
 
         if len(same_names) == 1:  # has exactly one file pair
-            items.extend(_process_pair(fn, same_names[0]))
+            items.extend(_process_pair(fn, same_names[0], error_protocol))
             processed_files.extend([fn, same_names[0]])
         elif not same_names:  # there is no similar files
             if _is_meta(fn):
@@ -201,8 +201,9 @@ def _process_directory(dn, files, error_protocol):
             )
             processed_files.append(fn)
 
-    if len(dir_list) == files_len:  # directory doesn't contain subdirs
-        if dn != path:              # don't remove root directory (user home)
+    # TODO: move to process_import_request() ? for ISBN pairing?
+    if dir_size == files_len:   # directory doesn't contain subdirs
+        if dn != path:          # don't remove root directory (user home)
             shutil.rmtree(dn)
         else:
             _remove_files(processed_files)
@@ -212,8 +213,17 @@ def _process_directory(dn, files, error_protocol):
     return items
 
 
+def _isbn_pairing(items):
+    metas = filter(lambda x: isinstance(x, MetadataFile), items)
+    ebooks = filter(lambda x: isinstance(x, EbookFile), items)
+
+    metas = map(lambda x: (x.filename, x), metas)
+    ebooks = map(lambda x: (x.filename, x), ebooks)
+
+
 # TODO: create protocol about import
 # TODO: párování na základě ISBN
+# TODO: reject data files with random filename?
 def process_import_request(username, path, timestamp):
     items = []
     error_protocol = []  # TODO: use logging?
@@ -228,7 +238,15 @@ def process_import_request(username, path, timestamp):
             dir_list = map(lambda fn: dn + "/" + fn, os.listdir(dn))
             files = _filter_files(dir_list)
 
-            items.extend(_process_directory(dn, files, error_protocol))
+            items.extend(
+                _process_directory(
+                    dn,
+                    files,
+                    error_protocol,
+                    len(dir_list),
+                    path
+                )
+            )
 
     # unlink blank directories left by processing files
     for root, dirs, files in os.walk(path):
