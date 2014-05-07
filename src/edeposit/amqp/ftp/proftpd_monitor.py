@@ -11,6 +11,11 @@ import os.path
 
 import sh
 
+try:
+    from aleph import isbn
+except ImportError:
+    from edeposit.amqp.aleph import isbn
+
 import decoders
 from settings import *
 from structures import *
@@ -21,6 +26,14 @@ from proftpd_api import set_permissions, create_lock_file
 #= Variables ==================================================================
 #= Functions & objects ========================================================
 def _read_stdin():
+    """
+    Generator for reading from standard input in nonblocking mode.
+
+    Other ways of reading from ``stdin`` in python waits, until the buffer is
+    big enough, or until EOF character is sent.
+
+    This functions yields immediately after each line.
+    """
     line = sys.stdin.readline()
     while line:
         yield line
@@ -45,6 +58,18 @@ def _parse_line(line):
 
 
 def recursive_chmod(path, mode=0755):
+    """
+    Recursively change ``mode`` for given ``path``. Same as 'chmod -R `mode`'.
+
+    Args:
+        path (str): Path of the directory/file.
+        mode (octal int, default 0755): New mode of the file. Don't forget to
+                                        add ``0`` at the beginning of the
+                                        numbers, or Unspeakable HoRrOrS will be
+                                        awaken from their unholy sleep outside
+                                        of the reality and they WILL eat your
+                                        soul (and your files).
+    """
     set_permissions(path, mode=mode)
     if os.path.isfile(path):
         return
@@ -57,10 +82,13 @@ def recursive_chmod(path, mode=0755):
 
 def _filter_files(paths):
     """
-    Args:
-        paths (list): list of string paths
+    Filter files from the list of path. Directories, symlinks and other crap
+    (named pipes and so on) are ignored.
 
-    Return (list): paths, which points to files.
+    Args:
+        paths (list): List of string paths.
+
+    Return (list): Paths, which points to files.
     """
     return filter(
         lambda path: os.path.isfile(path),
@@ -104,17 +132,31 @@ def _same_named(fn, fn_list):
 
 
 def _is_meta(fn):
+    """
+    Return ``True``, if the `fn` argument looks (has right suffix) like it can
+    be meta.
+    """
     if "." not in fn:
         return False
     return fn.rsplit(".")[1].lower() in decoders.SUPPORTED_FILES
 
 
 def _remove_files(files):
+    """
+    Remove all given files.
+
+    Args:
+        files (list): List of filenames, which will be removed.
+    """
     for fn in files:
         os.remove(fn)
 
 
 def _safe_parse_meta_file(fn, error_protocol):
+    """
+    Try to parse MetadataFile. If the exception is raised, log the errors to
+    the `error_protocol` and return blank ``list``.
+    """
     try:
         return [parse_meta_file(fn)]
     except decoders.MetaParsingException, e:
@@ -126,6 +168,9 @@ def _safe_parse_meta_file(fn, error_protocol):
 
 
 def _process_pair(first_fn, second_fn, error_protocol):
+    """
+    Look at given filenames, decide which is what and try to pair them.
+    """
     ebook = None
     metadata = None
 
@@ -162,6 +207,18 @@ def _process_pair(first_fn, second_fn, error_protocol):
 
 
 def _process_directory(dn, files, error_protocol, dir_size, path):
+    """
+    Look at items in given directory, try to match them for same names and pair
+    them.
+
+    If the items can't be paired, add their representation.
+
+    Note:
+        All successfully processed files are removed.
+
+    Returns:
+        list: of items. Example: [MetadataFile, DataPair, DataPair, EbookFile]
+    """
     items = []
     files_len = len(files)  # used later, `files` is modified in process
     processed_files = []
@@ -214,6 +271,21 @@ def _process_directory(dn, files, error_protocol, dir_size, path):
 
 
 def index(array, item, key=None):
+    """
+    Array search function.
+
+    Written, because ``.index()`` method for array doesn't have `key` parameter
+    and raises `ValueError`, if the item is not found.
+
+    Args:
+        array (list): List of items, which will be searched.
+        item (whatever): Item, which will be matched to elements in `array`.
+        key (function, default None): Function, which will be used for lookup
+                                      into each element in `array`.
+
+    Return:
+        Index of `item` in `array`, if the `item` is in `array`, else `-1`.
+    """
     for i, el in enumerate(array):
         resolved_el = key(el) if key else el
 
@@ -224,6 +296,16 @@ def index(array, item, key=None):
 
 
 def _isbn_pairing(items):
+    """
+    Pair `items` with same ISBN into `DataPair` objects.
+
+    Args:
+        items (list): list of items, which will be searched.
+
+    Returns:
+        list: list with paired items. Paired items are removed, `DataPair` is \
+              added instead.
+    """
     metas = filter(lambda x: isinstance(x, MetadataFile), items)
     ebooks = filter(lambda x: isinstance(x, EbookFile), items)
 
@@ -233,7 +315,7 @@ def _isbn_pairing(items):
     while metas:
         meta = metas.pop()
 
-        if not is_isbn(meta.filename):
+        if not isbn.is_valid_isbn(meta.filename):
             continue
 
         if not ebooks:
@@ -256,7 +338,6 @@ def _isbn_pairing(items):
 
 
 # TODO: create protocol about import
-# TODO: párování na základě ISBN
 # TODO: reject data files with random filename?
 def process_import_request(username, path, timestamp):
     items = []
