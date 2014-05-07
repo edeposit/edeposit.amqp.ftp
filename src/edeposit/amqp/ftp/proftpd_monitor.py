@@ -306,32 +306,39 @@ def _isbn_pairing(items):
         list: list with paired items. Paired items are removed, `DataPair` is \
               added instead.
     """
-    metas = filter(lambda x: isinstance(x, MetadataFile), items)
-    ebooks = filter(lambda x: isinstance(x, EbookFile), items)
+    NameWrapper = namedtuple("NameWrapper", ["name", "obj"])
+    metas = map(
+        lambda x: NameWrapper(_just_name(x.filename), x),
+        filter(lambda x: isinstance(x, MetadataFile), items)
+    )
+    ebooks = map(
+        lambda x: NameWrapper(_just_name(x.filename), x),
+        filter(lambda x: isinstance(x, EbookFile), items)
+    )
 
-    metas = sorted(metas, key=lambda x: x.filename)
-    ebooks = sorted(ebooks, key=lambda x: x.filename, reverse=True)
+    metas = sorted(metas, key=lambda x: x.name)
+    ebooks = sorted(ebooks, key=lambda x: x.name, reverse=True)
 
     while metas:
         meta = metas.pop()
 
-        if not isbn.is_valid_isbn(meta.filename):
+        if not isbn.is_valid_isbn(meta.name):
             continue
 
         if not ebooks:
             break
 
-        ebook_index = index(ebooks, meta.filename, key=lambda x: x.filename)
+        ebook_index = index(ebooks, meta.name, key=lambda x: x.name)
 
         if ebook_index >= 0:
             items.append(
                 DataPair(
-                    metadata_file=meta,
-                    ebook_file=ebooks[ebook_index]
+                    metadata_file=meta.obj,
+                    ebook_file=ebooks[ebook_index].obj
                 )
             )
-            items.remove(meta)
-            items.remove(ebooks[ebook_index])
+            items.remove(meta.obj)
+            items.remove(ebooks[ebook_index].obj)
             ebooks = ebooks[ebook_index+1:]
 
     return items
