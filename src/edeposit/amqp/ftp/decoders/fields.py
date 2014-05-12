@@ -8,7 +8,18 @@
 
 
 #= Variables ==================================================================
-
+REQUIRED_FIELDS = [
+    "ISBN",
+    "Vazba/forma",
+    "Název",
+    "Url (pouze pro online publikace)",
+    "Formát (pouze pro online publikace)",
+    "Místo vydání",
+    "Nakladatel",
+    "Měsíc a rok vydání",
+    "Pořadí vydání",
+    "Zpracovatel záznamu"  # TODO: look only for the first word
+]
 
 
 #= Functions & objects ========================================================
