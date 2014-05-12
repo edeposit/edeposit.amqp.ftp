@@ -384,65 +384,112 @@ def _isbn_pairing(items):
     return items
 
 
-# TODO: create protocol about import
-# TODO: wrap critical part in try..finally block
+def _create_import_log(items):
+    """
+    Used to create log with successfully imported data.
+    """
+    log = []
+
+    for item in items:
+        if isinstance(item, MetadataFile):
+            log.append(
+                "Metadata file '%s' successfully imported." % item.filename
+            )
+        elif isinstance(item, EbookFile):
+            log.append("Ebook file '%s' successfully imported." % item.filename)
+        elif isinstance(item, DataPair):
+            meta = item.metadata_file.filename
+            data = item.ebook_file.filename
+            log.extend([
+                "Metadata and data files paired to epub. import request:",
+                "\tMetadata file '%s' successfully imported." % meta,
+                "\tEbook file '%s' successfully imported." % data
+            ])
+
+    return log
+
+
 def process_import_request(username, path, timestamp):
     items = []
-    error_protocol = []  # TODO: use logging?
+    error_protocol = []
 
     # lock directory to prevent user to write during processing of the batch
     logger.info("Locking user´s directory.")
     recursive_chmod(path, 0555)
 
-    # pick up pairs in directories
-    for root, dirs, files in os.walk(path):
-        for dn in dirs + [path]:
-            dn = os.path.join(root, dn)
-            dir_list = map(lambda fn: dn + "/" + fn, os.listdir(dn))
-            files = _filter_files(dir_list)
+    try:
+        # pick up pairs in directories
+        for root, dirs, files in os.walk(path):
+            for dn in dirs + [path]:
+                dn = os.path.join(root, dn)
+                dir_list = map(lambda fn: dn + "/" + fn, os.listdir(dn))
+                files = _filter_files(dir_list)
 
-            logger.info("Processing directory '%s'." % dn)
+                logger.info("Processing directory '%s'." % dn)
 
-            items.extend(
-                _process_directory(
-                    dn,
-                    files,
-                    error_protocol,
-                    len(dir_list),
-                    path
+                items.extend(
+                    _process_directory(
+                        dn,
+                        files,
+                        error_protocol,
+                        len(dir_list),
+                        path
+                    )
                 )
+
+        if PROFTPD_ISBN_PAIRING:
+            logger.debug("PROFTPD_ISBN_PAIRING is ON.")
+            logger.info("Pairing user's files by ISBN filename.")
+            items = _isbn_pairing(items)
+
+        # unlink blank directories left by processing files
+        logger.info("Removing blank directories.")
+        for root, dirs, files in os.walk(path):
+            for dn in dirs:
+                dn = os.path.join(root, dn)
+                if not os.listdir(dn):
+                    logger.debug("Removing blank directory '%s'." % dn)
+                    shutil.rmtree(dn)
+    finally:
+        # unlock directory
+        logger.info("Unlocking user´s directory.")
+        recursive_chmod(path, 0775)
+        logger.info("Creating lock file '%s'." % PROFTPD_LOCK_FILENAME)
+        create_lock_file(path + "/" + PROFTPD_LOCK_FILENAME)
+
+        # process errors if found
+        if error_protocol:
+            logger.error(
+                "Found %d error(s)." % len(error_protocol)
             )
 
-    if PROFTPD_ISBN_PAIRING:
-        logger.debug("PROFTPD_ISBN_PAIRING is ON.")
-        logger.info("Pairing user's files by ISBN filename.")
-        items = _isbn_pairing(items)
+            err_path = path + "/" + PROFTPD_USER_ERROR_LOG
+            with open(err_path, "wt") as f:
+                f.write("\n".join(error_protocol))
 
-    # unlink blank directories left by processing files
-    logger.info("Removing blank directories.")
-    for root, dirs, files in os.walk(path):
-        for dn in dirs:
-            dn = os.path.join(root, dn)
-            if not os.listdir(dn):
-                logger.debug("Removing blank directory '%s'." % dn)
-                shutil.rmtree(dn)
+            logger.error("Error protocol saved to '%s'." % err_path)
 
-    # unlock directory
-    logger.info("Unlocking user´s directory.")
-    recursive_chmod(path, 0775)
-    logger.info("Creating lock file '%s'." % PROFTPD_LOCK_FILENAME)
-    create_lock_file(path + "/" + PROFTPD_LOCK_FILENAME)
+        # process import log
+        import_log = _create_import_log(items)
+        if import_log and PROFTPD_CREATE_IMPORT_LOG:
+            logger.debug("PROFTPD_CREATE_IMPORT_LOG is on.")
 
-    if error_protocol:
-        logger.error(
-            "Found %d error(s). Saving error protocol." % len(error_protocol)
-        )
+            imp_path = path + "/" + PROFTPD_USER_IMPORT_LOG
+            with open(imp_path, "wt") as f:
+                if error_protocol:
+                    f.write("Error: Import only partially successful.\n")
+                    f.write("See '%s' for details.\n" % PROFTPD_USER_ERROR_LOG)
+                    f.write("\nErrors:\n")
+                    f.write("---\n")
+                    f.write("\n".join(error_protocol))
+                    f.write("Successfully imported files:")
+                    f.write("---\n")
+                else:
+                    f.write("Sucess!\n")
+                    f.write("---\n")
+                f.write("\n".join(import_log))
 
-        err_path = path + "/" + PROFTPD_USER_ERROR_LOG
-        with open(err_path, "wt") as f:
-            f.write("\n".join(error_protocol))
-
-        logger.error("Error protocol saved to '%s'." % err_path)
+            logger.info("Created import protocol '%s'." % imp_path)
 
     return ImportRequest(
         username=username,
@@ -451,6 +498,16 @@ def process_import_request(username, path, timestamp):
 
 
 def process_log(file_iterator):
+    """
+    Process the extended ProFTPD log.
+
+    Args:
+        file_iterator (file): any file-like iterator for reading the log or
+                              stdin (see :funkc:`_read_stdin`).
+
+    Yields:
+        ImportRequest: with each import.
+    """
     for line in file_iterator:
         if "," not in line:
             continue
@@ -530,13 +587,13 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
 
-    if args.verbose:  # TODO: zprovoznit
+    if args.verbose:
         logger.setLevel(logging.INFO)
     if args.very_verbose:
         logger.setLevel(logging.DEBUG)
         logger.debug("Logger set to debug level.")
 
-    logger.info("Runnig as standalone program.")
+    logger.info("Running as standalone program.")
     try:
         main(args)
     except KeyboardInterrupt:

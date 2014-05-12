@@ -52,6 +52,9 @@ PROFTPD_LOCK_FILENAME = "delete_me_to_import_files.txt"
 #: filename, where the error protocol is stored
 PROFTPD_USER_ERROR_LOG = "error.log.txt"
 
+#: filename, where the import protocol for the user is stored
+PROFTPD_USER_IMPORT_LOG = "import.log.txt"
+
 #: text, which will be writen to the PROTFPD_LOCK_FILENAME
 PROFTPD_LOCK_FILE_CONTENT = """Delete this file to start batch import of all \
 files, you've uploaded to the server.
@@ -74,6 +77,9 @@ PROFTPD_ISBN_PAIRING = True
 #: True - Lock file can be only in home directory, everywhere else will be
 #: ignored
 PROFTPD_LOCK_ONLY_IN_HOME = True
+
+#: True - PROFTPD_USER_IMPORT_LOG will be created
+PROFTPD_CREATE_IMPORT_LOG = True
 
 #: I am using GID 2000 for all our users - this GID shouldn't be used by other
 #: than FTP users!
