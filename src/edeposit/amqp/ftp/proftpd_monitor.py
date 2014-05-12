@@ -316,9 +316,10 @@ def _isbn_pairing(items):
         filter(lambda x: isinstance(x, EbookFile), items)
     )
 
+    # simple pairing mechanism, which shouldn't be O^2 complex, but something
+    # slightly better
     metas = sorted(metas, key=lambda x: x.name)
     ebooks = sorted(ebooks, key=lambda x: x.name, reverse=True)
-
     while metas:
         meta = metas.pop()
 
@@ -345,7 +346,6 @@ def _isbn_pairing(items):
 
 
 # TODO: create protocol about import
-# TODO: reject data files with random filename?
 def process_import_request(username, path, timestamp):
     items = []
     error_protocol = []  # TODO: use logging?
@@ -382,18 +382,21 @@ def process_import_request(username, path, timestamp):
 
     # unlock directory
     recursive_chmod(path, 0775)
-    # create_lock_file(path + "/" + PROFTPD_LOCK_FILENAME)
+    create_lock_file(path + "/" + PROFTPD_LOCK_FILENAME)
 
     if error_protocol:
         with open(PROFTPD_USER_ERROR_LOG, "wt") as f:
             f.write("\n".join(error_protocol))
 
-    return items  # TODO: ImportRequest
+    return ImportRequest(
+        username=username,
+        requests=items
+    )
 
 
 def process_log(file_iterator):
     for line in file_iterator:
-        if "," not in line or "[" in line:  # TODO: remove [ check
+        if "," not in line:
             continue
 
         parsed = _parse_line(line)
@@ -406,7 +409,11 @@ def process_log(file_iterator):
         if os.path.basename(parsed["path"]) != PROFTPD_LOCK_FILENAME:
             continue
 
-        # TODO: allow only trigger in home directory (or settings configurable?)
+        # react only to lock file in in home directory
+        dir_name = os.path.dirname(parsed["path"])
+        if PROFTPD_LOCK_ONLY_IN_HOME:
+            if dir_name != PROFTPD_DATA_PATH + parsed["username"]:
+                continue
 
         # old record, which doesn't need to be parsed again
         if os.path.exists(parsed["path"]):
@@ -423,7 +430,7 @@ def process_log(file_iterator):
 if __name__ == '__main__':
     try:
         it = None
-        if len(sys.argv) > 1:
+        if len(sys.argv) > 1:  # TODO: rewrite to argparse
             if not os.path.exists(sys.argv[1]):
                 sys.stderr.writeln("'" + sys.argv[1] + "' doesn't exists!\n")
                 sys.exit(1)

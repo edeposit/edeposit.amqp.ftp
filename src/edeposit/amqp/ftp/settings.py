@@ -71,6 +71,10 @@ PROFTPD_SAME_DIR_PAIRING = True
 #: stored (unless they weren't paired before)
 PROFTPD_ISBN_PAIRING = True
 
+#: True - Lock file can be only in home directory, everywhere else will be
+#: ignored
+PROFTPD_LOCK_ONLY_IN_HOME = True
+
 #: I am using GID 2000 for all our users - this GID shouldn't be used by other
 #: than FTP users!
 PROFTPD_USER_GID = 2000
