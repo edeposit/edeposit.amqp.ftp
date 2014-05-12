@@ -9,6 +9,7 @@ import sys
 import shutil
 import os.path
 import logging
+import argparse
 
 import sh
 
@@ -25,8 +26,9 @@ from proftpd_api import set_permissions, create_lock_file
 
 
 #= Variables ==================================================================
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig()
 logger = logging.getLogger(__name__)
+logger.info("Started")
 
 
 #= Functions & objects ========================================================
@@ -364,7 +366,10 @@ def _isbn_pairing(items):
 
         if ebook_index >= 0:
             logger.debug(
-                "Pairing '%s' and '%s'." % (meta.obj, ebooks[ebook_index].obj)
+                "Pairing '%s' and '%s'." % (
+                    meta.obj.filename,
+                    ebooks[ebook_index].obj.filename
+                )
             )
             items.append(
                 DataPair(
@@ -409,6 +414,7 @@ def process_import_request(username, path, timestamp):
             )
 
     if PROFTPD_ISBN_PAIRING:
+        logger.debug("PROFTPD_ISBN_PAIRING is ON.")
         logger.info("Pairing user's files by ISBN filename.")
         items = _isbn_pairing(items)
 
@@ -428,8 +434,15 @@ def process_import_request(username, path, timestamp):
     create_lock_file(path + "/" + PROFTPD_LOCK_FILENAME)
 
     if error_protocol:
-        with open(PROFTPD_USER_ERROR_LOG, "wt") as f:
+        logger.error(
+            "Found %d error(s). Saving error protocol." % len(error_protocol)
+        )
+
+        err_path = path + "/" + PROFTPD_USER_ERROR_LOG
+        with open(err_path, "wt") as f:
             f.write("\n".join(error_protocol))
+
+        logger.error("Error protocol saved to '%s'." % err_path)
 
     return ImportRequest(
         username=username,
@@ -473,25 +486,58 @@ def process_log(file_iterator):
         )
 
 
+def main(args):
+    if args.FN:
+        if not os.path.exists(sys.argv[1]):
+            logger.error("'%s' doesn't exists!" % args.FN)
+            sys.stderr.writeln("'%s' doesn't exists!\n" % args.FN)
+            sys.exit(1)
+
+        logger.info("Processing '%s'" % args.FN)
+        for ir in process_log(sh.tail("-f", args.FN, _iter=True)):
+            print ir
+    else:
+        logger.info("Processing stdin.")
+        for ir in process_log(_read_stdin()):
+            print ir
+
+
 #= Main program ===============================================================
 if __name__ == '__main__':
-    logger.info("Started")
 
+    parser = argparse.ArgumentParser(
+        description="""ProFTPD log monitor. This script reacts to preprogrammed
+                       events."""
+    )
+    parser.add_argument(
+        "FN",
+        type=str,
+        default=None,
+        help="""Path to the log file. Usually '%s'. If not set, stdin is used to
+                read the log file.""" % PROFTPD_LOG_FILE
+    )
+    parser.add_argument(
+        "-v",
+        '--verbose',
+        action="store_true",
+        help="Be verbose."
+    )
+    parser.add_argument(
+        "-vv",
+        '--very-verbose',
+        action="store_true",
+        help="Be very verbose (include debug messages)."
+    )
+    args = parser.parse_args()
+
+    if args.verbose:  # TODO: zprovoznit
+        logger.setLevel(logging.INFO)
+    if args.very_verbose:
+        logger.setLevel(logging.DEBUG)
+        logger.debug("Logger set to debug level.")
+
+    logger.info("Runnig as standalone program.")
     try:
-        it = None
-        if len(sys.argv) > 1:  # TODO: rewrite to argparse
-            if not os.path.exists(sys.argv[1]):
-                logger.error("'" + sys.argv[1] + "' doesn't exists!\n")
-                sys.stderr.writeln("'" + sys.argv[1] + "' doesn't exists!\n")
-                sys.exit(1)
-
-            logger.info("Processing '%s'" % sys.argv[1])
-            it = process_log(sh.tail("-f", sys.argv[1], _iter=True))
-        else:
-            logger.info("Processing stdin" % sys.argv[1])
-            it = process_log(_read_stdin())
-
-        for request in it:  # TODO: remove
-            print request
+        main(args)
     except KeyboardInterrupt:
         sys.exit(0)
