@@ -8,6 +8,7 @@ import os
 import sys
 import shutil
 import os.path
+import logging
 
 import sh
 
@@ -19,11 +20,15 @@ except ImportError:
 import decoders
 from settings import *
 from structures import *
-from __init__ import ImportRequest, SendEmail
+from __init__ import ImportRequest
 from proftpd_api import set_permissions, create_lock_file
 
 
 #= Variables ==================================================================
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
 #= Functions & objects ========================================================
 def _read_stdin():
     """
@@ -149,6 +154,7 @@ def _remove_files(files):
         files (list): List of filenames, which will be removed.
     """
     for fn in files:
+        logger.debug("Removing '%s'." % fn)
         os.remove(fn)
 
 
@@ -175,15 +181,27 @@ def _process_pair(first_fn, second_fn, error_protocol):
     metadata = None
 
     if _is_meta(first_fn) and not _is_meta(second_fn):    # 1st meta, 2nd data
+        logger.debug(
+            "Parsed: '%s' as meta, '%s' as data." % (first_fn, second_fn)
+        )
         metadata, ebook = first_fn, second_fn
     elif not _is_meta(first_fn) and _is_meta(second_fn):  # 1st data, 2nd meta
+        logger.debug(
+            "Parsed: '%s' as meta, '%s' as data." % (second_fn, first_fn)
+        )
         metadata, ebook = second_fn, first_fn
     elif _is_meta(first_fn) and _is_meta(second_fn):      # both metadata
+        logger.debug(
+            "Parsed: both '%s' and '%s' as meta." % (first_fn, second_fn)
+        )
         return [
             _safe_parse_meta_file(first_fn, error_protocol),
             _safe_parse_meta_file(second_fn, error_protocol)
         ]
     else:                                                 # both data
+        logger.debug(
+            "Parsed: both '%s' and '%s' as data." % (first_fn, second_fn)
+        )
         return [
             parse_data_file(first_fn),
             parse_data_file(second_fn)
@@ -199,6 +217,7 @@ def _process_pair(first_fn, second_fn, error_protocol):
         )
     except decoders.MetaParsingException, e:
         pair = parse_data_file(ebook)
+        logger.error("Can't parse MetadataFile '%s': %s" % (fn, e.value))
         error_protocol.append(
             "Can't parse MetadataFile '%s':\n\t%s\n" % (fn, e.value)
         )
@@ -224,6 +243,8 @@ def _process_directory(dn, files, error_protocol, dir_size, path):
     processed_files = []
 
     if len(files) == 2 and PROFTPD_SAME_DIR_PAIRING:
+        logger.debug("There are only two files.")
+
         items.extend(_process_pair(files[0], files[1], error_protocol))
         processed_files.extend(files)
         files = []
@@ -231,6 +252,8 @@ def _process_directory(dn, files, error_protocol, dir_size, path):
     while files:
         same_names = []
         fn = files.pop()
+
+        logger.debug("Processing '%s'." % fn)
 
         # get files with same names (ignore paths and suffixes)
         if PROFTPD_SAME_NAME_DIR_PAIRING:
@@ -243,24 +266,32 @@ def _process_directory(dn, files, error_protocol, dir_size, path):
                 del files[i]
 
         if len(same_names) == 1:  # has exactly one file pair
+            logger.debug(
+                "'%s' can be probably paired with '%s'." % (fn, same_names[0])
+            )
             items.extend(_process_pair(fn, same_names[0], error_protocol))
             processed_files.extend([fn, same_names[0]])
         elif not same_names:  # there is no similar files
+            logger.debug("'%s' can't be paired. Adding standalone file." % fn)
             if _is_meta(fn):
                 items.extend(_safe_parse_meta_file(fn, error_protocol))
             else:
                 items.append(parse_data_file(fn))
             processed_files.append(fn)
         else:  # error - there is too many similar files
+            logger.error(
+                "Too many files with same name: %s" % ", ".join(same_names)
+            )
             error_protocol.append(
                 "Too many files with same name:" +
                 "\n\t".join(same_names) + "\n\n---\n"
             )
             processed_files.append(fn)
 
-    # TODO: move to process_import_request() ? for ISBN pairing?
+    logger.info("Removing processed files.")
     if dir_size == files_len:   # directory doesn't contain subdirs
         if dn != path:          # don't remove root directory (user home)
+            logger.debug("Removing whole directory '%s'." % dn)
             shutil.rmtree(dn)
         else:
             _remove_files(processed_files)
@@ -332,6 +363,9 @@ def _isbn_pairing(items):
         ebook_index = index(ebooks, meta.name, key=lambda x: x.name)
 
         if ebook_index >= 0:
+            logger.debug(
+                "Pairing '%s' and '%s'." % (meta.obj, ebooks[ebook_index].obj)
+            )
             items.append(
                 DataPair(
                     metadata_file=meta.obj,
@@ -346,11 +380,13 @@ def _isbn_pairing(items):
 
 
 # TODO: create protocol about import
+# TODO: wrap critical part in try..finally block
 def process_import_request(username, path, timestamp):
     items = []
     error_protocol = []  # TODO: use logging?
 
     # lock directory to prevent user to write during processing of the batch
+    logger.info("Locking user´s directory.")
     recursive_chmod(path, 0555)
 
     # pick up pairs in directories
@@ -359,6 +395,8 @@ def process_import_request(username, path, timestamp):
             dn = os.path.join(root, dn)
             dir_list = map(lambda fn: dn + "/" + fn, os.listdir(dn))
             files = _filter_files(dir_list)
+
+            logger.info("Processing directory '%s'." % dn)
 
             items.extend(
                 _process_directory(
@@ -371,17 +409,22 @@ def process_import_request(username, path, timestamp):
             )
 
     if PROFTPD_ISBN_PAIRING:
+        logger.info("Pairing user's files by ISBN filename.")
         items = _isbn_pairing(items)
 
     # unlink blank directories left by processing files
+    logger.info("Removing blank directories.")
     for root, dirs, files in os.walk(path):
         for dn in dirs:
             dn = os.path.join(root, dn)
             if not os.listdir(dn):
+                logger.debug("Removing blank directory '%s'." % dn)
                 shutil.rmtree(dn)
 
     # unlock directory
+    logger.info("Unlocking user´s directory.")
     recursive_chmod(path, 0775)
+    logger.info("Creating lock file '%s'." % PROFTPD_LOCK_FILENAME)
     create_lock_file(path + "/" + PROFTPD_LOCK_FILENAME)
 
     if error_protocol:
@@ -419,6 +462,10 @@ def process_log(file_iterator):
         if os.path.exists(parsed["path"]):
             continue
 
+        logger.info(
+            "Request for processing from user '%s'." % parsed["username"]
+        )
+
         yield process_import_request(
             username=parsed["username"],
             path=os.path.dirname(parsed["path"]),
@@ -428,18 +475,23 @@ def process_log(file_iterator):
 
 #= Main program ===============================================================
 if __name__ == '__main__':
+    logger.info("Started")
+
     try:
         it = None
         if len(sys.argv) > 1:  # TODO: rewrite to argparse
             if not os.path.exists(sys.argv[1]):
+                logger.error("'" + sys.argv[1] + "' doesn't exists!\n")
                 sys.stderr.writeln("'" + sys.argv[1] + "' doesn't exists!\n")
                 sys.exit(1)
 
+            logger.info("Processing '%s'" % sys.argv[1])
             it = process_log(sh.tail("-f", sys.argv[1], _iter=True))
         else:
+            logger.info("Processing stdin" % sys.argv[1])
             it = process_log(_read_stdin())
 
-        for request in it:
+        for request in it:  # TODO: remove
             print request
     except KeyboardInterrupt:
         sys.exit(0)
