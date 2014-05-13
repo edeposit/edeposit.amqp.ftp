@@ -29,7 +29,7 @@ class ListRegisteredUsers(namedtuple("ListRegisteredUsers", [])):
 
 #= Responses ==================================================================
 class ImportRequest(namedtuple("ImportRequest", ["username", "requests"])):
-    pass  # TODO: rewrite to differentiate metadata/actual data
+    pass  # TODO: protocol
 
 
 class MetadataFile(namedtuple("MetadataFile", ["filename",
@@ -61,7 +61,7 @@ def parse_meta_file(fn):
     return MetadataFile(
         filename=fn,
         raw_data=data,
-        parsed_data=decoders.parse_meta(data)
+        parsed_data=decoders.parse_meta(fn, data)
     )
 
 
