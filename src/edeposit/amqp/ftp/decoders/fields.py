@@ -93,23 +93,29 @@ class FieldValidator:
 
         epub_dict = dict(map(lambda x: (x.epub, x.value), relevant_fields))
 
-        return EPublication(
-            ISBN=epub_dict.get("ISBN", None),
-            nazev=epub_dict.get("nazev", None),
-            podnazev=epub_dict.get("podnazev", None),
-            vazba=epub_dict.get("vazba", None),
-            cena=epub_dict.get("cena", None),
-            castDil=epub_dict.get("castDil", None),
-            nazevCasti=epub_dict.get("nazevCasti", None),
-            nakladatelVydavatel=epub_dict.get("nakladatelVydavatel", None),
-            datumVydani=epub_dict.get("datumVydani", None),
-            poradiVydani=epub_dict.get("poradiVydani", None),
-            zpracovatelZaznamu=epub_dict.get("zpracovatelZaznamu", None),
-            format=epub_dict.get("format", None),
-            url=epub_dict.get("url", None),
-            mistoVydani=epub_dict.get("mistoVydani", None),
-            ISBNSouboruPublikaci=epub_dict.get("ISBNSouboruPublikaci", None),
-            autori=epub_dict.get("autori", None),
-            originaly=epub_dict.get("originaly", None),
-            internal_url=epub_dict.get("internal_url", None),
-        )
+        epublication_parts = [
+            "ISBN",
+            "nazev",
+            "podnazev",
+            "vazba",
+            "cena",
+            "castDil",
+            "nazevCasti",
+            "nakladatelVydavatel",
+            "datumVydani",
+            "poradiVydani",
+            "zpracovatelZaznamu",
+            "format",
+            "url",
+            "mistoVydani",
+            "ISBNSouboruPublikaci",
+            "autori",
+            "originaly",
+            "internal_url",
+        ]
+
+        for epublication_part in epublication_parts:
+            if epublication_part not in epub_dict:
+                epub_dict[epublication_part] = None
+
+        return EPublication(**epub_dict)
