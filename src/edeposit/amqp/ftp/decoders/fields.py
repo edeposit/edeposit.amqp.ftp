@@ -62,7 +62,7 @@ class FieldValidator:
             Field(keyword="cena", descr="Cena"),
         ]
 
-    def process(self, key, val):  # TODO: rename to add()?
+    def process(self, key, val):
         for field in self.fields:
             if field.check(key, val):
                 return
@@ -93,28 +93,7 @@ class FieldValidator:
 
         epub_dict = dict(map(lambda x: (x.epub, x.value), relevant_fields))
 
-        epublication_parts = [
-            "ISBN",
-            "nazev",
-            "podnazev",
-            "vazba",
-            "cena",
-            "castDil",
-            "nazevCasti",
-            "nakladatelVydavatel",
-            "datumVydani",
-            "poradiVydani",
-            "zpracovatelZaznamu",
-            "format",
-            "url",
-            "mistoVydani",
-            "ISBNSouboruPublikaci",
-            "autori",
-            "originaly",
-            "internal_url",
-        ]
-
-        for epublication_part in epublication_parts:
+        for epublication_part in EPublication._fields:
             if epublication_part not in epub_dict:
                 epub_dict[epublication_part] = None
 
