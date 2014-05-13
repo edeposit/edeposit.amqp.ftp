@@ -8,3 +8,4 @@ docs/_build
 MANIFEST
 *.html
 src/edeposit/amqp/ftp/aleph
+src/edeposit/amqp/ftp/decoders/aleph
