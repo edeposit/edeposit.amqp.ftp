@@ -9,8 +9,9 @@ try:
 except ImportError:
     from edeposit.amqp.aleph.datastructures.epublication import EPublication
 
+from meta_exceptions import MetaParsingException
 
-#= Variables ==================================================================
+
 #= Functions & objects ========================================================
 class Field:
     def __init__(self, keyword, descr, epub=None):
@@ -30,7 +31,7 @@ class Field:
         return self.value is not None
 
 
-class FieldValidator:
+class FieldParser:
     def __init__(self):
         self.fields = [
             Field(keyword="isbn", descr="ISBN", epub="ISBN"),
@@ -86,7 +87,9 @@ class FieldValidator:
                 bad_fields
             )
 
-            raise ValueError("Missing fields:\n\t" + "\n\t".join(bad_fields))
+            raise MetaParsingException(
+                "Missing field(s):\n\t" + "\n\t".join(bad_fields)
+            )
 
         relevant_fields = self.fields
         relevant_fields += filter(lambda x: x.is_valid(), self.optional)
