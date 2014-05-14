@@ -214,7 +214,7 @@ def _process_pair(first_fn, second_fn, error_protocol):
     pair = None
     try:
         pair = DataPair(
-            metadata_file=parse_meta_file(metadata),
+            metadata_file=_safe_parse_meta_file(metadata),
             ebook_file=parse_data_file(ebook)
         )
     except decoders.MetaParsingException, e:
