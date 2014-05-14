@@ -6,7 +6,7 @@
 #= Imports ====================================================================
 import json
 
-import validator
+import parser
 from meta_exceptions import MetaParsingException
 
 
@@ -18,6 +18,6 @@ def decode(data):
     except:
         raise MetaParsingException("Can't parse your JSON data.")
 
-    validator.check_structure(decoded)
+    decoded = parser.check_structure(decoded)
 
     return decoded
