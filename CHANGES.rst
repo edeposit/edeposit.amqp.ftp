@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.3.0
+-----
+    - Json metadata parser is working.
+    - Added basic unittests for metadata decoders.
+
 0.2.0
 -----
     - proftpd_monitor.py is almost working, most of the harder algoritms are done.
