@@ -5,8 +5,10 @@
 #
 #= Imports ====================================================================
 try:
+    from aleph.isbn import is_valid_isbn
     from aleph.datastructures.epublication import EPublication
 except ImportError:
+    from edeposit.amqp.aleph.isbn import is_valid_isbn
     from edeposit.amqp.aleph.datastructures.epublication import EPublication
 
 from meta_exceptions import MetaParsingException
@@ -100,6 +102,11 @@ class FieldParser:
             if epublication_part not in epub_dict:
                 epub_dict[epublication_part] = None
 
+        if not is_valid_isbn(epub_dict["ISBN"]):
+            raise MetaParsingException(
+                "ISBN '%s' is not valid!" % epub_dict["ISBN"]
+            )
+
         return EPublication(**epub_dict)
 
 
@@ -156,3 +163,7 @@ def test_field_parser():
     assert e.datumVydani == "09/2012"
     assert e.poradiVydani == "1"
     assert e.zpracovatelZaznamu == "Franta Putsalek"
+
+    f.process("ISBN knihy", "80-XXXXX-XX-0")
+    assert f.is_valid()
+    assert_exc(None, f.get_epublication)
