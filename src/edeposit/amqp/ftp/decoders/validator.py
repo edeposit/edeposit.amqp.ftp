@@ -8,9 +8,35 @@ from meta_exceptions import MetaParsingException
 
 
 #= Variables ==================================================================
+ALLOWED_TYPES = [
+    str,
+    unicode,
+    int,
+    float,
+    long
+]
+
+
 #= Functions & objects ========================================================
 def check_structure(data):
     """
-    Check 
+    Check whether the structure is flat dictionary.
     """
-    pass
+    if not isinstance(data, dict):
+        raise MetaParsingException(
+            "Data format has invalid strucure (dictionary is expected)."
+        )
+
+    for key, val in data.iteritems():
+        if type(key) not in ALLOWED_TYPES:
+            raise MetaParsingException(
+                "Can't parse the data file - invalid type of keyword '" +
+                str(key) +
+                "'!"
+            )
+        if type(val) not in ALLOWED_TYPES:
+            raise MetaParsingException(
+                "Can't parse the data file - invalid type of keyword '" +
+                str(key) +
+                "'!"
+            )
