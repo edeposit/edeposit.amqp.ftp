@@ -30,13 +30,13 @@ def check_structure(data):
     for key, val in data.iteritems():
         if type(key) not in ALLOWED_TYPES:
             raise MetaParsingException(
-                "Can't parse the data file - invalid type of keyword '" +
+                "Can't decode the meta file - invalid type of keyword '" +
                 str(key) +
                 "'!"
             )
         if type(val) not in ALLOWED_TYPES:
             raise MetaParsingException(
-                "Can't parse the data file - invalid type of keyword '" +
+                "Can't decode the meta file - invalid type of keyword '" +
                 str(key) +
                 "'!"
             )
