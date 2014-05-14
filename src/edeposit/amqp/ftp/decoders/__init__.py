@@ -4,8 +4,7 @@
 # Interpreter version: python 2.7
 #
 #= Imports ====================================================================
-import fields
-
+import parser
 import parser_csv
 import parser_xml
 import parser_yaml
@@ -35,8 +34,8 @@ def parse_meta(fn, data):
     if suffix not in SUPPORTED_FILES:
         raise MetaParsingException("Can't parse file of type '%s'!" % suffix)
 
-    parser = fields.FieldParser()
+    fp = parser.FieldParser()
     for key, val in SUPPORTED_FILES[suffix](data).items():
-        parser.process(key, val)
+        fp.process(key, val)
 
-    return parser.get_epublication()
+    return fp.get_epublication()
