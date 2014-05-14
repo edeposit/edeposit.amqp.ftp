@@ -86,7 +86,10 @@ def check_structure(data):
 
 def assert_exc(data, fn, exc=MetaParsingException):
     try:
-        fn(data)
+        if data:
+            fn(data)
+        else:
+            fn()
         raise AssertionError(
             "%s() fails to recognize bad data: %s" % (fn.__name__, str(data))
         )

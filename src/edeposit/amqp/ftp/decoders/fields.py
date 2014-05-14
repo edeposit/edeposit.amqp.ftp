@@ -21,7 +21,7 @@ class Field:
         self.epub = epub if epub is not None else self.keyword
 
     def check(self, key, value):
-        if self.keyword in key.lower().strip():
+        if self.keyword in key.lower().strip().split():  # TODO: remove unicode?
             self.value = value
             return True
 
@@ -79,7 +79,7 @@ class FieldParser:
 
         return True
 
-    def get_epublication(self):
+    def get_epublication(self):  # TODO: validaci isbn
         if not self.is_valid():
             bad_fields = filter(lambda x: not x.is_valid(), self.fields)
             bad_fields = map(
@@ -101,3 +101,58 @@ class FieldParser:
                 epub_dict[epublication_part] = None
 
         return EPublication(**epub_dict)
+
+
+def test_field():
+    f = Field("isbn", "ISBN of the book", "ISBN")
+    assert not f.is_valid()
+
+    assert not f.check("ehlo", "xex")
+    assert f.value is None
+    assert not f.is_valid()
+
+    assert f.check("ISBN knihy", "80-86056-31-7")
+    assert f.value == "80-86056-31-7"
+    assert f.is_valid()
+    assert f.epub == "ISBN"
+
+
+def test_field_parser():
+    from parser import assert_exc
+
+    f = FieldParser()
+
+    assert len(f.fields) > 0
+
+    # is not valid and should fail to requests for validation
+    assert not f.is_valid()
+    assert_exc(None, f.get_epublication)
+
+    # put data into FieldParser
+    f.process("ISBN knihy", "80-86056-31-7")
+    assert not f.is_valid()
+    f.process("Vazba knihy", "brož.")
+    assert not f.is_valid()
+    f.process("Nazev knihy", "ZEN")
+    assert not f.is_valid()
+    f.process("Misto vydani", "Praha")
+    assert not f.is_valid()
+    f.process("Nakladatel", "Garda")
+    assert not f.is_valid()
+    f.process("Datum vydani", "09/2012")
+    assert not f.is_valid()
+    f.process("Poradi vydani", "1")
+    assert not f.is_valid()
+    f.process("Zpracovatel zaznamu", "Franta Putsalek")
+    assert f.is_valid()  # !
+
+    # test if the data are correctly parsed
+    e = f.get_epublication()
+    assert e.ISBN == "80-86056-31-7"
+    assert e.vazba == "brož."
+    assert e.nazev == "ZEN"
+    assert e.mistoVydani == "Praha"
+    assert e.nakladatelVydavatel == "Garda"
+    assert e.datumVydani == "09/2012"
+    assert e.poradiVydani == "1"
+    assert e.zpracovatelZaznamu == "Franta Putsalek"
