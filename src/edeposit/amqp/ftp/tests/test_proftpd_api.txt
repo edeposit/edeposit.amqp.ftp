@@ -1,0 +1,21 @@
+*** Settings ***
+Metadata    name  "Test ProFTPD API - create, rename, remove user and so on."
+Library     inspector.Inspector
+Library     OperatingSystem
+Variables   inspector.py
+
+*** Variables ***
+
+*** Keywords ***
+Create user
+
+Change password
+
+Remove user
+
+Test lock
+
+Test permissions
+
+*** Test Cases ***
+Test user

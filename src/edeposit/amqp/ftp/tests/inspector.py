@@ -8,11 +8,12 @@
 
 
 #= Variables ==================================================================
-
+BASE_PATH = os.path.dirname(__file__)
 
 
 #= Functions & objects ========================================================
-
+class Inspector(object):
+    ROBOT_LIBRARY_SCOPE = 'TEST SUITE'
 
 
 #= Main program ===============================================================
