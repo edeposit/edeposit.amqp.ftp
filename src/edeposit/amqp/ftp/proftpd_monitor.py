@@ -525,7 +525,7 @@ def process_log(file_iterator):
         # react only to lock file in in home directory
         dir_name = os.path.dirname(parsed["path"])
         if PROFTPD_LOCK_ONLY_IN_HOME:
-            if dir_name != PROFTPD_DATA_PATH + parsed["username"]:
+            if dir_name != DATA_PATH + parsed["username"]:
                 continue
 
         # old record, which doesn't need to be parsed again

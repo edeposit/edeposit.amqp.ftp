@@ -12,7 +12,7 @@ Note:
 Example of the configuration file (``$HOME/edeposit/ftp.json``)::
 
     {
-        "PROFTPD_CONF_PATH": "/home/bystrousak/.ftpdconf/"
+        "CONF_PATH": "/home/bystrousak/.ftpdconf/"
     }
 
 Attributes
@@ -28,23 +28,23 @@ import os.path
 BASE_PATH = (os.path.dirname(__file__))
 
 #: proftpd configuration directory
-PROFTPD_CONF_PATH = "/etc/proftpd/"
+CONF_PATH = "/etc/proftpd/"
 
 #: proftpd log directory
-PROFTPD_LOG_PATH = "/var/log/proftpd/"
+LOG_PATH = "/var/log/proftpd/"
 
 #: path to directory, where the user directories will be created
-PROFTPD_DATA_PATH = "/home/ftp/"
+DATA_PATH = "/home/ftp/"
 
 
 #: proftpd configuration file (in conf. directory)
-PROFTPD_CONF_FILE = PROFTPD_CONF_PATH + "proftpd.conf"  # TODO: prepend PATH var
+CONF_FILE = CONF_PATH + "proftpd.conf"  # TODO: prepend PATH var
 
 #: file where the login informations will be stored
-PROFTPD_LOGIN_FILE = PROFTPD_CONF_PATH + "ftpd.passwd"
+PROFTPD_LOGIN_FILE = CONF_PATH + "ftpd.passwd"
 
 #: file where the extended logs are stored
-PROFTPD_LOG_FILE = PROFTPD_LOG_PATH + "extended.log"
+PROFTPD_LOG_FILE = LOG_PATH + "extended.log"
 
 #: filename for the locking mechanism
 PROFTPD_LOCK_FILENAME = "delete_me_to_import_files.txt"

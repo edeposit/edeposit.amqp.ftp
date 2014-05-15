@@ -157,11 +157,11 @@ def add_user(username, password):
             "User '%s' is already registered!" % username
 
     # add new user to the proftpd's passwd file
-    home_dir = PROFTPD_DATA_PATH + username
+    home_dir = DATA_PATH + username
     sh.ftpasswd(
         passwd=True,        # passwd file, not group file
         name=username,
-        home=home_dir,      # chroot in PROFTPD_DATA_PATH
+        home=home_dir,      # chroot in DATA_PATH
         shell="/bin/false",
         uid=PROFTPD_USER_GID,         # TODO: parse dynamically?
         gid=PROFTPD_USER_GID,
@@ -200,7 +200,7 @@ def remove_user(username):
     _save_users(users)
 
     # remove home directory
-    home_dir = PROFTPD_DATA_PATH + username
+    home_dir = DATA_PATH + username
     if os.path.exists(home_dir):
         shutil.rmtree(home_dir)
 

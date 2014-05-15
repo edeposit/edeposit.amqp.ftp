@@ -217,17 +217,17 @@ if __name__ == '__main__':
         sys.stderr.write("You have to be root (uid 0) to use this program.\n")
         sys.exit(1)
 
-    if not os.path.exists(PROFTPD_CONF_PATH):
+    if not os.path.exists(CONF_PATH):
         pass  # TODO: create/unpack default configuration
 
     # check existence of proftpd.conf
-    if not os.path.exists(PROFTPD_CONF_PATH + PROFTPD_CONF_FILE):
-        with open(PROFTPD_CONF_FILE, "w") as f:
+    if not os.path.exists(CONF_PATH + CONF_FILE):
+        with open(CONF_FILE, "w") as f:
             f.write(DEFAULT_PROFTPD_CONF)
 
     # create data directory, where the user informations will be stored
-    if not os.path.exists(PROFTPD_DATA_PATH):
-        os.makedirs(PROFTPD_DATA_PATH, 0777)
+    if not os.path.exists(DATA_PATH):
+        os.makedirs(DATA_PATH, 0777)
 
     # create user files if they doesn't exists
     if not os.path.exists(PROFTPD_LOGIN_FILE):
@@ -238,7 +238,7 @@ if __name__ == '__main__':
 
     # change important configuration values in protpd conf
     data = ""
-    with open(PROFTPD_CONF_FILE) as f:
+    with open(CONF_FILE) as f:
         data = f.read()
 
     # set user file
@@ -259,7 +259,7 @@ if __name__ == '__main__':
         PROFTPD_LOG_FILE + " WRITE paths"
     )
 
-    with open(PROFTPD_CONF_FILE, "wt") as f:
+    with open(CONF_FILE, "wt") as f:
         f.write(data)
 
     reload_configuration()
