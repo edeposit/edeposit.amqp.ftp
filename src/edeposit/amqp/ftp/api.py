@@ -32,8 +32,15 @@ from settings import *
 from __init__ import reload_configuration
 
 
-#= Variables ==================================================================
 #= Functions & objects ========================================================
+def require_root(fn):
+    def xex(*args, **kwargs):
+        assert os.geteuid() == 0, "You have to be root to run this tests."
+        return fn(*args, **kwargs)
+
+    return xex
+
+
 def _load_users(path=PROFTPD_LOGIN_FILE):
     """
     Load users defined passwd-like format file.
@@ -139,6 +146,7 @@ def create_lock_file(path):
     set_permissions(path, gid=PROFTPD_USER_GID)
 
 
+@require_root
 def add_user(username, password):
     """
     Add new user.
@@ -186,6 +194,7 @@ def add_user(username, password):
     reload_configuration()
 
 
+@require_root
 def remove_user(username):
     """
     Remove user, his home directory and so on..
@@ -209,6 +218,7 @@ def remove_user(username):
     reload_configuration()
 
 
+@require_root
 def change_password(username, new_password):
     """
     Change password for given `username`.
@@ -229,3 +239,12 @@ def change_password(username, new_password):
     )
 
     reload_configuration()
+
+
+@require_root
+def list_users():
+    """
+    Returns:
+        list: of str usernames.
+    """
+    return map(lambda (key, val): key, _load_users().items())
