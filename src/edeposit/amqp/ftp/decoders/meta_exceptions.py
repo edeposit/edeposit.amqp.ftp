@@ -7,6 +7,5 @@
 #= Functions & objects ========================================================
 class MetaParsingException(UserWarning):
     """docstring for MetaParsingException"""
-    def __init__(self, value):
-        super(MetaParsingException, self).__init__(value)
-        self.value = value
+    def __init__(self, message):
+        super(MetaParsingException, self).__init__(message)
