@@ -18,7 +18,7 @@ from __init__ import reload_configuration
 
 
 #= Variables ==================================================================
-DEFAULT_PROFTPD_CONF """
+DEFAULT_PROFTPD_CONF = """
 #
 # /etc/proftpd/proftpd.conf -- This is a basic ProFTPD configuration file.
 # To really apply changes, reload proftpd after modifications, if
