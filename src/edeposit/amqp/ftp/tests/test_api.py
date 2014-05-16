@@ -41,6 +41,7 @@ class TestAPI:
         assert not api._is_valid_username("asd/asd")
 
     def try_login(self):
+        """Used to test if it is possible to log into FTP account"""
         ftp = ftplib.FTP('localhost')
         ftp.login(USERNAME, PASSWORD)
 
@@ -68,11 +69,10 @@ class TestAPI:
     def test_remove_user(self):
         is_root()
 
-        assert False
-
         api.remove_user(USERNAME)
         with pytest.raises(ftplib.error_perm):
             self.try_login()
 
-    def finalize_options(self):
+    @classmethod
+    def teardown_class(cls):
         api.remove_user(USERNAME)
