@@ -22,7 +22,7 @@ import decoders
 from settings import *
 from structures import *
 from __init__ import ImportRequest
-from proftpd_api import set_permissions, create_lock_file
+from .api import set_permissions, create_lock_file
 
 
 #= Variables ==================================================================
