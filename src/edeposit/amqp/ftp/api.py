@@ -156,6 +156,8 @@ def add_user(username, password):
     assert username not in _load_users(), \
             "User '%s' is already registered!" % username
 
+    assert password, "Password is reqired!"
+
     # add new user to the proftpd's passwd file
     home_dir = DATA_PATH + username
     sh.ftpasswd(
@@ -179,7 +181,7 @@ def add_user(username, password):
     set_permissions(home_dir, gid=PROFTPD_USER_GID)
     set_permissions(PROFTPD_LOGIN_FILE, mode=0600)
 
-    create_lock_file(home_dir + "/" + PROTFPD_LOCK_FILENAME)
+    create_lock_file(home_dir + "/" + PROFTPD_LOCK_FILENAME)
 
     reload_configuration()
 
