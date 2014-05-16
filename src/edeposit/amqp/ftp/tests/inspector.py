@@ -32,3 +32,16 @@ class Inspector(object):
             out += s[random.randint(0, len(s)-1)]
 
         return out
+
+    def should_fail(self, fn, *args, **kwargs):
+        try:
+            fn(*args, **kwargs)
+            raise AssertionError(
+                "Function %s(%s) didn't failed (it should)!" % (
+                    fn.__name__,
+                    str(args),
+                    str(kwargs),
+                )
+            )
+        except:
+            pass
