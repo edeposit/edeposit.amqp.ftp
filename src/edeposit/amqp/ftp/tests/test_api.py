@@ -73,6 +73,13 @@ class TestAPI:
         with pytest.raises(ftplib.error_perm):
             self.try_login()
 
+    def test_list_users(self):
+        users_old = api.list_users()
+        api.add_user(USERNAME, PASSWORD)  # removed in .teardown_class()
+        users_new = api.list_users()
+
+        assert len(users_old) < len(users_new)
+
     @classmethod
     def teardown_class(cls):
         api.remove_user(USERNAME)
