@@ -3,10 +3,6 @@
 #
 # Interpreter version: python 2.7
 #
-# TODO: log path to settings
-# TODO: default configuration
-# TODO: add nice status printout
-#
 #= Imports ====================================================================
 import os
 import os.path
