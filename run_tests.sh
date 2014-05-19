@@ -15,18 +15,22 @@ function show_help {
     echo -e "\t-u"
     echo -e "\t\tRun unittest."
     echo
+    exit;
 }
 
 function run_all_tests {
-    sudo env PYTHONPATH=$PYTHONPATH py.test $TEST_PATH
+    sudo env PYTHONPATH=$PYTHONPATH py.test $TEST_PATH;
+    exit
 }
 
 function run_int_tests {
-    sudo env PYTHONPATH=$PYTHONPATH py.test "$TEST_PATH/integration"
+    sudo env PYTHONPATH=$PYTHONPATH py.test "$TEST_PATH/integration";
+    exit
 }
 
 function run_unit_tests {
-    py.test "$TEST_PATH/unittests"
+    py.test "$TEST_PATH/unittests";
+    exit
 }
 
 while getopts "haiu" optname; do
@@ -55,3 +59,5 @@ while getopts "haiu" optname; do
         ;;
     esac
 done
+
+show_help;
