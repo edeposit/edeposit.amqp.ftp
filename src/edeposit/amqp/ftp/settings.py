@@ -23,7 +23,8 @@ import os
 import os.path
 
 
-#= module configuration =======================================================
+#= Module configuration =======================================================
+#= Paths ======================================================================
 #: Module's path.
 BASE_PATH = (os.path.dirname(__file__))
 
@@ -37,6 +38,7 @@ LOG_PATH = "/var/log/proftpd/"
 DATA_PATH = "/home/ftp/"
 
 
+#= Files =======================================================================
 #: proftpd configuration file (in conf. directory)
 CONF_FILE = CONF_PATH + "proftpd.conf"  # TODO: prepend PATH var
 
@@ -63,6 +65,8 @@ Smazte tento soubor pro zapoceti davkoveho importu vsech souboru, ktere jste
 nahrali na server.
 """
 
+
+#= Switches ===================================================================
 #: True - will pair files with same filename in same directory
 SAME_NAME_DIR_PAIRING = True
 
@@ -86,7 +90,7 @@ CREATE_IMPORT_LOG = True
 PROFTPD_USERS_GID = 2000
 
 
-#= user configuration reader ==================================================
+#= User configuration reader ==================================================
 _ALLOWED = [str, int, float]
 
 _SETTINGS_PATH = "/edeposit/ftp.json"
