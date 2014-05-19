@@ -6,18 +6,9 @@
 #= Imports ====================================================================
 import edeposit.amqp.ftp.decoders as decoders
 from edeposit.amqp.ftp.decoders import parser
-from edeposit.amqp.ftp.decoders import parser_json
 
 
-#= Variables ==================================================================
 #= Functions & objects ========================================================
-def test_meta_parsing_exception():
-    try:
-        raise decoders.MetaParsingException("Message")
-    except decoders.MetaParsingException, e:
-        assert e.message == "Message"
-
-
 def assert_exc(data, fn, exc=decoders.MetaParsingException):
     try:
         if data:
@@ -31,37 +22,7 @@ def assert_exc(data, fn, exc=decoders.MetaParsingException):
         pass
 
 
-def test_json():
-    def test_assertions(test_str):
-        data = parser_json.decode(test_str)
-        assert data["isbn"] == "80-86056-31-7"
-        assert data["vazba"] == u"pevná"
-
-    # dict
-    test_str = """
-    {
-        "isbn": "80-86056-31-7",
-        "vazba": "pevná"
-    }
-    """
-    test_assertions(test_str)
-
-    # array
-    test_str = """
-    [
-        "isbn", "80-86056-31-7",
-        "vazba", "pevná"
-    ]
-    """
-    test_assertions(test_str)
-
-    try:
-        parser_json.decode('[["isbn"], "80-86056-31-7", "asd"]')
-        raise AssertionError("Field check failed!")
-    except decoders.MetaParsingException:
-        pass
-
-
+#= Tests ======================================================================
 class TestParser:
     def test__all_correct_list(self):
         assert parser._all_correct_list([])
