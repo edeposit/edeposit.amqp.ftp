@@ -41,22 +41,22 @@ DATA_PATH = "/home/ftp/"
 CONF_FILE = CONF_PATH + "proftpd.conf"  # TODO: prepend PATH var
 
 #: file where the login informations will be stored
-PROFTPD_LOGIN_FILE = CONF_PATH + "ftpd.passwd"
+LOGIN_FILE = CONF_PATH + "ftpd.passwd"
 
 #: file where the extended logs are stored
-PROFTPD_LOG_FILE = LOG_PATH + "extended.log"
+LOG_FILE = LOG_PATH + "extended.log"
 
 #: filename for the locking mechanism
-PROFTPD_LOCK_FILENAME = "delete_me_to_import_files.txt"
+LOCK_FILENAME = "delete_me_to_import_files.txt"
 
 #: filename, where the error protocol is stored
-PROFTPD_USER_ERROR_LOG = "error.log.txt"
+USER_ERROR_LOG = "error.log.txt"
 
 #: filename, where the import protocol for the user is stored
-PROFTPD_USER_IMPORT_LOG = "import.log.txt"
+USER_IMPORT_LOG = "import.log.txt"
 
 #: text, which will be writen to the PROTFPD_LOCK_FILENAME
-PROFTPD_LOCK_FILE_CONTENT = """Delete this file to start batch import of all \
+LOCK_FILE_CONTENT = """Delete this file to start batch import of all \
 files, you've uploaded to the server.
 
 Smazte tento soubor pro zapoceti davkoveho importu vsech souboru, ktere jste
@@ -64,26 +64,27 @@ nahrali na server.
 """
 
 #: True - will pair files with same filename in same directory
-PROFTPD_SAME_NAME_DIR_PAIRING = True
+SAME_NAME_DIR_PAIRING = True
 
 #: True - will pair files with different filenames, if there is only two files
 #: in dir
-PROFTPD_SAME_DIR_PAIRING = True
+SAME_DIR_PAIRING = True
 
 #: True - if the name is ISBN, files will be paired no matter where they are
 #: stored (unless they weren't paired before)
-PROFTPD_ISBN_PAIRING = True
+ISBN_PAIRING = True
 
 #: True - Lock file can be only in home directory, everywhere else will be
 #: ignored
-PROFTPD_LOCK_ONLY_IN_HOME = True
+LOCK_ONLY_IN_HOME = True
 
-#: True - PROFTPD_USER_IMPORT_LOG will be created
-PROFTPD_CREATE_IMPORT_LOG = True
+#: True - USER_IMPORT_LOG will be created
+CREATE_IMPORT_LOG = True
 
 #: I am using GID 2000 for all our users - this GID shouldn't be used by other
 #: than FTP users!
-PROFTPD_USER_GID = 2000
+PROFTPD_USERS_GID = 2000
+
 
 #= user configuration reader ==================================================
 _ALLOWED = [str, int, float]

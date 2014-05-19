@@ -41,13 +41,13 @@ def require_root(fn):
     return xex
 
 
-def _load_users(path=PROFTPD_LOGIN_FILE):
+def _load_users(path=LOGIN_FILE):
     """
     Load users defined passwd-like format file.
 
     Args:
-        path (str, default settings.PROFTPD_LOGIN_FILE): path of the file,
-            which will be loaded (default :attr:`.PROFTPD_LOGIN_FILE`).
+        path (str, default settings.LOGIN_FILE): path of the file,
+            which will be loaded (default :attr:`.LOGIN_FILE`).
 
     Returns:
         (dict): "username": {"pass_hash": "..", "uid": "..", "gid": "..", \
@@ -66,7 +66,7 @@ def _load_users(path=PROFTPD_LOGIN_FILE):
         line = line.split(":")
 
         assert len(line) == 7, "Bad number of fields in '%s', at line %d!" % (
-            PROFTPD_LOGIN_FILE,
+            LOGIN_FILE,
             cnt
         )
 
@@ -84,15 +84,15 @@ def _load_users(path=PROFTPD_LOGIN_FILE):
     return users
 
 
-def _save_users(users, path=PROFTPD_LOGIN_FILE):
+def _save_users(users, path=LOGIN_FILE):
     """
     Save dictionary with user data to passwd-like file.
 
     Args:
         users (dict): dictionary with user data. For details look at dict
                       returned from :func:`_load_users`.
-        path (str, default settings.PROFTPD_LOGIN_FILE): path of the file,
-            which will be loaded (default :attr:`.PROFTPD_LOGIN_FILE`).
+        path (str, default settings.LOGIN_FILE): path of the file,
+            which will be loaded (default :attr:`.LOGIN_FILE`).
     """
     with open(path, "wt") as f:
         for username, data in users.items():
@@ -141,9 +141,9 @@ def set_permissions(filename, uid=None, gid=None, mode=0775):
 
 def create_lock_file(path):
     with open(path, "wt") as f:
-        f.write(PROFTPD_LOCK_FILE_CONTENT)
+        f.write(LOCK_FILE_CONTENT)
 
-    set_permissions(path, gid=PROFTPD_USER_GID)
+    set_permissions(path, gid=PROFTPD_USERS_GID)
 
 
 @require_root
@@ -173,10 +173,10 @@ def add_user(username, password):
         name=username,
         home=home_dir,      # chroot in DATA_PATH
         shell="/bin/false",
-        uid=PROFTPD_USER_GID,         # TODO: parse dynamically?
-        gid=PROFTPD_USER_GID,
+        uid=PROFTPD_USERS_GID,         # TODO: parse dynamically?
+        gid=PROFTPD_USERS_GID,
         stdin=True,         # tell ftpasswd to read password from stdin
-        file=PROFTPD_LOGIN_FILE,
+        file=LOGIN_FILE,
         _in=password
     )
 
@@ -184,12 +184,12 @@ def add_user(username, password):
     if not os.path.exists(home_dir):
         os.makedirs(home_dir, 0775)
 
-    # I am using PROFTPD_USER_GID (2000) for all our users - this GID shouldn't
+    # I am using PROFTPD_USERS_GID (2000) for all our users - this GID shouldn't
     # be used by other than FTP users!
-    set_permissions(home_dir, gid=PROFTPD_USER_GID)
-    set_permissions(PROFTPD_LOGIN_FILE, mode=0600)
+    set_permissions(home_dir, gid=PROFTPD_USERS_GID)
+    set_permissions(LOGIN_FILE, mode=0600)
 
-    create_lock_file(home_dir + "/" + PROFTPD_LOCK_FILENAME)
+    create_lock_file(home_dir + "/" + LOCK_FILENAME)
 
     reload_configuration()
 
@@ -234,7 +234,7 @@ def change_password(username, new_password):
         passwd=True,        # passwd file, not group file
         name=username,
         stdin=True,         # tell ftpasswd to read password from stdin
-        file=PROFTPD_LOGIN_FILE,
+        file=LOGIN_FILE,
         _in=new_password
     )
 

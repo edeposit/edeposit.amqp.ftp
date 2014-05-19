@@ -244,7 +244,7 @@ def _process_directory(dn, files, error_protocol, dir_size, path):
     files_len = len(files)  # used later, `files` is modified in process
     processed_files = []
 
-    if len(files) == 2 and PROFTPD_SAME_DIR_PAIRING:
+    if len(files) == 2 and SAME_DIR_PAIRING:
         logger.debug("There are only two files.")
 
         items.extend(_process_pair(files[0], files[1], error_protocol))
@@ -258,7 +258,7 @@ def _process_directory(dn, files, error_protocol, dir_size, path):
         logger.debug("Processing '%s'." % fn)
 
         # get files with same names (ignore paths and suffixes)
-        if PROFTPD_SAME_NAME_DIR_PAIRING:
+        if SAME_NAME_DIR_PAIRING:
             same_names = _same_named(fn, files)  # returns (index, name)
             indexes = map(lambda (i, fn): i, same_names)  # get indexes
             same_names = map(lambda (i, fn): fn, same_names)  # get names
@@ -437,8 +437,8 @@ def process_import_request(username, path, timestamp):
                     )
                 )
 
-        if PROFTPD_ISBN_PAIRING:
-            logger.debug("PROFTPD_ISBN_PAIRING is ON.")
+        if ISBN_PAIRING:
+            logger.debug("ISBN_PAIRING is ON.")
             logger.info("Pairing user's files by ISBN filename.")
             items = _isbn_pairing(items)
 
@@ -454,8 +454,8 @@ def process_import_request(username, path, timestamp):
         # unlock directory
         logger.info("Unlocking user´s directory.")
         recursive_chmod(path, 0775)
-        logger.info("Creating lock file '%s'." % PROFTPD_LOCK_FILENAME)
-        create_lock_file(path + "/" + PROFTPD_LOCK_FILENAME)
+        logger.info("Creating lock file '%s'." % LOCK_FILENAME)
+        create_lock_file(path + "/" + LOCK_FILENAME)
 
         # process errors if found
         if error_protocol:
@@ -463,7 +463,7 @@ def process_import_request(username, path, timestamp):
                 "Found %d error(s)." % len(error_protocol)
             )
 
-            err_path = path + "/" + PROFTPD_USER_ERROR_LOG
+            err_path = path + "/" + USER_ERROR_LOG
             with open(err_path, "wt") as f:
                 f.write("\n".join(error_protocol))
 
@@ -471,14 +471,14 @@ def process_import_request(username, path, timestamp):
 
         # process import log
         import_log = _create_import_log(items)
-        if import_log and PROFTPD_CREATE_IMPORT_LOG:
-            logger.debug("PROFTPD_CREATE_IMPORT_LOG is on.")
+        if import_log and CREATE_IMPORT_LOG:
+            logger.debug("CREATE_IMPORT_LOG is on.")
 
-            imp_path = path + "/" + PROFTPD_USER_IMPORT_LOG
+            imp_path = path + "/" + USER_IMPORT_LOG
             with open(imp_path, "wt") as f:
                 if error_protocol:
                     f.write("Error: Import only partially successful.\n")
-                    f.write("See '%s' for details.\n" % PROFTPD_USER_ERROR_LOG)
+                    f.write("See '%s' for details.\n" % USER_ERROR_LOG)
                     f.write("\nErrors:\n")
                     f.write("---\n")
                     f.write("\n".join(error_protocol))
@@ -519,12 +519,12 @@ def process_log(file_iterator):
 
         # don't react to anything else, than trigger in form of deleted
         # "lock" file
-        if os.path.basename(parsed["path"]) != PROFTPD_LOCK_FILENAME:
+        if os.path.basename(parsed["path"]) != LOCK_FILENAME:
             continue
 
         # react only to lock file in in home directory
         dir_name = os.path.dirname(parsed["path"])
-        if PROFTPD_LOCK_ONLY_IN_HOME:
+        if LOCK_ONLY_IN_HOME:
             if dir_name != DATA_PATH + parsed["username"]:
                 continue
 
@@ -571,7 +571,7 @@ if __name__ == '__main__':
         type=str,
         default=None,
         help="""Path to the log file. Usually '%s'. If not set, stdin is used to
-                read the log file.""" % PROFTPD_LOG_FILE
+                read the log file.""" % LOG_FILE
     )
     parser.add_argument(
         "-v",

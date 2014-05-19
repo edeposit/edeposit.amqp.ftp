@@ -230,11 +230,11 @@ if __name__ == '__main__':
         os.makedirs(DATA_PATH, 0777)
 
     # create user files if they doesn't exists
-    if not os.path.exists(PROFTPD_LOGIN_FILE):
-        open(PROFTPD_LOGIN_FILE, "a").close()
+    if not os.path.exists(LOGIN_FILE):
+        open(LOGIN_FILE, "a").close()
 
-    os.chown(PROFTPD_LOGIN_FILE, getpwnam('proftpd').pw_uid, -1)
-    os.chmod(PROFTPD_LOGIN_FILE, 0400)
+    os.chown(LOGIN_FILE, getpwnam('proftpd').pw_uid, -1)
+    os.chmod(LOGIN_FILE, 0400)
 
     # change important configuration values in protpd conf
     data = ""
@@ -245,7 +245,7 @@ if __name__ == '__main__':
     data = add_or_update(
         data,
         "AuthUserFile",
-        PROFTPD_LOGIN_FILE
+        LOGIN_FILE
     )
 
     data = add_or_update(data, "RequireValidShell", "off")
@@ -256,7 +256,7 @@ if __name__ == '__main__':
     data = add_or_update(
         data,
         "ExtendedLog",
-        PROFTPD_LOG_FILE + " WRITE paths"
+        LOG_FILE + " WRITE paths"
     )
 
     with open(CONF_FILE, "wt") as f:
