@@ -23,13 +23,13 @@ SUPPORTED_FILES = {
 
 
 #= Functions & objects ========================================================
-def parse_meta(fn, data):
-    if "." not in fn:
+def parse_meta(filename, data):
+    if "." not in filename:
         raise MetaParsingException(
-            "Can't recognize type of your metadata ('%s')!" % fn
+            "Can't recognize type of your metadata ('%s')!" % filename
         )
 
-    suffix = fn.rsplit(".", 1)[1].lower()
+    suffix = filename.rsplit(".", 1)[1].lower()
 
     if suffix not in SUPPORTED_FILES:
         raise MetaParsingException("Can't parse file of type '%s'!" % suffix)
