@@ -543,15 +543,15 @@ def process_log(file_iterator):
         )
 
 
-def main(args):
-    if args.FN:
+def main(filename):
+    if filename:
         if not os.path.exists(sys.argv[1]):
-            logger.error("'%s' doesn't exists!" % args.FN)
-            sys.stderr.writeln("'%s' doesn't exists!\n" % args.FN)
+            logger.error("'%s' doesn't exists!" % filename)
+            sys.stderr.writeln("'%s' doesn't exists!\n" % filename)
             sys.exit(1)
 
-        logger.info("Processing '%s'" % args.FN)
-        for ir in process_log(sh.tail("-f", args.FN, _iter=True)):
+        logger.info("Processing '%s'" % filename)
+        for ir in process_log(sh.tail("-f", filename, _iter=True)):
             print ir
     else:
         logger.info("Processing stdin.")
@@ -561,7 +561,6 @@ def main(args):
 
 #= Main program ===============================================================
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser(
         description="""ProFTPD log monitor. This script reacts to preprogrammed
                        events."""
@@ -595,6 +594,6 @@ if __name__ == '__main__':
 
     logger.info("Running as standalone program.")
     try:
-        main(args)
+        main(args.FN)
     except KeyboardInterrupt:
         sys.exit(0)
