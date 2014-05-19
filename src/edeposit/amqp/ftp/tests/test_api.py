@@ -5,9 +5,11 @@
 #
 #= Imports ====================================================================
 import os
-import string
-import random
 import ftplib
+import random
+import socket
+import string
+import telnetlib
 
 import pytest
 
@@ -34,6 +36,14 @@ PASSWORD = get_random_str()
 #= Tests ======================================================================
 
 class TestAPI:
+    @classmethod
+    def setup_class(self):
+        """Test whether the proftpd is runnig or not."""
+        try:
+            telnetlib.Telnet("localhost", 21)
+        except socket.error:
+            raise AssertionError("Looks like your proftpd is not running!")
+
     def test_is_valid_username(self):
         assert api._is_valid_username("xex")
         assert api._is_valid_username("Xex")
@@ -41,7 +51,7 @@ class TestAPI:
         assert not api._is_valid_username("asd/asd")
 
     def try_login(self):
-        """Used to test if it is possible to log into FTP account"""
+        """Used to test if it is possible to log into FTP account."""
         ftp = ftplib.FTP('localhost')
         ftp.login(USERNAME, PASSWORD)
 
@@ -81,5 +91,5 @@ class TestAPI:
         assert len(users_old) < len(users_new)
 
     @classmethod
-    def teardown_class(cls):
+    def teardown_class(self):
         api.remove_user(USERNAME)
