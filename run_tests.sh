@@ -1,4 +1,57 @@
-#! /usr/bin/env sh
+#! /usr/bin/env bash
 
 PYTHONPATH="$PYTHONPATH:src/"
-sudo env PYTHONPATH=$PYTHONPATH py.test src/edeposit/amqp/ftp/tests
+TEST_PATH="src/edeposit/amqp/ftp/tests"
+
+function show_help {
+    echo -e "Usage: $0 [-h] [-a] [-i] [-u]"
+    echo
+    echo -e "\t-h"
+    echo -e "\t\tShow this help."
+    echo -e "\t-a"
+    echo -e "\t\tRun all tests."
+    echo -e "\t-i"
+    echo -e "\t\tRun integration test (requires sudo)."
+    echo -e "\t-u"
+    echo -e "\t\tRun unittest."
+    echo
+}
+
+function run_all_tests {
+    sudo env PYTHONPATH=$PYTHONPATH py.test $TEST_PATH
+}
+
+function run_int_tests {
+    sudo env PYTHONPATH=$PYTHONPATH py.test "$TEST_PATH/integration"
+}
+
+function run_unit_tests {
+    py.test "$TEST_PATH/unittests"
+}
+
+while getopts "haiu" optname; do
+    case "$optname" in
+        "a")
+            run_all_tests;
+        ;;
+        "i")
+            run_int_tests;
+        ;;
+        "u")
+            run_unit_tests;
+        ;;
+        "h")
+            show_help;
+        ;;
+        "?")
+            echo "Unknown option $OPTARG"
+        ;;
+        ":")
+            echo "No argument value for option $OPTARG"
+        ;;
+        *)
+            # Should not occur
+            echo "Unknown error while processing options"
+        ;;
+    esac
+done
