@@ -76,19 +76,13 @@ def test_monitor():
     pairs = filter(lambda x: isinstance(x, structures.DataPair), reqs)
     assert pairs
 
-    # test whether the pairs hafe same filename
-    for pair in pairs:
-        m_fn = monitor._just_name(pair.metadata_file.filename)
-        d_fn = monitor._just_name(pair.ebook_file.filename)
-        assert m_fn == d_fn
-
     standalone = filter(
         lambda x: isinstance(x, structures.MetadataFile) and
                     x.filename.endswith("standalone_meta.json"),
         reqs
     )
 
-    assert standalone
+    assert len(standalone) == 1
     assert standalone[0].parsed_data.ISBN == '80-86056-31-7'
 
 
@@ -96,6 +90,8 @@ def test_isbn_pairing():
     settings.SAME_NAME_DIR_PAIRING = False
     settings.SAME_DIR_PAIRING = False
     settings.ISBN_PAIRING = True
+
+    reload(monitor)
 
     upload_files()
     remove_lock()
@@ -109,3 +105,47 @@ def test_isbn_pairing():
 
     assert m_fn == d_fn
     assert m_fn == "80-86056-31-7"
+
+
+def test_same_dir_pairing():
+    settings.SAME_NAME_DIR_PAIRING = False
+    settings.SAME_DIR_PAIRING = True
+    settings.ISBN_PAIRING = False
+
+    reload(monitor)
+
+    upload_files()
+    remove_lock()
+    out = process_files()
+
+    pair = filter(lambda x: isinstance(x, structures.DataPair), out.requests)
+    assert len(pair) == 1
+
+    m_fn = monitor._just_name(pair[0].metadata_file.filename)
+    d_fn = monitor._just_name(pair[0].ebook_file.filename)
+
+    assert m_fn == "whatever"
+    assert d_fn == "meta"
+
+
+def test_same_name_dir_pairing():
+    settings.SAME_NAME_DIR_PAIRING = True
+    settings.SAME_DIR_PAIRING = False
+    settings.ISBN_PAIRING = False
+
+    reload(monitor)
+
+    upload_files()
+    remove_lock()
+    out = process_files()
+
+    pair = filter(lambda x: isinstance(x, structures.DataPair), out.requests)
+    assert len(pair) == 1
+
+    m_fn = monitor._just_name(pair[0].metadata_file.filename)
+    d_fn = monitor._just_name(pair[0].ebook_file.filename)
+
+    assert m_fn == "samename"
+    assert d_fn == "samename"
+
+    assert pair[0].metadata_file.parsed_data.nazev == "samename.json"
