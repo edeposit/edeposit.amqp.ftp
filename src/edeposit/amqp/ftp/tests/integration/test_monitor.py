@@ -14,6 +14,7 @@ import edeposit.amqp.ftp.api as api
 import edeposit.amqp.ftp.monitor as monitor
 import edeposit.amqp.ftp.settings as settings
 import edeposit.amqp.ftp.structures as structures
+import edeposit.amqp.ftp.request_parser as request_parser
 
 
 #= Variables ==================================================================
@@ -88,8 +89,7 @@ def test_isbn_pairing():
     settings.SAME_NAME_DIR_PAIRING = False
     settings.SAME_DIR_PAIRING = False
     settings.ISBN_PAIRING = True
-
-    reload(monitor)
+    reload(request_parser)
 
     upload_files()
     remove_lock()
@@ -98,8 +98,8 @@ def test_isbn_pairing():
     pair = filter(lambda x: isinstance(x, structures.DataPair), out.requests)
     assert len(pair) == 1
 
-    m_fn = monitor._just_name(pair[0].metadata_file.filename)
-    d_fn = monitor._just_name(pair[0].ebook_file.filename)
+    m_fn = request_parser._just_name(pair[0].metadata_file.filename)
+    d_fn = request_parser._just_name(pair[0].ebook_file.filename)
 
     assert m_fn == d_fn
     assert m_fn == "80-86056-31-7"
@@ -109,7 +109,7 @@ def test_same_dir_pairing():
     settings.SAME_NAME_DIR_PAIRING = False
     settings.SAME_DIR_PAIRING = True
     settings.ISBN_PAIRING = False
-    reload(monitor)
+    reload(request_parser)
 
     upload_files()
     remove_lock()
@@ -118,8 +118,8 @@ def test_same_dir_pairing():
     pair = filter(lambda x: isinstance(x, structures.DataPair), out.requests)
     assert len(pair) == 1
 
-    m_fn = monitor._just_name(pair[0].metadata_file.filename)
-    d_fn = monitor._just_name(pair[0].ebook_file.filename)
+    m_fn = request_parser._just_name(pair[0].metadata_file.filename)
+    d_fn = request_parser._just_name(pair[0].ebook_file.filename)
 
     assert m_fn == "whatever"
     assert d_fn == "meta"
@@ -129,7 +129,7 @@ def test_same_name_dir_pairing():
     settings.SAME_NAME_DIR_PAIRING = True
     settings.SAME_DIR_PAIRING = False
     settings.ISBN_PAIRING = False
-    reload(monitor)
+    reload(request_parser)
 
     upload_files()
     remove_lock()
@@ -138,8 +138,8 @@ def test_same_name_dir_pairing():
     pair = filter(lambda x: isinstance(x, structures.DataPair), out.requests)
     assert len(pair) == 1
 
-    m_fn = monitor._just_name(pair[0].metadata_file.filename)
-    d_fn = monitor._just_name(pair[0].ebook_file.filename)
+    m_fn = request_parser._just_name(pair[0].metadata_file.filename)
+    d_fn = request_parser._just_name(pair[0].ebook_file.filename)
 
     assert m_fn == "samename"
     assert d_fn == "samename"
@@ -149,7 +149,7 @@ def test_same_name_dir_pairing():
 
 def test_import_log_disabled():
     settings.CREATE_IMPORT_LOG = False
-    reload(monitor)
+    reload(request_parser)
 
     with ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD) as ftp:
         if ftp.path.isfile(settings.USER_IMPORT_LOG):
@@ -165,7 +165,7 @@ def test_import_log_disabled():
 
 def test_import_log_enabled():
     settings.CREATE_IMPORT_LOG = True
-    reload(monitor)
+    reload(request_parser)
 
     with ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD) as ftp:
         if ftp.path.isfile(settings.USER_IMPORT_LOG):
