@@ -7,6 +7,7 @@
 import pytest
 
 import edeposit.amqp.ftp.monitor as monitor
+import edeposit.amqp.ftp.request_parser as request_parser
 
 
 #= Variables ==================================================================
@@ -28,12 +29,12 @@ def test_recursive_chmod():
 
 
 def test_just_name():
-    assert monitor._just_name("/home/bystrousak/xex.asd") == "xex"
-    assert monitor._just_name("/home/bystrousak/xex") == "xex"
+    assert request_parser._just_name("/home/bystrousak/xex.asd") == "xex"
+    assert request_parser._just_name("/home/bystrousak/xex") == "xex"
 
 
 def test_same_named():
-    out = monitor._same_named(
+    out = request_parser._same_named(
         "/hello/joe.mp3",
         [
             "/hi/",
