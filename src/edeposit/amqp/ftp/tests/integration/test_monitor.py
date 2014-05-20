@@ -27,7 +27,6 @@ def setup_module(module):
 
 
 def teardown_module(module):
-    pass
     api.remove_user(USERNAME)
 
 
@@ -111,7 +110,6 @@ def test_same_dir_pairing():
     settings.SAME_NAME_DIR_PAIRING = False
     settings.SAME_DIR_PAIRING = True
     settings.ISBN_PAIRING = False
-
     reload(monitor)
 
     upload_files()
@@ -132,7 +130,6 @@ def test_same_name_dir_pairing():
     settings.SAME_NAME_DIR_PAIRING = True
     settings.SAME_DIR_PAIRING = False
     settings.ISBN_PAIRING = False
-
     reload(monitor)
 
     upload_files()
@@ -149,3 +146,58 @@ def test_same_name_dir_pairing():
     assert d_fn == "samename"
 
     assert pair[0].metadata_file.parsed_data.nazev == "samename.json"
+
+
+def test_import_log_disabled():
+    settings.CREATE_IMPORT_LOG = False
+    reload(monitor)
+
+    with ftputil.FTPHost("localhost", USERNAME, PASSWORD) as ftp:
+        if ftp.path.isfile(settings.USER_IMPORT_LOG):
+            ftp.remove(settings.USER_IMPORT_LOG)
+
+    upload_files()
+    remove_lock()
+    process_files()
+
+    with ftputil.FTPHost("localhost", USERNAME, PASSWORD) as ftp:
+        assert not ftp.path.isfile(settings.USER_IMPORT_LOG)
+
+
+def test_import_log_enabled():
+    settings.CREATE_IMPORT_LOG = True
+    reload(monitor)
+
+    with ftputil.FTPHost("localhost", USERNAME, PASSWORD) as ftp:
+        if ftp.path.isfile(settings.USER_IMPORT_LOG):
+            ftp.remove(settings.USER_IMPORT_LOG)
+
+    upload_files()
+    remove_lock()
+    process_files()
+
+    with ftputil.FTPHost("localhost", USERNAME, PASSWORD) as ftp:
+        assert ftp.path.isfile(settings.USER_IMPORT_LOG)
+
+        with ftp.open(settings.USER_IMPORT_LOG) as log:
+            user_log = log.read()
+
+            assert len(user_log.splitlines()) > 5, "Userlog is not working!"
+            assert "Error: Import only partially successful." in user_log
+            assert "--- Errors ---" in user_log
+            assert "--- Successfully imported files ---"
+
+
+def test_error_log():
+    upload_files()
+    remove_lock()
+    process_files()
+
+    with ftputil.FTPHost("localhost", USERNAME, PASSWORD) as ftp:
+        assert ftp.path.isfile(settings.USER_ERROR_LOG)
+
+        with ftp.open(settings.USER_ERROR_LOG) as elog:
+            error_log = elog.read()
+
+            assert error_log.splitlines(), "Error log is not working!"
+            assert "bad.json" in error_log
