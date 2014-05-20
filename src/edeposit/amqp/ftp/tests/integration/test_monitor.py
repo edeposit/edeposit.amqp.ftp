@@ -59,6 +59,9 @@ def process_files():
         for o in monitor.process_log(lines):
             out = o
 
+    assert isinstance(out, structures.ImportRequest), "Bad structure retuned!"
+    assert out.username == USERNAME, "Badly parsed username!"
+
     return out
 
 
@@ -66,9 +69,6 @@ def test_monitor():
     upload_files()
     remove_lock()
     out = process_files()
-
-    assert isinstance(out, structures.ImportRequest), "Bad structure retuned!"
-    assert out.username == USERNAME, "Badly parsed username!"
 
     reqs = out.requests
     assert len(reqs) >= 4, "Didn't received expected amount of items!"
@@ -91,4 +91,21 @@ def test_monitor():
     assert standalone
     assert standalone[0].parsed_data.ISBN == '80-86056-31-7'
 
-    raise AssertionError()
+
+def test_isbn_pairing():
+    settings.SAME_NAME_DIR_PAIRING = False
+    settings.SAME_DIR_PAIRING = False
+    settings.ISBN_PAIRING = True
+
+    upload_files()
+    remove_lock()
+    out = process_files()
+
+    pair = filter(lambda x: isinstance(x, structures.DataPair), out.requests)
+    assert len(pair) == 1
+
+    m_fn = monitor._just_name(pair[0].metadata_file.filename)
+    d_fn = monitor._just_name(pair[0].ebook_file.filename)
+
+    assert m_fn == d_fn
+    assert m_fn == "80-86056-31-7"
