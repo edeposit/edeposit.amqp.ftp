@@ -166,13 +166,13 @@ def _safe_parse_meta_file(fn, error_protocol):
     the `error_protocol` and return blank ``list``.
     """
     try:
-        return [parse_meta_file(fn)]
+        return parse_meta_file(fn)
     except decoders.MetaParsingException, e:
         error_protocol.append(
             "Can't parse MetadataFile '%s':\n\t%s\n" % (fn, e.message)
         )
 
-    return []
+    return None
 
 
 def _process_pair(first_fn, second_fn, error_protocol):
@@ -266,7 +266,7 @@ def _process_directory(dn, files, error_protocol, dir_size, path):
             for i in sorted(indexes, reverse=True):
                 del files[i]
 
-        if len(same_names) == 1:  # has exactly one file pair
+        if len(same_names) == 1 and SAME_NAME_DIR_PAIRING:  # has exactly one file pair
             logger.debug(
                 "'%s' can be probably paired with '%s'." % (fn, same_names[0])
             )
@@ -275,7 +275,7 @@ def _process_directory(dn, files, error_protocol, dir_size, path):
         elif not same_names:  # there is no similar files
             logger.debug("'%s' can't be paired. Adding standalone file." % fn)
             if _is_meta(fn):
-                items.extend(_safe_parse_meta_file(fn, error_protocol))
+                items.append(_safe_parse_meta_file(fn, error_protocol))
             else:
                 items.append(parse_data_file(fn))
             processed_files.append(fn)
