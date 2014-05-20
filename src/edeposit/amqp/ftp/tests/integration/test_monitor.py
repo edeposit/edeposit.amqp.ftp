@@ -12,6 +12,8 @@ from shared import get_random_str
 
 import edeposit.amqp.ftp.api as api
 import edeposit.amqp.ftp.monitor as monitor
+import edeposit.amqp.ftp.settings as settings
+import edeposit.amqp.ftp.structures as structures
 
 
 #= Variables ==================================================================
@@ -25,26 +27,68 @@ def setup_module(module):
 
 
 def teardown_module(module):
-    api.remove_user(USERNAME)
-    api.remove_user("vbftgbjo")
     pass
+    api.remove_user(USERNAME)
 
 
 def upload_files(path="src/edeposit/amqp/ftp/tests/integration/data"):
-    ftp = ftputil.FTPHost("localhost", USERNAME, PASSWORD)
+    with ftputil.FTPHost("localhost", USERNAME, PASSWORD) as ftp:
+        for root, dirs, files in os.walk(path):
+            for dn in dirs:
+                full_dn = os.path.join(root, dn)
+                remote_dn = full_dn[len(path):]
+                ftp.makedirs(remote_dn)
 
-    for root, dirs, files in os.walk(path):
-        for dn in dirs:
-            full_dn = os.path.join(root, dn)
-            remote_dn = full_dn[len(path):]
-            ftp.makedirs(remote_dn)
+            for fn in files:
+                full_fn = os.path.join(root, fn)
+                remote_fn = full_fn[len(path):]
+                ftp.upload(full_fn, remote_fn)
 
-        for fn in files:
-            full_fn = os.path.join(root, fn)
-            remote_fn = full_fn[len(path):]
-            ftp.upload(full_fn, remote_fn)
+
+def remove_lock():
+    with ftputil.FTPHost("localhost", USERNAME, PASSWORD) as ftp:
+        # check if lock exists
+        assert ftp.path.isfile(settings.LOCK_FILENAME), "Lock not found!"
+        ftp.remove(settings.LOCK_FILENAME)
+
+
+def process_files():
+    out = None
+    with open(settings.LOG_FILE) as f:
+        lines = f.read().splitlines()[-5:]
+        for o in monitor.process_log(lines):
+            out = o
+
+    return out
 
 
 def test_monitor():
     upload_files()
+    remove_lock()
+    out = process_files()
 
+    assert isinstance(out, structures.ImportRequest), "Bad structure retuned!"
+    assert out.username == USERNAME, "Badly parsed username!"
+
+    reqs = out.requests
+    assert len(reqs) >= 4, "Didn't received expected amount of items!"
+
+    pairs = filter(lambda x: isinstance(x, structures.DataPair), reqs)
+    assert pairs
+
+    # test whether the pairs hafe same filename
+    for pair in pairs:
+        m_fn = monitor._just_name(pair.metadata_file.filename)
+        d_fn = monitor._just_name(pair.ebook_file.filename)
+        assert m_fn == d_fn
+
+    standalone = filter(
+        lambda x: isinstance(x, structures.MetadataFile) and
+                    x.filename.endswith("standalone_meta.json"),
+        reqs
+    )
+
+    assert standalone
+    assert standalone[0].parsed_data.ISBN == '80-86056-31-7'
+
+    raise AssertionError()
