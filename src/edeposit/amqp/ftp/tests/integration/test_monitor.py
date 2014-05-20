@@ -31,7 +31,7 @@ def teardown_module(module):
 
 
 def upload_files(path="src/edeposit/amqp/ftp/tests/integration/data"):
-    with ftputil.FTPHost("localhost", USERNAME, PASSWORD) as ftp:
+    with ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD) as ftp:
         for root, dirs, files in os.walk(path):
             for dn in dirs:
                 full_dn = os.path.join(root, dn)
@@ -45,7 +45,7 @@ def upload_files(path="src/edeposit/amqp/ftp/tests/integration/data"):
 
 
 def remove_lock():
-    with ftputil.FTPHost("localhost", USERNAME, PASSWORD) as ftp:
+    with ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD) as ftp:
         # check if lock exists
         assert ftp.path.isfile(settings.LOCK_FILENAME), "Lock not found!"
         ftp.remove(settings.LOCK_FILENAME)
@@ -151,7 +151,7 @@ def test_import_log_disabled():
     settings.CREATE_IMPORT_LOG = False
     reload(monitor)
 
-    with ftputil.FTPHost("localhost", USERNAME, PASSWORD) as ftp:
+    with ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD) as ftp:
         if ftp.path.isfile(settings.USER_IMPORT_LOG):
             ftp.remove(settings.USER_IMPORT_LOG)
 
@@ -159,7 +159,7 @@ def test_import_log_disabled():
     remove_lock()
     process_files()
 
-    with ftputil.FTPHost("localhost", USERNAME, PASSWORD) as ftp:
+    with ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD) as ftp:
         assert not ftp.path.isfile(settings.USER_IMPORT_LOG)
 
 
@@ -167,7 +167,7 @@ def test_import_log_enabled():
     settings.CREATE_IMPORT_LOG = True
     reload(monitor)
 
-    with ftputil.FTPHost("localhost", USERNAME, PASSWORD) as ftp:
+    with ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD) as ftp:
         if ftp.path.isfile(settings.USER_IMPORT_LOG):
             ftp.remove(settings.USER_IMPORT_LOG)
 
@@ -175,7 +175,7 @@ def test_import_log_enabled():
     remove_lock()
     process_files()
 
-    with ftputil.FTPHost("localhost", USERNAME, PASSWORD) as ftp:
+    with ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD) as ftp:
         assert ftp.path.isfile(settings.USER_IMPORT_LOG)
 
         with ftp.open(settings.USER_IMPORT_LOG) as log:
@@ -192,7 +192,7 @@ def test_error_log():
     remove_lock()
     process_files()
 
-    with ftputil.FTPHost("localhost", USERNAME, PASSWORD) as ftp:
+    with ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD) as ftp:
         assert ftp.path.isfile(settings.USER_ERROR_LOG)
 
         with ftp.open(settings.USER_ERROR_LOG) as elog:

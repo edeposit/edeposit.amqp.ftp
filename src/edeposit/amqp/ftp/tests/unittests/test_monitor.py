@@ -10,9 +10,6 @@ import edeposit.amqp.ftp.monitor as monitor
 
 
 #= Variables ==================================================================
-
-
-
 #= Functions & objects ========================================================
 def test_parse_line():
     l = monitor._parse_line("/path/to/the/he,ll, pcxaioay, EXIT, 1400508413")
@@ -25,12 +22,15 @@ def test_parse_line():
     with pytest.raises(ValueError):
         monitor._parse_line("/path/to/the/hell, EXIT, 1400508413")
 
+
 def test_recursive_chmod():
     raise NotImplementedError()
+
 
 def test_just_name():
     assert monitor._just_name("/home/bystrousak/xex.asd") == "xex"
     assert monitor._just_name("/home/bystrousak/xex") == "xex"
+
 
 def test_same_named():
     out = monitor._same_named(

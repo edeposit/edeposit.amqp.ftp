@@ -37,6 +37,9 @@ LOG_PATH = "/var/log/proftpd/"
 #: path to directory, where the user directories will be created
 DATA_PATH = "/home/ftp/"
 
+#: server's address - used only in unit/integration testing
+SERVER_ADDRESS = "localhost"
+
 
 #= Files ======================================================================
 #: proftpd configuration file (in CONF_PATH directory)
