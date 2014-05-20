@@ -76,8 +76,7 @@ def test_monitor():
     assert pairs
 
     standalone = filter(
-        lambda x: isinstance(x, structures.MetadataFile) and
-                    x.filename.endswith("standalone_meta.json"),
+        lambda x: isinstance(x, structures.MetadataFile),
         reqs
     )
 
