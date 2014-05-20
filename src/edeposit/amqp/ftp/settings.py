@@ -39,13 +39,14 @@ DATA_PATH = "/home/ftp/"
 
 
 #= Files ======================================================================
-#: proftpd configuration file (in conf. directory)
-CONF_FILE = CONF_PATH + "proftpd.conf"  # TODO: prepend PATH var
+#: proftpd configuration file (in CONF_PATH directory)
+CONF_FILE = CONF_PATH + "proftpd.conf"
 
-#: file where the login informations will be stored
+#: file where the login informations will be stored (CONF_PATH is used as
+#: dirname)
 LOGIN_FILE = CONF_PATH + "ftpd.passwd"
 
-#: file where the extended logs are stored
+#: file where the extended logs are stored (LOG_PATH is used as dirname)
 LOG_FILE = LOG_PATH + "extended.log"
 
 #: filename for the locking mechanism
