@@ -38,7 +38,7 @@ LOG_PATH = "/var/log/proftpd/"
 DATA_PATH = "/home/ftp/"
 
 
-#= Files =======================================================================
+#= Files ======================================================================
 #: proftpd configuration file (in conf. directory)
 CONF_FILE = CONF_PATH + "proftpd.conf"  # TODO: prepend PATH var
 
@@ -85,12 +85,14 @@ LOCK_ONLY_IN_HOME = True
 #: True - USER_IMPORT_LOG will be created
 CREATE_IMPORT_LOG = True
 
+
+#= Other config ===============================================================
 #: I am using GID 2000 for all our users - this GID shouldn't be used by other
 #: than FTP users!
 PROFTPD_USERS_GID = 2000
 
 
-#= User configuration reader ==================================================
+#= User configuration reader (don't edit this =================================
 _ALLOWED = [str, int, float]
 
 _SETTINGS_PATH = "/edeposit/ftp.json"
