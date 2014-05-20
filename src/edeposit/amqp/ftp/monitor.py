@@ -169,7 +169,7 @@ def _safe_parse_meta_file(fn, error_protocol):
         return [parse_meta_file(fn)]
     except decoders.MetaParsingException, e:
         error_protocol.append(
-            "Can't parse MetadataFile '%s':\n\t%s\n" % (fn, e.value)
+            "Can't parse MetadataFile '%s':\n\t%s\n" % (fn, e.message)
         )
 
     return []
@@ -209,20 +209,19 @@ def _process_pair(first_fn, second_fn, error_protocol):
             parse_data_file(second_fn)
         ]
 
-    # process pairs, which were created in first two branches
-    # of the if statement above
-    pair = None
-    try:
-        pair = DataPair(
-            metadata_file=_safe_parse_meta_file(metadata),
-            ebook_file=parse_data_file(ebook)
+    # process pairs, which were created in first two branches of the if
+    # statement above
+    pair = DataPair(
+        metadata_file=_safe_parse_meta_file(metadata, error_protocol),
+        ebook_file=parse_data_file(ebook)
+    )
+    if not pair.metadata_file:
+        logger.error(
+            "Can't parse MetadataFile '%s'. Continuing with data file '%s'." % (
+                metadata, ebook
+            )
         )
-    except decoders.MetaParsingException, e:
-        pair = parse_data_file(ebook)
-        logger.error("Can't parse MetadataFile '%s': %s" % (fn, e.value))
-        error_protocol.append(
-            "Can't parse MetadataFile '%s':\n\t%s\n" % (fn, e.value)
-        )
+        return [pair.ebook_file]
 
     return [pair]
 
@@ -479,14 +478,11 @@ def process_import_request(username, path, timestamp):
                 if error_protocol:
                     f.write("Error: Import only partially successful.\n")
                     f.write("See '%s' for details.\n" % USER_ERROR_LOG)
-                    f.write("\nErrors:\n")
-                    f.write("---\n")
+                    f.write("\n--- Errors ---\n")
                     f.write("\n".join(error_protocol))
-                    f.write("Successfully imported files:")
-                    f.write("---\n")
+                    f.write("\n\n--- Successfully imported files ---\n")
                 else:
-                    f.write("Sucess!\n")
-                    f.write("---\n")
+                    f.write("--- Sucess ---\n")
                 f.write("\n".join(import_log))
 
             logger.info("Created import protocol '%s'." % imp_path)
