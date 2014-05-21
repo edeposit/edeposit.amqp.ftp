@@ -33,6 +33,14 @@ def test_yaml():
         """
     )
 
+    # added quote test
+    test_assertions(
+        """
+        isbn: "80-86056-31-7"
+        vazba: "pevná"
+        """
+    )
+
     with pytest.raises(decoders.MetaParsingException):
         parser_yaml.decode('isbn: 80-86056-31-7: xex')
 
