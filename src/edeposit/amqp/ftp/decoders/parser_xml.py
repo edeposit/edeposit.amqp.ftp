@@ -16,7 +16,7 @@ Example::
     <root>
         <item key="ISBN knihy">80-86056-31-7</item>
         <item key="Vazba knihy">brož.</item>
-        <item key="Nazev knihy">80-86056-31-7.json</item>
+        <item key="Nazev knihy">standalone2.xml</item>
         <item key="Misto vydani">Praha</item>
         <item key="Nakladatel": >Garda</item>
         <item key="Datum vydani">09/2012</item>

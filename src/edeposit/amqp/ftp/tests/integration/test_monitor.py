@@ -96,9 +96,14 @@ def test_monitor():
         reqs
     )
 
-    assert len(standalone) == 1
+    assert len(standalone) == 2
+    standalone_names = map(lambda x: x.parsed_data.nazev, standalone)
+
     assert standalone[0].parsed_data.ISBN == '80-86056-31-7'
-    assert standalone[0].parsed_data.nazev == 'standalone_meta.yaml'
+    assert standalone[1].parsed_data.ISBN == '80-86056-31-7'
+
+    assert 'standalone_meta.yaml' in standalone_names
+    assert "standalone_meta.xml" in standalone_names
 
 
 def test_isbn_pairing():
