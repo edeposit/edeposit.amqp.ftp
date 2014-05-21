@@ -98,6 +98,7 @@ def test_monitor():
 
     assert len(standalone) == 1
     assert standalone[0].parsed_data.ISBN == '80-86056-31-7'
+    assert standalone[0].parsed_data.nazev == 'standalone_meta.yaml'
 
 
 def test_isbn_pairing():
