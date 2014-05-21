@@ -20,36 +20,51 @@ import edeposit.amqp.ftp.request_parser as request_parser
 #= Variables ==================================================================
 USERNAME = get_random_str()
 PASSWORD = get_random_str()
+ftp = None
 
 
 #= Tests ======================================================================
 def setup_module(module):
     api.add_user(USERNAME, PASSWORD)
 
+    global ftp
+    ftp = ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD)
+
 
 def teardown_module(module):
     api.remove_user(USERNAME)
 
+    global ftp
+    ftp.close()
+
+
+def get_ftp_handler():
+    global ftp
+
+    return ftp
+
 
 def upload_files(path="src/edeposit/amqp/ftp/tests/integration/data"):
-    with ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD) as ftp:
-        for root, dirs, files in os.walk(path):
-            for dn in dirs:
-                full_dn = os.path.join(root, dn)
-                remote_dn = full_dn[len(path):]
-                ftp.makedirs(remote_dn)
+    ftp = get_ftp_handler()
 
-            for fn in files:
-                full_fn = os.path.join(root, fn)
-                remote_fn = full_fn[len(path):]
-                ftp.upload(full_fn, remote_fn)
+    for root, dirs, files in os.walk(path):
+        for dn in dirs:
+            full_dn = os.path.join(root, dn)
+            remote_dn = full_dn[len(path):]
+            ftp.makedirs(remote_dn)
+
+        for fn in files:
+            full_fn = os.path.join(root, fn)
+            remote_fn = full_fn[len(path):]
+            ftp.upload(full_fn, remote_fn)
 
 
 def remove_lock():
-    with ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD) as ftp:
-        # check if lock exists
-        assert ftp.path.isfile(settings.LOCK_FILENAME), "Lock not found!"
-        ftp.remove(settings.LOCK_FILENAME)
+    ftp = get_ftp_handler()
+
+    # check if lock exists
+    assert ftp.path.isfile(settings.LOCK_FILENAME), "Lock not found!"
+    ftp.remove(settings.LOCK_FILENAME)
 
 
 def process_files():
@@ -151,40 +166,38 @@ def test_import_log_disabled():
     settings.CREATE_IMPORT_LOG = False
     reload(request_parser)
 
-    with ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD) as ftp:
-        if ftp.path.isfile(settings.USER_IMPORT_LOG):
-            ftp.remove(settings.USER_IMPORT_LOG)
+    ftp = get_ftp_handler()
+    if ftp.path.isfile(settings.USER_IMPORT_LOG):
+        ftp.remove(settings.USER_IMPORT_LOG)
 
     upload_files()
     remove_lock()
     process_files()
 
-    with ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD) as ftp:
-        assert not ftp.path.isfile(settings.USER_IMPORT_LOG)
+    assert not ftp.path.isfile(settings.USER_IMPORT_LOG)
 
 
 def test_import_log_enabled():
     settings.CREATE_IMPORT_LOG = True
     reload(request_parser)
 
-    with ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD) as ftp:
-        if ftp.path.isfile(settings.USER_IMPORT_LOG):
-            ftp.remove(settings.USER_IMPORT_LOG)
+    ftp = get_ftp_handler()
+    if ftp.path.isfile(settings.USER_IMPORT_LOG):
+        ftp.remove(settings.USER_IMPORT_LOG)
 
     upload_files()
     remove_lock()
     process_files()
 
-    with ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD) as ftp:
-        assert ftp.path.isfile(settings.USER_IMPORT_LOG)
+    assert ftp.path.isfile(settings.USER_IMPORT_LOG)
 
-        with ftp.open(settings.USER_IMPORT_LOG) as log:
-            user_log = log.read()
+    with ftp.open(settings.USER_IMPORT_LOG) as log:
+        user_log = log.read()
 
-            assert len(user_log.splitlines()) > 5, "Userlog is not working!"
-            assert "Error: Import only partially successful." in user_log
-            assert "--- Errors ---" in user_log
-            assert "--- Successfully imported files ---"
+        assert len(user_log.splitlines()) > 5, "Userlog is not working!"
+        assert "Error: Import only partially successful." in user_log
+        assert "--- Errors ---" in user_log
+        assert "--- Successfully imported files ---"
 
 
 def test_error_log():
@@ -192,11 +205,11 @@ def test_error_log():
     remove_lock()
     process_files()
 
-    with ftputil.FTPHost(settings.SERVER_ADDRESS, USERNAME, PASSWORD) as ftp:
-        assert ftp.path.isfile(settings.USER_ERROR_LOG)
+    ftp = get_ftp_handler()
+    assert ftp.path.isfile(settings.USER_ERROR_LOG)
 
-        with ftp.open(settings.USER_ERROR_LOG) as elog:
-            error_log = elog.read()
+    with ftp.open(settings.USER_ERROR_LOG) as elog:
+        error_log = elog.read()
 
-            assert error_log.splitlines(), "Error log is not working!"
-            assert "bad.json" in error_log
+        assert error_log.splitlines(), "Error log is not working!"
+        assert "bad.json" in error_log
