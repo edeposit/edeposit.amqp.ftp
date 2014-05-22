@@ -35,36 +35,51 @@ class ImportRequest(namedtuple("ImportRequest", ["username", "requests"])):
 class MetadataFile(namedtuple("MetadataFile", ["filename",
                                                "raw_data",
                                                "parsed_data"])):
-    pass
+    def __new__(self, filename, raw_data=None, parsed_data=None):
+        if not raw_data:
+            with open(filename) as f:
+                raw_data = f.read()
+
+        return super(MetadataFile, self).__new__(
+            self,
+            filename,
+            raw_data,
+            parsed_data
+        )
+
+    def parse(self):
+        return MetadataFile(
+            self.filename,
+            self.raw_data,
+            decoders.parse_meta(self.filename, self.raw_data)
+        )
+
+    def get_filenames(self):
+        return [self.filename]
 
 
 class EbookFile(namedtuple("EbookFile", ["filename", "raw_data"])):
-    pass
+    def __new__(self, filename, raw_data=None):
+        if not raw_data:
+            with open(filename) as f:
+                raw_data = f.read()
+
+        return super(EbookFile, self).__new__(self, filename, raw_data)
+
+    def get_filenames(self):
+        return [self.filename]
 
 
 class DataPair(namedtuple("DataPair", ["metadata_file", "ebook_file"])):
-    pass
+    def parse(self):
+        return DataPair(self.metadata_file.parse(), self.ebook_file)
+
+    def get_filenames(self):
+        return [
+            self.metadata_file.filename,  # don't change the order - used in RP
+            self.ebook_file.filename
+        ]
 
 
 class SendEmail(namedtuple("SendEmail", ["username", "subject", "text"])):
     pass
-
-
-#= Functions & objects ========================================================
-def _read_data(fn):
-    with open(fn) as f:
-        return f.read()
-
-
-def parse_meta_file(fn):
-    data = _read_data(fn)
-    return MetadataFile(
-        filename=fn,
-        raw_data=data,
-        parsed_data=decoders.parse_meta(fn, data)
-    )
-
-
-def parse_data_file(fn):
-    data = _read_data(fn)
-    return EbookFile(filename=fn, raw_data=data)

@@ -6,6 +6,8 @@
 #= Imports ====================================================================
 import os
 import shutil
+from collections import namedtuple
+
 
 try:
     from aleph import isbn
@@ -15,8 +17,7 @@ except ImportError:
 
 import decoders
 from settings import *
-from structures import *
-from __init__ import ImportRequest
+from structures import ImportRequest, MetadataFile, EbookFile, DataPair
 from api import set_permissions, create_lock_file
 
 
@@ -116,24 +117,25 @@ def _remove_files(files):
     Args:
         files (list): List of filenames, which will be removed.
     """
+    logger.debug("Request for file removal (_remove_files()).")
+
     for fn in files:
-        logger.debug("Removing '%s'." % fn)
-        os.remove(fn)
+        if os.path.exists(fn):
+            logger.debug("Removing '%s'." % fn)
+            os.remove(fn)
 
 
-def _safe_parse_meta_file(fn, error_protocol):
+def _safe_read_meta_file(fn, error_protocol):
     """
-    Try to parse MetadataFile. If the exception is raised, log the errors to
-    the `error_protocol` and return blank ``list``.
+    Try to read MetadataFile. If the exception is raised, log the errors to
+    the `error_protocol` and return None.
     """
     try:
-        return parse_meta_file(fn)
-    except decoders.MetaParsingException, e:
+        return MetadataFile(fn)
+    except Exception, e:
         error_protocol.append(
-            "Can't parse MetadataFile '%s':\n\t%s\n" % (fn, e.message)
+            "Can't read MetadataFile '%s':\n\t%s\n" % (fn, e.message)
         )
-
-    return None
 
 
 def _process_pair(first_fn, second_fn, error_protocol):
@@ -158,23 +160,23 @@ def _process_pair(first_fn, second_fn, error_protocol):
             "Parsed: both '%s' and '%s' as meta." % (first_fn, second_fn)
         )
         return [
-            _safe_parse_meta_file(first_fn, error_protocol),
-            _safe_parse_meta_file(second_fn, error_protocol)
+            _safe_read_meta_file(first_fn, error_protocol),
+            _safe_read_meta_file(second_fn, error_protocol)
         ]
     else:                                                 # both data
         logger.debug(
             "Parsed: both '%s' and '%s' as data." % (first_fn, second_fn)
         )
         return [
-            parse_data_file(first_fn),
-            parse_data_file(second_fn)
+            EbookFile(first_fn),
+            EbookFile(second_fn)
         ]
 
     # process pairs, which were created in first two branches of the if
     # statement above
     pair = DataPair(
-        metadata_file=_safe_parse_meta_file(metadata, error_protocol),
-        ebook_file=parse_data_file(ebook)
+        metadata_file=_safe_read_meta_file(metadata, error_protocol),
+        ebook_file=EbookFile(ebook)
     )
     if not pair.metadata_file:
         logger.error(
@@ -201,14 +203,11 @@ def _process_directory(dn, files, error_protocol, dir_size, path):
         list: of items. Example: [MetadataFile, DataPair, DataPair, EbookFile]
     """
     items = []
-    files_len = len(files)  # used later, `files` is modified in process
-    processed_files = []
 
     if len(files) == 2 and SAME_DIR_PAIRING:
         logger.debug("There are only two files.")
 
         items.extend(_process_pair(files[0], files[1], error_protocol))
-        processed_files.extend(files)
         files = []
 
     while files:
@@ -233,14 +232,12 @@ def _process_directory(dn, files, error_protocol, dir_size, path):
                 "'%s' can be probably paired with '%s'." % (fn, same_names[0])
             )
             items.extend(_process_pair(fn, same_names[0], error_protocol))
-            processed_files.extend([fn, same_names[0]])
         elif not same_names:  # there is no similar files
             logger.debug("'%s' can't be paired. Adding standalone file." % fn)
             if _is_meta(fn):
-                items.append(_safe_parse_meta_file(fn, error_protocol))
+                items.append(_safe_read_meta_file(fn, error_protocol))
             else:
-                items.append(parse_data_file(fn))
-            processed_files.append(fn)
+                items.append(EbookFile(fn))
         else:  # error - there is too many similar files
             logger.error(
                 "Too many files with same name: %s" % ", ".join(same_names)
@@ -249,22 +246,11 @@ def _process_directory(dn, files, error_protocol, dir_size, path):
                 "Too many files with same name:" +
                 "\n\t".join(same_names) + "\n\n---\n"
             )
-            processed_files.append(fn)
 
-    logger.info("Removing processed files.")
-    if dir_size == files_len:   # directory doesn't contain subdirs
-        if dn != path:          # don't remove root directory (user home)
-            logger.debug("Removing whole directory '%s'." % dn)
-            shutil.rmtree(dn)
-        else:
-            _remove_files(processed_files)
-    else:
-        _remove_files(processed_files)
-
-    return items
+    return filter(lambda x: x, items)  # remove None items (errors during read)
 
 
-def index(array, item, key=None):
+def _index(array, item, key=None):
     """
     Array search function.
 
@@ -323,7 +309,7 @@ def _isbn_pairing(items):
         if not ebooks:
             break
 
-        ebook_index = index(ebooks, meta.name, key=lambda x: x.name)
+        ebook_index = _index(ebooks, meta.name, key=lambda x: x.name)
 
         if ebook_index >= 0:
             logger.debug(
@@ -370,6 +356,43 @@ def _create_import_log(items):
     return log
 
 
+def _process_items(items, error_protocol):
+    """
+    Parse metadata. Remove processed and sucessfully parsed items.
+
+    Returns sucessfully processed items.
+    """
+    def process_meta(item, error_protocol):
+        try:
+            return item.parse()
+        except Exception, e:
+            error_protocol.append(
+                "Can't parse %s: %s" % (item.get_filenames()[0], e.message)
+            )
+
+            if isinstance(item, DataPair):
+                return item.ebook_file
+
+    # process all items and put them to output queue
+    out = []
+    for item in items:
+        if isinstance(item, EbookFile):
+            out.append(item)
+        else:
+            out.append(process_meta(item, error_protocol))
+    out = filter(lambda x: x, out)  # remove None items (process_meta() fails)
+
+    # remove processed files
+    fn_pool = []
+    soon_removed = out if LEAVE_BAD_FILES else items
+    for item in soon_removed:
+        fn_pool.extend(item.get_filenames())
+
+    _remove_files(fn_pool)
+
+    return out
+
+
 def process_import_request(username, path, timestamp, logger_handler):
     items = []
     error_protocol = []
@@ -405,6 +428,9 @@ def process_import_request(username, path, timestamp, logger_handler):
             logger.debug("ISBN_PAIRING is ON.")
             logger.info("Pairing user's files by ISBN filename.")
             items = _isbn_pairing(items)
+
+        # parse metadata and remove files from disk
+        items = _process_items(items, error_protocol)
 
         # unlink blank directories left by processing files
         logger.info("Removing blank directories.")
