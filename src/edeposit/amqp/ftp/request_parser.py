@@ -3,7 +3,7 @@
 #
 # Interpreter version: python 2.7
 #
-#= Imports ====================================================================
+# Imports =====================================================================
 import os
 import shutil
 from collections import namedtuple
@@ -18,14 +18,15 @@ except ImportError:
 import decoders
 from settings import *
 from structures import ImportRequest, MetadataFile, EbookFile, DataPair
-from api import set_permissions, create_lock_file
+from api import create_lock_file
+from passwd_reader import set_permissions
 
 
-#= Variables ==================================================================
+# Variables ===================================================================
 logger = None
 
 
-#= Functions & objects ========================================================
+# Functions & objects =========================================================
 def recursive_chmod(path, mode=0755):
     """
     Recursively change ``mode`` for given ``path``. Same as 'chmod -R `mode`'.
@@ -189,7 +190,7 @@ def _process_pair(first_fn, second_fn, error_protocol):
     return [pair]
 
 
-def _process_directory(dn, files, error_protocol, dir_size, path):
+def _process_directory(files, error_protocol):
     """
     Look at items in given directory, try to match them for same names and pair
     them.
@@ -416,11 +417,8 @@ def process_import_request(username, path, timestamp, logger_handler):
 
                 items.extend(
                     _process_directory(
-                        dn,
                         files,
                         error_protocol,
-                        len(dir_list),
-                        path
                     )
                 )
 
@@ -463,8 +461,8 @@ def process_import_request(username, path, timestamp, logger_handler):
             )
 
             err_path = path + "/" + USER_ERROR_LOG
-            with open(err_path, "wt") as f:
-                f.write("\n".join(error_protocol))
+            with open(err_path, "w") as fh:
+                fh.write("\n".join(error_protocol))
 
             logger.error("Error protocol saved to '%s'." % err_path)
 
@@ -474,7 +472,7 @@ def process_import_request(username, path, timestamp, logger_handler):
             logger.debug("CREATE_IMPORT_LOG is on.")
 
             imp_path = path + "/" + USER_IMPORT_LOG
-            with open(imp_path, "wt") as f:
+            with open(imp_path, "w") as f:
                 if error_protocol:
                     f.write("Error: Import only partially successful.\n")
                     f.write("See '%s' for details.\n" % USER_ERROR_LOG)

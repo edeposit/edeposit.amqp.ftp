@@ -24,88 +24,24 @@ import re
 import os
 import os.path
 import shutil
-from pwd import getpwnam
 
 import sh
 
-from settings import *
+import settings
+import passwd_reader
 from __init__ import reload_configuration
 
 
 #= Functions & objects ========================================================
 def require_root(fn):
+    """
+    Decorator to make sure, that user is root.
+    """
     def xex(*args, **kwargs):
         assert os.geteuid() == 0, "You have to be root to run this tests."
         return fn(*args, **kwargs)
 
     return xex
-
-
-def _load_users(path=LOGIN_FILE):
-    """
-    Load users defined passwd-like format file.
-
-    Args:
-        path (str, default settings.LOGIN_FILE): path of the file,
-            which will be loaded (default :attr:`.LOGIN_FILE`).
-
-    Returns:
-        (dict): "username": {"pass_hash": "..", "uid": "..", "gid": "..", \
-                "full_name": "..", "home": "..", "shell": ".."}
-    """
-    if not os.path.exists(path):
-        return {}
-
-    data = ""
-    with open(path) as f:
-        data = f.read().splitlines()
-
-    users = {}
-    cnt = 1
-    for line in data:
-        line = line.split(":")
-
-        assert len(line) == 7, "Bad number of fields in '%s', at line %d!" % (
-            LOGIN_FILE,
-            cnt
-        )
-
-        users[line[0]] = {  # TODO: use namedtuple?
-            "pass_hash": line[1],
-            "uid": line[2],
-            "gid": line[3],
-            "full_name": line[4],
-            "home": line[5],
-            "shell": line[6]
-        }
-
-        cnt += 1
-
-    return users
-
-
-def _save_users(users, path=LOGIN_FILE):
-    """
-    Save dictionary with user data to passwd-like file.
-
-    Args:
-        users (dict): dictionary with user data. For details look at dict
-                      returned from :func:`_load_users`.
-        path (str, default settings.LOGIN_FILE): path of the file,
-            which will be loaded (default :attr:`.LOGIN_FILE`).
-    """
-    with open(path, "wt") as f:
-        for username, data in users.items():
-            pass_line = username + ":" + ":".join([
-                data["pass_hash"],
-                data["uid"],
-                data["gid"],
-                data["full_name"],
-                data["home"],
-                data["shell"]
-            ])
-
-            f.write(pass_line + "\n")
 
 
 def _is_valid_username(username):
@@ -115,35 +51,17 @@ def _is_valid_username(username):
     Args:
         username (str): username.
     """
-    return re.search("^[a-zA-Z0-9\.\_\-]*$", username)
-
-
-def set_permissions(filename, uid=None, gid=None, mode=0775):
-    """
-    Set pemissions for given `filename`.
-
-    Args:
-        filename (str): name of the file/directory
-        uid (int, default proftpd): user ID - if not set, user ID of `proftpd`
-                                    is used
-        gid (int): group ID, if not set, it is not changed
-        mode (int, default 0775): unix access mode
-    """
-    if uid is None:
-        uid = getpwnam('proftpd').pw_uid
-
-    if gid is None:
-        gid = -1
-
-    os.chown(filename, uid, gid)
-    os.chmod(filename, mode)
+    return re.search(r"^[a-zA-Z0-9\.\_\-]*$", username)
 
 
 def create_lock_file(path):
-    with open(path, "wt") as f:
-        f.write(LOCK_FILE_CONTENT)
+    """
+    Create lock file (:attr:`settings.LOCK_FILE_CONTENT`).
+    """
+    with open(path, "w") as f:
+        f.write(settings.LOCK_FILE_CONTENT)
 
-    set_permissions(path, gid=PROFTPD_USERS_GID)
+    passwd_reader.set_permissions(path, gid=settings.PROFTPD_USERS_GID)
 
 
 @require_root
@@ -161,22 +79,22 @@ def add_user(username, password):
     assert _is_valid_username(username), \
             "Invalid format of username '%s'!" % username
 
-    assert username not in _load_users(), \
+    assert username not in passwd_reader.load_users(), \
             "User '%s' is already registered!" % username
 
     assert password, "Password is reqired!"
 
     # add new user to the proftpd's passwd file
-    home_dir = DATA_PATH + username
+    home_dir = settings.DATA_PATH + username
     sh.ftpasswd(
-        passwd=True,        # passwd file, not group file
+        passwd=True,                    # passwd file, not group file
         name=username,
-        home=home_dir,      # chroot in DATA_PATH
+        home=home_dir,                  # chroot in DATA_PATH
         shell="/bin/false",
-        uid=PROFTPD_USERS_GID,         # TODO: parse dynamically?
-        gid=PROFTPD_USERS_GID,
-        stdin=True,         # tell ftpasswd to read password from stdin
-        file=LOGIN_FILE,
+        uid=settings.PROFTPD_USERS_GID, # TODO: parse dynamically?
+        gid=settings.PROFTPD_USERS_GID,
+        stdin=True,                 # tell ftpasswd to read password from stdin
+        file=settings.LOGIN_FILE,
         _in=password
     )
 
@@ -186,10 +104,10 @@ def add_user(username, password):
 
     # I am using PROFTPD_USERS_GID (2000) for all our users - this GID shouldn't
     # be used by other than FTP users!
-    set_permissions(home_dir, gid=PROFTPD_USERS_GID)
-    set_permissions(LOGIN_FILE, mode=0600)
+    passwd_reader.set_permissions(home_dir, gid=settings.PROFTPD_USERS_GID)
+    passwd_reader.set_permissions(settings.LOGIN_FILE, mode=0600)
 
-    create_lock_file(home_dir + "/" + LOCK_FILENAME)
+    create_lock_file(home_dir + "/" + settings.LOCK_FILENAME)
 
     reload_configuration()
 
@@ -202,16 +120,16 @@ def remove_user(username):
     Args:
         username (str): ..
     """
-    users = _load_users()
+    users = passwd_reader.load_users()
 
     assert username in users, "Username '%s' not found!" % username
 
     # remove user from passwd file
     del users[username]
-    _save_users(users)
+    passwd_reader.save_users(users)
 
     # remove home directory
-    home_dir = DATA_PATH + username
+    home_dir = settings.DATA_PATH + username
     if os.path.exists(home_dir):
         shutil.rmtree(home_dir)
 
@@ -227,14 +145,15 @@ def change_password(username, new_password):
         username (str): ..
         new_password (str): ..
     """
-    assert username in _load_users(), "Username '%s' not found!" % username
+    assert username in passwd_reader.load_users(),\
+           "Username '%s' not found!" % username
 
     sh.ftpasswd(
         "--change-password",
         passwd=True,        # passwd file, not group file
         name=username,
         stdin=True,         # tell ftpasswd to read password from stdin
-        file=LOGIN_FILE,
+        file=settings.LOGIN_FILE,
         _in=new_password
     )
 
@@ -247,4 +166,4 @@ def list_users():
     Returns:
         list: of str usernames.
     """
-    return map(lambda (key, val): key, _load_users().items())
+    return map(lambda (key, val): key, passwd_reader.load_users().items())
