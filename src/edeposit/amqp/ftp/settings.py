@@ -90,7 +90,7 @@ LOCK_ONLY_IN_HOME = True
 CREATE_IMPORT_LOG = True
 
 #: True - don't remove badly formatted metadata files
-LEAVE_BAD_FILES = False
+LEAVE_BAD_FILES = True
 
 
 #= Other config ===============================================================
