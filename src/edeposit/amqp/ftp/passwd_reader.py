@@ -78,8 +78,6 @@ def save_users(users, path=settings.LOGIN_FILE):
 
             fh.write(pass_line + "\n")
 
-    set_permissions(settings.LOGIN_FILE, mode=0600)
-
 
 def set_permissions(filename, uid=None, gid=None, mode=0775):
     """
