@@ -89,6 +89,9 @@ LOCK_ONLY_IN_HOME = True
 #: True - USER_IMPORT_LOG will be created
 CREATE_IMPORT_LOG = True
 
+#: True - don't remove badly formatted metadata files
+LEAVE_BAD_FILES = False
+
 
 #= Other config ===============================================================
 #: I am using GID 2000 for all our users - this GID shouldn't be used by other
