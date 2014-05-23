@@ -52,7 +52,7 @@ def recursive_chmod(path, mode=0755):
 
 def _filter_files(paths):
     """
-    Filter files from the list of path. Directories, symlinks and other crap
+    Filter files from the list of `paths`. Directories, symlinks and other crap
     (named pipes and so on) are ignored.
 
     Args:
@@ -108,7 +108,7 @@ def _is_meta(fn):
     """
     if "." not in fn:
         return False
-    return fn.rsplit(".")[1].lower() in decoders.SUPPORTED_FILES
+    return fn.rsplit(".")[-1].lower() in decoders.SUPPORTED_FILES
 
 
 def _remove_files(files):

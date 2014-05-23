@@ -62,8 +62,8 @@ def save_users(users, path=settings.LOGIN_FILE):
     Args:
         users (dict): dictionary with user data. For details look at dict
                       returned from :func:`load_users`.
-        path (str, default settings.LOGIN_FILE): path of the file,
-            which will be loaded (default :attr:`.LOGIN_FILE`).
+        path (str, default settings.LOGIN_FILE): path of the file, where the
+             data will be stored (default :attr:`.LOGIN_FILE`).
     """
     with open(path, "w") as fh:
         for username, data in users.items():
