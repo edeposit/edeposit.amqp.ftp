@@ -32,6 +32,10 @@ class ImportRequest(namedtuple("ImportRequest", ["username", "requests"])):
     pass  # TODO: protocol
 
 
+class SendEmail(namedtuple("SendEmail", ["username", "subject", "text"])):
+    pass
+
+
 class MetadataFile(namedtuple("MetadataFile", ["filename",
                                                "raw_data",
                                                "parsed_data"])):
@@ -79,7 +83,3 @@ class DataPair(namedtuple("DataPair", ["metadata_file", "ebook_file"])):
             self.metadata_file.filename,  # don't change the order - used in RP
             self.ebook_file.filename
         ]
-
-
-class SendEmail(namedtuple("SendEmail", ["username", "subject", "text"])):
-    pass
