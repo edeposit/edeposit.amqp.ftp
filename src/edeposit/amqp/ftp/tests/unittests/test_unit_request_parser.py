@@ -66,3 +66,32 @@ def test_index():
     assert request_parser._index(data, "x") == -1
 
 
+def test_isbn_pairing():
+    data = [
+        structures.EbookFile("/home/xex/80-86056-31-7.epub", "Random content."),
+        structures.MetadataFile(
+            "/80-86056-31-7.xml",
+            "Random content.",
+            "Parsed"
+        )
+    ]
+
+    pair = request_parser._isbn_pairing(data[:])
+    assert pair
+    assert isinstance(pair[0], structures.DataPair)
+    assert pair[0].metadata_file == data[1]
+    assert pair[0].ebook_file == data[0]
+
+    data = [
+        structures.EbookFile("samename.epub", "Random content."),
+        structures.MetadataFile(
+            "samename.xml",
+            "Random content.",
+            "Parsed"
+        )
+    ]
+
+    pair = request_parser._isbn_pairing(data[:])
+    assert len(pair) == 2
+
+    assert not filter(lambda x: isinstance(x, structures.DataPair), pair)
