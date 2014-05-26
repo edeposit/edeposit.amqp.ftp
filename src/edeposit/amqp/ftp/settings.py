@@ -23,8 +23,8 @@ import os
 import os.path
 
 
-#= Module configuration =======================================================
-#= Paths ======================================================================
+# Module configuration ========================================================
+# Paths =======================================================================
 #: Module's path.
 BASE_PATH = (os.path.dirname(__file__))
 
@@ -41,7 +41,7 @@ DATA_PATH = "/home/ftp/"
 SERVER_ADDRESS = "localhost"
 
 
-#= Files ======================================================================
+# Files =======================================================================
 #: proftpd configuration file (in CONF_PATH directory)
 CONF_FILE = CONF_PATH + "proftpd.conf"
 
@@ -70,7 +70,7 @@ nahrali na server.
 """
 
 
-#= Switches ===================================================================
+# Switches ====================================================================
 #: True - will pair files with same filename in same directory
 SAME_NAME_DIR_PAIRING = True
 
@@ -93,13 +93,46 @@ CREATE_IMPORT_LOG = True
 LEAVE_BAD_FILES = True
 
 
-#= Other config ===============================================================
+#: True - email with error/import log will be sent
+SEND_EMAIL = False
+
+
+# Other config ================================================================
 #: I am using GID 2000 for all our users - this GID shouldn't be used by other
 #: than FTP users!
 PROFTPD_USERS_GID = 2000
 
 
-#= User configuration reader (don't edit this =================================
+###############################################################################
+# System part, do not edit this ###############################################
+###############################################################################
+# User configuration merger ===================================================
+_ALLOWED_MERGES = [
+    "SAME_NAME_DIR_PAIRING",
+    "SAME_DIR_PAIRING",
+    "ISBN_PAIRING",
+    "CREATE_IMPORT_LOG",
+    "LEAVE_BAD_FILES",
+    "SEND_EMAIL",
+]
+
+
+def conf_merger(user_dict, variable):
+    """
+    Merge global configuration with user's personal configuration.
+
+    Global configuration has always higher priority.
+    """
+    if variable not in globals().keys():
+        raise NameError("Unknown variable '%s'." % variable)
+
+    if variable not in user_dict:
+        return globals()[variable]
+
+    return globals()[variable] and user_dict[variable]
+
+
+# User configuration reader (don't edit this ==================================
 _ALLOWED = [str, int, float]
 
 _SETTINGS_PATH = "/edeposit/ftp.json"

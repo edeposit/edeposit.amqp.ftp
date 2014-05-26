@@ -16,7 +16,9 @@ except ImportError:
 
 
 import decoders
-from settings import *
+import passwd_reader
+import settings
+from settings import conf_merger
 from structures import ImportRequest, MetadataFile, EbookFile, DataPair
 from api import create_lock_file
 from passwd_reader import set_permissions
@@ -70,8 +72,8 @@ def _just_name(fn):
     """
     Return: (str) `name` for given `fn`.
 
-    Name is taken from the filename and it is just the name of the file, without
-    suffix and path.
+    Name is taken from the filename and it is just the name of the file,
+    without suffix and path.
 
     For example - name of ``/home/bystrousak/config.json`` is just ``config``.
     """
@@ -88,8 +90,8 @@ def _same_named(fn, fn_list):
     Return: (list of tuples) filenames from `fn_list`, which has same *name* as
     `fn` and their indexes in tuple (i, fn).
 
-    Name is taken from the filename and it is just the name of the file, without
-    suffix and path.
+    Name is taken from the filename and it is just the name of the file,
+    without suffix and path.
 
     For example - name of ``/home/bystrousak/config.json`` is just ``config``.
     """
@@ -190,7 +192,7 @@ def _process_pair(first_fn, second_fn, error_protocol):
     return [pair]
 
 
-def _process_directory(files, error_protocol):
+def _process_directory(files, user_conf, error_protocol):
     """
     Look at items in given directory, try to match them for same names and pair
     them.
@@ -205,7 +207,7 @@ def _process_directory(files, error_protocol):
     """
     items = []
 
-    if len(files) == 2 and SAME_DIR_PAIRING:
+    if len(files) == 2 and conf_merger(user_conf, "SAME_DIR_PAIRING"):
         logger.debug("There are only two files.")
 
         items.extend(_process_pair(files[0], files[1], error_protocol))
@@ -218,17 +220,19 @@ def _process_directory(files, error_protocol):
         logger.debug("Processing '%s'." % fn)
 
         # get files with same names (ignore paths and suffixes)
-        if SAME_NAME_DIR_PAIRING:
+        if conf_merger(user_conf, "SAME_NAME_DIR_PAIRING"):
             same_names = _same_named(fn, files)  # returns (index, name)
             indexes = map(lambda (i, fn): i, same_names)  # get indexes
             same_names = map(lambda (i, fn): fn, same_names)  # get names
 
-            # remove `same_names` from `files` (they are processed in this pass)
+            # remove `same_names` from `files` (they are processed in this
+            # pass)
             for i in sorted(indexes, reverse=True):
                 del files[i]
 
         # has exactly one file pair
-        if len(same_names) == 1 and SAME_NAME_DIR_PAIRING:
+        SDP = conf_merger(user_conf, "SAME_NAME_DIR_PAIRING")
+        if len(same_names) == 1 and SDP:
             logger.debug(
                 "'%s' can be probably paired with '%s'." % (fn, same_names[0])
             )
@@ -344,7 +348,9 @@ def _create_import_log(items):
                 "Metadata file '%s' successfully imported." % item.filename
             )
         elif isinstance(item, EbookFile):
-            log.append("Ebook file '%s' successfully imported." % item.filename)
+            log.append(
+                "Ebook file '%s' successfully imported." % item.filename
+            )
         elif isinstance(item, DataPair):
             meta = item.metadata_file.filename
             data = item.ebook_file.filename
@@ -357,7 +363,7 @@ def _create_import_log(items):
     return log
 
 
-def _process_items(items, error_protocol):
+def _process_items(items, user_conf, error_protocol):
     """
     Parse metadata. Remove processed and sucessfully parsed items.
 
@@ -385,7 +391,7 @@ def _process_items(items, error_protocol):
 
     # remove processed files
     fn_pool = []
-    soon_removed = out if LEAVE_BAD_FILES else items
+    soon_removed = out if conf_merger(user_conf, "LEAVE_BAD_FILES") else items
     for item in soon_removed:
         fn_pool.extend(item.get_filenames())
 
@@ -398,8 +404,12 @@ def process_import_request(username, path, timestamp, logger_handler):
     items = []
     error_protocol = []
 
+    # import logger into local namespace
     global logger
     logger = logger_handler
+
+    # read user configuration
+    user_conf = passwd_reader.read_user_config(username)
 
     # lock directory to prevent user to write during processing of the batch
     logger.info("Locking user´s directory.")
@@ -418,17 +428,18 @@ def process_import_request(username, path, timestamp, logger_handler):
                 items.extend(
                     _process_directory(
                         files,
+                        user_conf,
                         error_protocol,
                     )
                 )
 
-        if ISBN_PAIRING:
+        if conf_merger(user_conf, "ISBN_PAIRING"):
             logger.debug("ISBN_PAIRING is ON.")
             logger.info("Pairing user's files by ISBN filename.")
             items = _isbn_pairing(items)
 
         # parse metadata and remove files from disk
-        items = _process_items(items, error_protocol)
+        items = _process_items(items, user_conf, error_protocol)
 
         # unlink blank directories left by processing files
         logger.info("Removing blank directories.")
@@ -451,8 +462,8 @@ def process_import_request(username, path, timestamp, logger_handler):
         # unlock directory
         logger.info("Unlocking user´s directory.")
         recursive_chmod(path, 0775)
-        logger.info("Creating lock file '%s'." % LOCK_FILENAME)
-        create_lock_file(path + "/" + LOCK_FILENAME)
+        logger.info("Creating lock file '%s'." % settings.LOCK_FILENAME)
+        create_lock_file(path + "/" + settings.LOCK_FILENAME)
 
         # process errors if found
         if error_protocol:
@@ -460,7 +471,7 @@ def process_import_request(username, path, timestamp, logger_handler):
                 "Found %d error(s)." % len(error_protocol)
             )
 
-            err_path = path + "/" + USER_ERROR_LOG
+            err_path = path + "/" + settings.USER_ERROR_LOG
             with open(err_path, "w") as fh:
                 fh.write("\n".join(error_protocol))
 
@@ -468,14 +479,16 @@ def process_import_request(username, path, timestamp, logger_handler):
 
         # process import log
         import_log = _create_import_log(items)
-        if import_log and CREATE_IMPORT_LOG:
+        if import_log and conf_merger(user_conf, "CREATE_IMPORT_LOG"):
             logger.debug("CREATE_IMPORT_LOG is on.")
 
-            imp_path = path + "/" + USER_IMPORT_LOG
+            imp_path = path + "/" + settings.USER_IMPORT_LOG
             with open(imp_path, "w") as f:
                 if error_protocol:
                     f.write("Error: Import only partially successful.\n")
-                    f.write("See '%s' for details.\n" % USER_ERROR_LOG)
+                    f.write(
+                        "See '%s' for details.\n" % settings.USER_ERROR_LOG
+                    )
                     f.write("\n--- Errors ---\n")
                     f.write("\n".join(error_protocol))
                     f.write("\n\n--- Successfully imported files ---\n")

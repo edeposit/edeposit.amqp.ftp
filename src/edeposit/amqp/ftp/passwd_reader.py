@@ -3,7 +3,7 @@
 #
 # Interpreter version: python 2.7
 #
-#= Imports ====================================================================
+# Imports =====================================================================
 import os
 import os.path
 from pwd import getpwnam
@@ -11,7 +11,7 @@ from pwd import getpwnam
 import settings
 
 
-#= Functions & objects ========================================================
+# Functions & objects =========================================================
 def load_users(path=settings.LOGIN_FILE):
     """
     Load users defined passwd-like format file.
@@ -98,3 +98,57 @@ def set_permissions(filename, uid=None, gid=None, mode=0775):
 
     os.chown(filename, uid, gid)
     os.chmod(filename, mode)
+
+
+def _decode_config(conf_str):
+    """
+    Decode string to configuration dict.
+
+    Only values defined in settings._ALLOWED_MERGES can be redefined.
+    """
+    conf_str = conf_str.strip()
+
+    # convert "tttff" -> [True, True, True, False, False]
+    conf = map(
+        lambda x: True if x.upper() == "T" else False,
+        list(conf_str)
+    )
+
+    return dict(zip(settings._ALLOWED_MERGES, conf))
+
+
+def _encode_config(conf_dict):
+    """Encode `conf_dict` to string."""
+    out = []
+
+    # get variables in order defined in settings._ALLOWED_MERGES
+    for var in settings._ALLOWED_MERGES:
+        out.append(conf_dict[var])
+
+    # convert bools to chars
+    out = map(
+        lambda x: "t" if x else "f",
+        out
+    )
+
+    return "".join(out)
+
+
+def read_user_config(username):
+    """
+    Read user's configuration from otherwise unused field 'full_name' in passwd
+    file.
+
+    Configuration is stored in string as list of t/f characters.
+    """
+    return _decode_config(load_users()[username]["full_name"])
+
+
+def save_user_config(username, conf_dict):
+    """
+    Save user's configuration to otherwise unused field 'full_name' in passwd
+    file.
+    """
+    users = load_users()
+    users[username]["full_name"] = _encode_config(conf_dict)
+    save_users(users)
