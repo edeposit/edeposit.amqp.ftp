@@ -15,7 +15,7 @@ class AddUser(namedtuple("AddUser", ["username", "password"])):
     pass
 
 
-class RemoveUser(namedtuple("RemoveUser", ["username", "password"])):
+class RemoveUser(namedtuple("RemoveUser", ["username"])):
     pass
 
 
@@ -28,28 +28,34 @@ class ListRegisteredUsers(namedtuple("ListRegisteredUsers", [])):
     pass
 
 
-class SetUserSettings(namedtuple("SetUserSettings", settings._ALLOWED_MERGES)):
+class SetUserSettings(namedtuple("SetUserSettings",
+                                 ["username"] + settings._ALLOWED_MERGES)):
     pass
 
 
-class GetUserSettings(namedtuple("GetUserSettings", [])):
+class GetUserSettings(namedtuple("GetUserSettings", ["username"])):
     pass
 
 
 # Responses ===================================================================
-class ImportRequest(namedtuple("ImportRequest", ["username", "requests"])):
-    pass  # TODO: protocol
+class Userlist(namedtuple("Userlist", ["users"])):
+    pass
 
 
 class SendEmail(namedtuple("SendEmail", ["username", "subject", "text"])):
     pass
 
 
-# File structures =============================================================
-class UserSettings(namedtuple("UserSettings", settings._ALLOWED_MERGES)):
+class UserSettings(namedtuple("UserSettings",
+                              ["username"] + settings._ALLOWED_MERGES)):
     pass
 
 
+class ImportRequest(namedtuple("ImportRequest", ["username", "requests"])):
+    pass  # TODO: protocol
+
+
+# File structures =============================================================
 class MetadataFile(namedtuple("MetadataFile", ["filename",
                                                "raw_data",
                                                "parsed_data"])):

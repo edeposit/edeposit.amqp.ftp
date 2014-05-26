@@ -3,7 +3,7 @@
 #
 # Interpreter version: python 2.7
 #
-#= Imports ====================================================================
+# Imports =====================================================================
 """
 ProFTPD manager used to add/remove users to the FTP server.
 
@@ -31,13 +31,14 @@ import settings
 import passwd_reader
 
 
-#= Functions & objects ========================================================
+# Functions & objects =========================================================
 def require_root(fn):
     """
     Decorator to make sure, that user is root.
     """
     def xex(*args, **kwargs):
-        assert os.geteuid() == 0, "You have to be root to run this tests."
+        assert os.geteuid() == 0, \
+            "You have to be root to run function '%s'." % fn.__name__
         return fn(*args, **kwargs)
 
     return xex
@@ -109,8 +110,8 @@ def add_user(username, password):
     if not os.path.exists(home_dir):
         os.makedirs(home_dir, 0775)
 
-    # I am using PROFTPD_USERS_GID (2000) for all our users - this GID shouldn't
-    # be used by other than FTP users!
+    # I am using PROFTPD_USERS_GID (2000) for all our users - this GID
+    # shouldn't be used by other than FTP users!
     passwd_reader.set_permissions(home_dir, gid=settings.PROFTPD_USERS_GID)
     passwd_reader.set_permissions(settings.LOGIN_FILE, mode=0600)
 
