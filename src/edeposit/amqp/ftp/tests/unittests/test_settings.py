@@ -3,11 +3,13 @@
 #
 # Interpreter version: python 2.7
 #
-#= Imports ====================================================================
+# Imports =====================================================================
+import pytest
+
 import edeposit.amqp.ftp.settings as settings
 
 
-#= Variables ==================================================================
+# Variables ===================================================================
 STRINGS = [
     "BASE_PATH",
     "CONF_PATH",
@@ -38,7 +40,7 @@ NUMERIC = [
 ALL_VARS = STRINGS + BOOLEAN + NUMERIC
 
 
-#= Tests ======================================================================
+# Tests =======================================================================
 def test_variable_presence():
     for var in ALL_VARS:
         hasattr(settings, var)
@@ -62,3 +64,19 @@ def test_booleans():
 def test_numerics():
     for var in NUMERIC:
         int(getattr(settings, var))
+
+
+def test_conf_merger():
+    with pytest.raises(NameError):
+        settings.conf_merger({}, "xex")
+
+    with pytest.raises(NameError):
+        settings.conf_merger({"xex": True}, "xex")
+
+    data = {"LEAVE_BAD_FILES": True}
+
+    assert settings.conf_merger(data, "LEAVE_BAD_FILES")
+
+    # test whether the settings has higher priority than user's configuration
+    settings.LEAVE_BAD_FILES = False
+    assert not settings.conf_merger(data, "LEAVE_BAD_FILES")
