@@ -3,13 +3,14 @@
 #
 # Interpreter version: python 2.7
 #
-#= Imports ====================================================================
+# Imports =====================================================================
 from collections import namedtuple
 
 import decoders
+import settings
 
 
-#= Requests ===================================================================
+# Requests ====================================================================
 class AddUser(namedtuple("AddUser", ["username", "password"])):
     pass
 
@@ -27,12 +28,25 @@ class ListRegisteredUsers(namedtuple("ListRegisteredUsers", [])):
     pass
 
 
-#= Responses ==================================================================
+class SetUserSettings(namedtuple("SetUserSettings", settings._ALLOWED_MERGES)):
+    pass
+
+
+class GetUserSettings(namedtuple("GetUserSettings", [])):
+    pass
+
+
+# Responses ===================================================================
 class ImportRequest(namedtuple("ImportRequest", ["username", "requests"])):
     pass  # TODO: protocol
 
 
 class SendEmail(namedtuple("SendEmail", ["username", "subject", "text"])):
+    pass
+
+
+# File structures =============================================================
+class UserSettings(namedtuple("UserSettings", settings._ALLOWED_MERGES)):
     pass
 
 
