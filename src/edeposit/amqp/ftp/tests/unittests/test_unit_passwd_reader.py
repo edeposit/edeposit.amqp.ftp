@@ -64,5 +64,34 @@ def test_save_users():
     test_load_users()
 
 
+config_data = {
+    "SAME_NAME_DIR_PAIRING": True,
+    "SAME_DIR_PAIRING": False,
+    "ISBN_PAIRING": True,
+    "CREATE_IMPORT_LOG": False,
+    "LEAVE_BAD_FILES": True,
+    "SEND_EMAIL": False,
+}
+
+
+def test_decode_config():
+    data = passwd_reader._decode_config("tftftf")
+
+    assert data == config_data
+
+
+def test_encode_config():
+    assert passwd_reader._encode_config(config_data) == "tftftf"
+
+
+def test_read_write_user_config():
+    assert passwd_reader.read_user_config("xex", RAND_FN) == {}
+
+    passwd_reader.save_user_config("xex", config_data, RAND_FN)
+
+    assert passwd_reader.read_user_config("xex", RAND_FN) == config_data
+    assert passwd_reader.load_users(RAND_FN)["xex"]["full_name"] == "tftftf"
+
+
 def teardown_module():
     os.remove(RAND_FN)
