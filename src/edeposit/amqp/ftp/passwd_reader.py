@@ -37,7 +37,7 @@ def load_users(path=settings.LOGIN_FILE):
         line = line.split(":")
 
         assert len(line) == 7, "Bad number of fields in '%s', at line %d!" % (
-            settings.LOGIN_FILE,
+            path,
             cnt
         )
 
@@ -134,21 +134,21 @@ def _encode_config(conf_dict):
     return "".join(out)
 
 
-def read_user_config(username):
+def read_user_config(username, path=settings.LOGIN_FILE):
     """
     Read user's configuration from otherwise unused field 'full_name' in passwd
     file.
 
     Configuration is stored in string as list of t/f characters.
     """
-    return _decode_config(load_users()[username]["full_name"])
+    return _decode_config(load_users(path=path)[username]["full_name"])
 
 
-def save_user_config(username, conf_dict):
+def save_user_config(username, conf_dict, path=settings.LOGIN_FILE):
     """
     Save user's configuration to otherwise unused field 'full_name' in passwd
     file.
     """
-    users = load_users()
+    users = load_users(path=path)
     users[username]["full_name"] = _encode_config(conf_dict)
-    save_users(users)
+    save_users(users, path=path)
