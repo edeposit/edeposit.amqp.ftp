@@ -10,7 +10,7 @@ import sys
 from pwd import getpwnam
 
 from settings import *
-from __init__ import reload_configuration
+from api import reload_configuration
 
 
 #= Variables ==================================================================

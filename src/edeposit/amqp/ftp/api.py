@@ -29,7 +29,6 @@ import sh
 
 import settings
 import passwd_reader
-from __init__ import reload_configuration
 
 
 #= Functions & objects ========================================================
@@ -42,6 +41,14 @@ def require_root(fn):
         return fn(*args, **kwargs)
 
     return xex
+
+
+@require_root
+def reload_configuration():
+    """
+    Send signal to the proftpd daemon to reload configuration.
+    """
+    sh.killall("-HUP", "proftpd", _ok_code=[0, 1])
 
 
 def _is_valid_username(username):

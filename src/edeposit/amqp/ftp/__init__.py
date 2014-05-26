@@ -1,22 +1,15 @@
-
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Interpreter version: python 2.7
 #
 #= Imports ====================================================================
-import sh
-
 from settings import *
 from structures import *
 
 
 #= Variables ==================================================================
 #= Functions & objects ========================================================
-def reload_configuration():
-    sh.killall("-HUP", "proftpd", _ok_code=[0, 1])
-
-
 def _instanceof(instance, class_):
     """Check type by matching ``.__name__``."""
     return type(instance).__name__ == class_.__name__
