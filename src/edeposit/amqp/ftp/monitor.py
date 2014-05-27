@@ -3,7 +3,7 @@
 #
 # Interpreter version: python 2.7
 #
-#= Imports ====================================================================
+# Imports =====================================================================
 import os
 import sys
 
@@ -13,17 +13,17 @@ import argparse
 
 import sh
 
-from settings import *
+import settings
 from request_parser import process_import_request
 
 
-#= Variables ==================================================================
+# Variables ===================================================================
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.info("Started")
 
 
-#= Functions & objects ========================================================
+# Functions & objects =========================================================
 def _read_stdin():
     """
     Generator for reading from standard input in nonblocking mode.
@@ -78,13 +78,13 @@ def process_log(file_iterator):
 
         # don't react to anything else, than trigger in form of deleted
         # "lock" file
-        if os.path.basename(parsed["path"]) != LOCK_FILENAME:
+        if os.path.basename(parsed["path"]) != settings.LOCK_FILENAME:
             continue
 
         # react only to lock file in in home directory
         dir_name = os.path.dirname(parsed["path"])
-        if LOCK_ONLY_IN_HOME:
-            if dir_name != DATA_PATH + parsed["username"]:
+        if settings.LOCK_ONLY_IN_HOME:
+            if dir_name != settings.DATA_PATH + parsed["username"]:
                 continue
 
         # deleted user
@@ -111,7 +111,7 @@ def main(filename):
     if filename:
         if not os.path.exists(filename):
             logger.error("'%s' doesn't exists!" % filename)
-            sys.stderr.writeln("'%s' doesn't exists!\n" % filename)
+            sys.stderr.write("'%s' doesn't exists!\n" % filename)
             sys.exit(1)
 
         logger.info("Processing '%s'" % filename)
@@ -123,7 +123,7 @@ def main(filename):
             print ir
 
 
-#= Main program ===============================================================
+# Main program ================================================================
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description="""ProFTPD log monitor. This script reacts to preprogrammed
@@ -134,7 +134,7 @@ if __name__ == '__main__':
         type=str,
         default=None,
         help="""Path to the log file. Usually '%s'. If not set, stdin is used to
-                read the log file.""" % LOG_FILE
+                read the log file.""" % settings.LOG_FILE
     )
     parser.add_argument(
         "-v",
