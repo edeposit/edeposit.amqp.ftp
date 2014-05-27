@@ -485,6 +485,7 @@ def process_import_request(username, path, timestamp, logger_handler):
             imp_path = path + "/" + settings.USER_IMPORT_LOG
             with open(imp_path, "w") as f:
                 if error_protocol:
+                    f.write("Status: Error\n\n")
                     f.write("Error: Import only partially successful.\n")
                     f.write(
                         "See '%s' for details.\n" % settings.USER_ERROR_LOG
@@ -493,6 +494,7 @@ def process_import_request(username, path, timestamp, logger_handler):
                     f.write("\n".join(error_protocol))
                     f.write("\n\n--- Successfully imported files ---\n")
                 else:
+                    f.write("Status: Ok\n\n")
                     f.write("--- Sucess ---\n")
                 f.write("\n".join(import_log))
 
