@@ -3,13 +3,13 @@
 #
 # Interpreter version: python 2.7
 #
-#= Imports ====================================================================
+# Imports =====================================================================
 import pytest
 
 import edeposit.amqp.ftp.decoders as decoders
 
 
-#= Variables ==================================================================
+# Variables ===================================================================
 JSON_TEST_DATA = """
 [
     "ISBN knihy", "80-86056-31-7",
@@ -24,7 +24,7 @@ JSON_TEST_DATA = """
 """
 
 
-#= Tests ======================================================================
+# Tests =======================================================================
 def test_parse_meta():
     with pytest.raises(decoders.MetaParsingException):
         decoders.parse_meta("asd", JSON_TEST_DATA)
@@ -37,5 +37,5 @@ def test_parse_meta():
     assert r.ISBN == "80-86056-31-7", "Badly resolved ISBN."
     assert r.mistoVydani == "Praha"
 
-    # with pytest.raises(decoders.MetaParsingException):  # TODO: fixnout
-    #     decoders.parse_meta("asd.csv", JSON_TEST_DATA)
+    with pytest.raises(decoders.MetaParsingException):
+        decoders.parse_meta("asd.csv", JSON_TEST_DATA)
