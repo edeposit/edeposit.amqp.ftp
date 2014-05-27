@@ -500,5 +500,7 @@ def process_import_request(username, path, timestamp, logger_handler):
 
     return ImportRequest(
         username=username,
-        requests=items
+        requests=items,
+        import_log=import_log,
+        error_log=error_protocol
     )

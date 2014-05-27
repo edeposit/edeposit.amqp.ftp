@@ -42,17 +42,17 @@ class Userlist(namedtuple("Userlist", ["users"])):
     pass
 
 
-class SendEmail(namedtuple("SendEmail", ["username", "subject", "text"])):
-    pass
-
-
 class UserSettings(namedtuple("UserSettings",
                               ["username"] + settings._ALLOWED_MERGES)):
     pass
 
 
-class ImportRequest(namedtuple("ImportRequest", ["username", "requests"])):
-    pass  # TODO: protocol
+class ImportRequest(namedtuple("ImportRequest",
+                               ["username",
+                                "requests",
+                                "import_log",
+                                "error_log"])):
+    pass
 
 
 # File structures =============================================================

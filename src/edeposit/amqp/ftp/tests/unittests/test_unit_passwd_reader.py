@@ -70,18 +70,17 @@ config_data = {
     "ISBN_PAIRING": True,
     "CREATE_IMPORT_LOG": False,
     "LEAVE_BAD_FILES": True,
-    "SEND_EMAIL": False,
 }
 
 
 def test_decode_config():
-    data = passwd_reader._decode_config("tftftf")
+    data = passwd_reader._decode_config("tftft")
 
     assert data == config_data
 
 
 def test_encode_config():
-    assert passwd_reader._encode_config(config_data) == "tftftf"
+    assert passwd_reader._encode_config(config_data) == "tftft"
 
 
 def test_read_write_user_config():
@@ -90,7 +89,7 @@ def test_read_write_user_config():
     passwd_reader.save_user_config("xex", config_data, RAND_FN)
 
     assert passwd_reader.read_user_config("xex", RAND_FN) == config_data
-    assert passwd_reader.load_users(RAND_FN)["xex"]["full_name"] == "tftftf"
+    assert passwd_reader.load_users(RAND_FN)["xex"]["full_name"] == "tftft"
 
 
 def teardown_module():

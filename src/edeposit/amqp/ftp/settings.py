@@ -93,10 +93,6 @@ CREATE_IMPORT_LOG = True
 LEAVE_BAD_FILES = True
 
 
-#: True - email with error/import log will be sent
-SEND_EMAIL = False
-
-
 # Other config ================================================================
 #: I am using GID 2000 for all our users - this GID shouldn't be used by other
 #: than FTP users!
@@ -113,7 +109,6 @@ _ALLOWED_MERGES = [
     "ISBN_PAIRING",
     "CREATE_IMPORT_LOG",
     "LEAVE_BAD_FILES",
-    "SEND_EMAIL",
 ]
 
 
