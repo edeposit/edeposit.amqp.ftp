@@ -3,7 +3,9 @@
 #
 # Interpreter version: python 2.7
 #
-#= Imports ====================================================================
+# Imports =====================================================================
+import unicodedata
+
 try:
     from aleph.isbn import is_valid_isbn
     from aleph.datastructures.epublication import EPublication
@@ -14,7 +16,7 @@ except ImportError:
 from meta_exceptions import MetaParsingException
 
 
-#= Variables ==================================================================
+# Variables ===================================================================
 ALLOWED_TYPES = [
     str,
     unicode,
@@ -29,7 +31,7 @@ ITERABLE_TYPES = [
 ]
 
 
-#= Functions & objects ========================================================
+# Functions & objects =========================================================
 class Field:
     def __init__(self, keyword, descr, epub=None):
         self.keyword = keyword
@@ -38,14 +40,39 @@ class Field:
         self.epub = epub if epub is not None else self.keyword
 
     def check(self, key, value):
-        if self.keyword in key.lower().strip().split():  # TODO: remove unicode?
+        key = key.lower().strip()
+
+        # try unicode conversion
+        try:
+            key = key.decode("utf-8")
+        except UnicodeEncodeError:
+            pass
+
+        key = self.remove_accents(key)
+
+        if self.keyword in key.split():
             self.value = value
             return True
 
         return False
 
     def is_valid(self):
+        """
+        Return True if :attr:`self.value` is set.
+
+        Note:
+            Value is set by calling :method:`check` with proper `key`.
+        """
         return self.value is not None
+
+    def remove_accents(self, input_str):
+        """
+        Convert unicode string to ASCII.
+
+        Credit: http://stackoverflow.com/a/517974
+        """
+        nkfd_form = unicodedata.normalize('NFKD', input_str)
+        return u"".join([c for c in nkfd_form if not unicodedata.combining(c)])
 
 
 class FieldParser:
@@ -166,7 +193,7 @@ def check_structure(data):
             raise
         except:
             raise MetaParsingException(
-                "Metadata format has invalid strucure (dictionary is expected)."
+                "Metadata format has invalid strucure (dict is expected)."
             )
 
     for key, val in data.iteritems():

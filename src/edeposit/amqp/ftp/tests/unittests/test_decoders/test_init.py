@@ -14,8 +14,8 @@ JSON_TEST_DATA = """
 [
     "ISBN knihy", "80-86056-31-7",
     "Vazba knihy", "brož.",
-    "Nazev knihy", "ZEN",
-    "Misto vydani", "Praha",
+    "Název knihy", "ZEN",
+    "Místo vydáni", "Praha",
     "Nakladatel", "Garda",
     "Datum vydani", "09/2012",
     "Poradi vydani", "1",
@@ -35,6 +35,7 @@ def test_parse_meta():
 
     assert r.__class__.__name__ == "EPublication", "Bad type of structure."
     assert r.ISBN == "80-86056-31-7", "Badly resolved ISBN."
+    assert r.mistoVydani == "Praha"
 
     # with pytest.raises(decoders.MetaParsingException):  # TODO: fixnout
     #     decoders.parse_meta("asd.csv", JSON_TEST_DATA)
