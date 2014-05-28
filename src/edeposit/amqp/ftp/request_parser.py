@@ -3,6 +3,18 @@
 #
 # Interpreter version: python 2.7
 #
+"""
+This submodule provides ability to process and parse import requests.
+
+Most important function in this matter is the :func:`process_import_request`,
+which is called from from :func:`ftp.monitor.process_log`. When it is called,
+it scans the user's home directory, detects new files, pairs them together into
+proper objects (see :mod:`ftp.structures`, speficifally :class:`.MetadataFile`,
+:class:`.EbookFile` and :class:`.DataPair`).
+
+API
+---
+"""
 # Imports =====================================================================
 import os
 import shutil
@@ -20,8 +32,7 @@ import passwd_reader
 import settings
 from settings import conf_merger
 from structures import ImportRequest, MetadataFile, EbookFile, DataPair
-from api import create_lock_file
-from passwd_reader import set_permissions
+from api import create_lock_file, recursive_chmod
 
 
 # Variables ===================================================================
@@ -29,29 +40,6 @@ logger = None
 
 
 # Functions & objects =========================================================
-def recursive_chmod(path, mode=0755):
-    """
-    Recursively change ``mode`` for given ``path``. Same as 'chmod -R `mode`'.
-
-    Args:
-        path (str): Path of the directory/file.
-        mode (octal int, default 0755): New mode of the file. Don't forget to
-                                        add ``0`` at the beginning of the
-                                        numbers, or Unspeakable HoRrOrS will be
-                                        awaken from their unholy sleep outside
-                                        of the reality and they WILL eat your
-                                        soul (and your files).
-    """
-    set_permissions(path, mode=mode)
-    if os.path.isfile(path):
-        return
-
-    # recursively change mode of all subdirectories
-    for root, dirs, files in os.walk(path):
-        for fn in files + dirs:
-            set_permissions(os.path.join(root, fn), mode=mode)
-
-
 def _filter_files(paths):
     """
     Filter files from the list of `paths`. Directories, symlinks and other crap
@@ -401,6 +389,23 @@ def _process_items(items, user_conf, error_protocol):
 
 
 def process_import_request(username, path, timestamp, logger_handler):
+    """
+    React to import request. Look into user's directory and react to files
+    user uploaded there.
+
+    Behavior of this function can be set by setting variables in
+    :mod:`ftp.settings`.
+
+    Args:
+        username (str): Name of the user who triggered the import request.
+        path (str): Path to the file, which triggered import request.
+        timestamp (float): Timestamp of the event.
+        logger_handler (object): Python logger. See :py:mod:`logging` for
+                                 details.
+
+    Returns:
+        ::class:`.ImportRequest`.
+    """
     items = []
     error_protocol = []
 
