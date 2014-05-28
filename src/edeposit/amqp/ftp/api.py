@@ -52,6 +52,27 @@ def reload_configuration():
     sh.killall("-HUP", "proftpd", _ok_code=[0, 1])
 
 
+def recursive_chmod(path, mode=0755):
+    """
+    Recursively change ``mode`` for given ``path``. Same as ``chmod -R mode``.
+
+    Args:
+        path (str): Path of the directory/file.
+        mode (octal int, default 0755): New mode of the file. Don't forget to
+             add ``0`` at the beginning of the numbers, or Unspeakable HoRrOrS
+             will be awaken from their unholy sleep outside of the reality and
+             they WILL eat your soul (and your files).
+    """
+    passwd_reader.set_permissions(path, mode=mode)
+    if os.path.isfile(path):
+        return
+
+    # recursively change mode of all subdirectories
+    for root, dirs, files in os.walk(path):
+        for fn in files + dirs:
+            passwd_reader.set_permissions(os.path.join(root, fn), mode=mode)
+
+
 def _is_valid_username(username):
     """
     Check if username consist from characters "a-zA-Z0-9._-".
