@@ -1,12 +1,34 @@
 edeposit.amqp.ftp
 =================
 
-This module provides wrappers over ProFTPD_ for edeposit_ project. It allows
-producers automatic and/or batch uploads of both files and metadata.
+This module provides wrappers over ProFTPD_ FTP server for edeposit_ project.
+
+It allows producers automatic and/or batch uploads of both files and metadata.
+Metadata are recognized and parsed by this package and in case of error, user
+is notified by creating special file with error log.
 
 .. _ProFTPD: http://www.proftpd.org/
 .. _edeposit: http://edeposit.nkp.cz/
 
+
+Installation
+------------
+This module is hosted at PIP, so you can install it very easily with following
+command::
+
+    sudo pip install edeposit.amqp.ftp
+
+This will install the module and all necessary requirements with one exception
+- the ProFTPD server itself. That can be installed manually or using package
+manager from your distribution.
+
+Ubuntu/Debian::
+
+    sudo apt-get install proftpd-basic proftpd-mod-vroot
+
+OpenSuse::
+
+    sudo zypper install proftpd
 
 Content
 -------
@@ -26,7 +48,7 @@ Standalone scripts
 API
 +++
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
     /api/ftp.request_parser
     /api/ftp.api
@@ -36,8 +58,8 @@ API
     /api/ftp.decoders
 
 
-Source codes
-------------
+Source code
+-----------
 The project is opensource (GPL) and source codes can be found at GitHub:
 
 - https://github.com/edeposit/edeposit.amqp.ftp
@@ -45,7 +67,7 @@ The project is opensource (GPL) and source codes can be found at GitHub:
 Testing
 -------
 Almost every feature of the project is tested in unit/integration tests. You
-can run this tests using provided script ``run_tests.sh``, which can be found
+can run this tests using provided ``run_tests.sh`` script, which can be found
 in the root of the project.
 
 Requirements
