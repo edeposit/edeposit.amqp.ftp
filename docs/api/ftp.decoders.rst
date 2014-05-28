@@ -1,13 +1,6 @@
 ftp.decoders package
 ====================
 
-Subpackages
------------
-
-.. toctree::
-
-    ftp.decoders.aleph
-
 Submodules
 ----------
 
