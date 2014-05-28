@@ -1,5 +1,5 @@
-ftp.request_parser module
-=========================
+Request parser
+==============
 
 .. automodule:: ftp.request_parser
     :members:
