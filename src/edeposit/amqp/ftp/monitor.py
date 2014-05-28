@@ -3,6 +3,11 @@
 #
 # Interpreter version: python 2.7
 #
+"""
+ProFTPD monitoring script.
+
+This script is used to monitor ProFTPD log and to react at certain events.
+"""
 # Imports =====================================================================
 import os
 import sys
