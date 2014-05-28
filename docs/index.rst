@@ -13,7 +13,7 @@ is notified by creating special file with error log.
 
 Installation
 ------------
-This module is hosted at PIP, so you can install it very easily with following
+This module is hosted at PIP, so you can install it easily with following
 command::
 
     sudo pip install edeposit.amqp.ftp
@@ -29,6 +29,15 @@ Ubuntu/Debian::
 OpenSuse::
 
     sudo zypper install proftpd
+
+Initialization
+++++++++++++++
+After installation of the ``ProFTPD`` and ``edeposit.amqp.ftp``, run the
+:mod:`init script <ftp.initializer>`, which will configure ProFTPD and create
+all necessary files and directories.
+
+You may also want to check :mod:`.settings` module, to change some of the paths
+using JSON configuration files.
 
 Content
 -------
