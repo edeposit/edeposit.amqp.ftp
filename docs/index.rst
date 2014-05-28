@@ -72,6 +72,31 @@ this) and also **root permissions**. Integration tests are trying all usual
 (and some unusual) use-cases, permissions to read/write into ProFTPD 
 configuration files and so on. Thats why the root access is required.
 
+Example of the success output from test script::
+
+    $ ./run_tests.sh -a
+    [sudo] password for bystrousak: 
+    ============================= test session starts ==============================
+    platform linux2 -- Python 2.7.5 -- py-1.4.20 -- pytest-2.5.2
+    collected 42 items 
+
+    src/edeposit/amqp/ftp/tests/integration/test_api.py .....
+    src/edeposit/amqp/ftp/tests/integration/test_monitor.py .......
+    src/edeposit/amqp/ftp/tests/unittests/test_settings.py .....
+    src/edeposit/amqp/ftp/tests/unittests/test_structures.py ...
+    src/edeposit/amqp/ftp/tests/unittests/test_unit_monitor.py .
+    src/edeposit/amqp/ftp/tests/unittests/test_unit_passwd_reader.py .....
+    src/edeposit/amqp/ftp/tests/unittests/test_unit_request_parser.py .....
+    src/edeposit/amqp/ftp/tests/unittests/test_decoders/test_init.py .
+    src/edeposit/amqp/ftp/tests/unittests/test_decoders/test_meta_exceptions.py .
+    src/edeposit/amqp/ftp/tests/unittests/test_decoders/test_parser.py .....
+    src/edeposit/amqp/ftp/tests/unittests/test_decoders/test_parser_csv.py .
+    src/edeposit/amqp/ftp/tests/unittests/test_decoders/test_parser_json.py .
+    src/edeposit/amqp/ftp/tests/unittests/test_decoders/test_parser_xml.py .
+    src/edeposit/amqp/ftp/tests/unittests/test_decoders/test_parser_yaml.py .
+
+    ========================== 42 passed in 13.96 seconds ==========================
+
 
 Indices and tables
 ==================
