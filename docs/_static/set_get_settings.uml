@@ -1,0 +1,32 @@
+package "structures.py" as UMR {
+    class SetUserSettings {
+    	username: str
+    	SAME_NAME_DIR_PAIRING: bool
+    	SAME_DIR_PAIRING: bool
+    	ISBN_PAIRING: bool
+    	CREATE_IMPORT_LOG: bool
+    	LEAVE_BAD_FILES: bool
+    }
+    class GetUserSettings {
+    	username: str
+    }
+}
+
+
+class reactToAMQPMessage << (F,RED) >>{
+    AMQP interface from edeposit.amqp
+    to edeposit.amqp.ftp.
+}
+
+class UserSettings {
+	username: str
+	SAME_NAME_DIR_PAIRING: bool
+	SAME_DIR_PAIRING: bool
+	ISBN_PAIRING: bool
+	CREATE_IMPORT_LOG: bool
+	LEAVE_BAD_FILES: bool
+}
+
+SetUserSettings --> reactToAMQPMessage
+GetUserSettings --> reactToAMQPMessage
+reactToAMQPMessage --> UserSettings

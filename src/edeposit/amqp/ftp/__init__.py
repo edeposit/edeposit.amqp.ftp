@@ -37,6 +37,8 @@ at this moment returns just simple ``True``. This may be changed later.
 :class:`.SetUserSettings` and :class:`.GetUserSettings` both returns
 :class:`.UserSettings` structure.
 
+.. image:: /_static/set_get_settings.png
+
 API
 ---
 """
