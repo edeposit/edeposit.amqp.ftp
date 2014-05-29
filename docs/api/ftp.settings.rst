@@ -1,7 +1,8 @@
-ftp.settings module
-===================
+Settings and configuration
+==========================
 
 .. automodule:: ftp.settings
     :members:
+    :private-members:
+    :special-members:
     :undoc-members:
-    :show-inheritance:

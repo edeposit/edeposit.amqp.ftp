@@ -1,10 +1,14 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Module is containing all necessary global variables for package.
+Module is containing all necessary global variables for the package.
 
-Module also has ability to read user-defined data from two paths:
-$HOME/:attr:`_SETTINGS_PATH` and /etc/:attr:`_SETTINGS_PATH`.
+Module also has the ability to read user-defined data from two paths:
+
+- ``$HOME/_SETTINGS_PATH``
+- ``/etc/_SETTINGS_PATH``
+
+See :attr:`._SETTINGS_PATH` for details.
 
 Note:
     If the first path is found, other is ignored.
@@ -28,40 +32,40 @@ import os.path
 #: Module's path.
 BASE_PATH = (os.path.dirname(__file__))
 
-#: proftpd configuration directory
+#: Proftpd configuration directory.
 CONF_PATH = "/etc/proftpd/"
 
-#: proftpd log directory
+#: Proftpd log directory.
 LOG_PATH = "/var/log/proftpd/"
 
-#: path to directory, where the user directories will be created
+#: Path to directory, where the user directories will be created.
 DATA_PATH = "/home/ftp/"
 
-#: server's address - used only in unit/integration testing
+#: Server's address - used only in unit/integration testing.
 SERVER_ADDRESS = "localhost"
 
 
 # Files =======================================================================
-#: proftpd configuration file (in CONF_PATH directory)
+#: Proftpd configuration file (in CONF_PATH directory).
 CONF_FILE = CONF_PATH + "proftpd.conf"
 
-#: file where the login informations will be stored (CONF_PATH is used as
-#: dirname)
+#: File where the login informations will be stored (CONF_PATH is used as
+#: dirname).
 LOGIN_FILE = CONF_PATH + "ftpd.passwd"
 
-#: file where the extended logs are stored (LOG_PATH is used as dirname)
+#: File where the extended logs are stored (LOG_PATH is used as dirname).
 LOG_FILE = LOG_PATH + "extended.log"
 
-#: filename for the locking mechanism
+#: Filename for the locking mechanism.
 LOCK_FILENAME = "delete_me_to_import_files.txt"
 
-#: filename, where the error protocol is stored
+#: Filename, where the error protocol is stored.
 USER_ERROR_LOG = "error.log.txt"
 
-#: filename, where the import protocol for the user is stored
+#: Filename, where the import protocol for the user is stored.
 USER_IMPORT_LOG = "import.log.txt"
 
-#: text, which will be writen to the PROTFPD_LOCK_FILENAME
+#: Text, which will be writen to the PROTFPD_LOCK_FILENAME.
 LOCK_FILE_CONTENT = """Delete this file to start batch import of all \
 files, you've uploaded to the server.
 

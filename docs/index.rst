@@ -62,9 +62,9 @@ API
     /api/ftp.request_parser
     /api/ftp.api
     /api/ftp.passwd_reader
-    /api/ftp.settings
     /api/ftp.structures
     /api/ftp.decoders
+    /api/ftp.settings
 
 
 Source code
