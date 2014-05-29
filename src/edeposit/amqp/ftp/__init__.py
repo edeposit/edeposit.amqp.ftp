@@ -3,6 +3,43 @@
 #
 # Interpreter version: python 2.7
 #
+"""
+edeposit.amqp.ftp
+-----------------
+In this module, :func:`.reactToAMQPMessage` is used only for **receiving**
+commands from the other side. Events caused by FTP users are handled by
+:mod:`monitor.py <.monitor>`.
+
+Commands can create/change/remove users and so on. This is done by sending one
+of the following structures defined in :mod:`structures.py <.structures>`:
+
+
+- :class:`.AddUser`
+- :class:`.RemoveUser`
+- :class:`.ChangePassword`
+
+- :class:`.ListRegisteredUsers`
+
+- :class:`.SetUserSettings`
+- :class:`.GetUserSettings`
+
+Responses
++++++++++
+:class:`.AddUser`, :class:`.RemoveUser` and :class:`.ChangePassword` requests
+at this moment returns just simple ``True``. This may be changed later.
+
+.. image:: /_static/user_management.png
+
+:class:`.ListRegisteredUsers` returns :class:`.Userlist` class.
+
+.. image:: /_static/list_registered_users.png
+
+:class:`.SetUserSettings` and :class:`.GetUserSettings` both returns
+:class:`.UserSettings` structure.
+
+API
+---
+"""
 # Imports =====================================================================
 # from settings import *
 import api

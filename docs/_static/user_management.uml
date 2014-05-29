@@ -1,0 +1,28 @@
+package "structures.py" as UMR {
+    class AddUser {
+        username: str
+        password: str
+    }
+    class ChangePassword {
+        username: str
+        new_password: str
+    }
+    class RemoveUser {
+        username: str
+    } 
+}
+
+
+class reactToAMQPMessage << (F,RED) >>{
+    AMQP interface from edeposit.amqp
+    to edeposit.amqp.ftp.
+}
+
+class True << (V,LightBlue) >> {
+    Python bool value.
+}
+
+AddUser --> reactToAMQPMessage
+RemoveUser --> reactToAMQPMessage
+ChangePassword --> reactToAMQPMessage
+reactToAMQPMessage --> True

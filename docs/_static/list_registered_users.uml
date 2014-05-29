@@ -1,0 +1,15 @@
+class ListRegisteredUsers {
+}
+
+
+class reactToAMQPMessage << (F,RED) >>{
+    AMQP interface from edeposit.amqp
+    to edeposit.amqp.ftp.
+}
+
+class Userlist {
+    users: list
+}
+
+ListRegisteredUsers -r-> reactToAMQPMessage
+reactToAMQPMessage -r-> Userlist
