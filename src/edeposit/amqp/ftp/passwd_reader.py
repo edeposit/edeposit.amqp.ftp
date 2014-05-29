@@ -3,6 +3,12 @@
 #
 # Interpreter version: python 2.7
 #
+"""
+API for reading/writing of the passwd file used by ProFTPD (and also unix).
+
+API
+---
+"""
 # Imports =====================================================================
 import os
 import os.path
@@ -14,15 +20,27 @@ import settings
 # Functions & objects =========================================================
 def load_users(path=settings.LOGIN_FILE):
     """
-    Load users defined passwd-like format file.
+    Read passwd file and return dict with users and all their settings.
 
     Args:
         path (str, default settings.LOGIN_FILE): path of the file,
-            which will be loaded (default :attr:`.LOGIN_FILE`).
+            which will be loaded (default :attr:`ftp.settings.LOGIN_FILE`).
 
     Returns:
-        (dict): "username": {"pass_hash": "..", "uid": "..", "gid": "..", \
-                "full_name": "..", "home": "..", "shell": ".."}
+        (dict): username: {pass_hash, uid, gid, full_name, home, shell}
+
+    Example of returned data::
+
+        {
+            "xex": {
+                "pass_hash": "$asd$aiosjdaiosjdásghwasdjo",
+                "uid": "2000",
+                "gid": "2000",
+                "full_name": "ftftf",
+                "home": "/home/ftp/xex",
+                "shell": "/bin/false"
+            }
+        }
     """
     if not os.path.exists(path):
         return {}
@@ -41,7 +59,7 @@ def load_users(path=settings.LOGIN_FILE):
             cnt
         )
 
-        users[line[0]] = {  # TODO: use namedtuple?
+        users[line[0]] = {
             "pass_hash": line[1],
             "uid": line[2],
             "gid": line[3],
@@ -57,13 +75,14 @@ def load_users(path=settings.LOGIN_FILE):
 
 def save_users(users, path=settings.LOGIN_FILE):
     """
-    Save dictionary with user data to passwd-like file.
+    Save dictionary with user data to passwd file (default
+    :attr:`ftp.settings.LOGIN_FILE`).
 
     Args:
         users (dict): dictionary with user data. For details look at dict
                       returned from :func:`load_users`.
         path (str, default settings.LOGIN_FILE): path of the file, where the
-             data will be stored (default :attr:`.LOGIN_FILE`).
+             data will be stored (default :attr:`ftp.settings.LOGIN_FILE`).
     """
     with open(path, "w") as fh:
         for username, data in users.items():
@@ -136,8 +155,8 @@ def _encode_config(conf_dict):
 
 def read_user_config(username, path=settings.LOGIN_FILE):
     """
-    Read user's configuration from otherwise unused field 'full_name' in passwd
-    file.
+    Read user's configuration from otherwise unused field ``full_name`` in
+    passwd file.
 
     Configuration is stored in string as list of t/f characters.
     """
@@ -146,7 +165,7 @@ def read_user_config(username, path=settings.LOGIN_FILE):
 
 def save_user_config(username, conf_dict, path=settings.LOGIN_FILE):
     """
-    Save user's configuration to otherwise unused field 'full_name' in passwd
+    Save user's configuration to otherwise unused field ``full_name`` in passwd
     file.
     """
     users = load_users(path=path)

@@ -1,5 +1,5 @@
-ftp.passwd_reader module
-========================
+Passwd reader
+=============
 
 .. automodule:: ftp.passwd_reader
     :members:
