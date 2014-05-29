@@ -5,7 +5,8 @@
 #
 """
 This script opens all template_* files from _static/ directory, adds values
-from structures into them and saves them as _static/fn.uml and f_static/n.png
+from structures into "class" declarations and saves them as ``_static/fn.uml``
+and ``_static/nn.png``
 
 It is used as documentation generator, because structures can be changed and
 I have better things to do than edit the docs.
