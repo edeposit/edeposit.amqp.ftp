@@ -1,0 +1,19 @@
+package "structures.py" as UMR {
+    class SetUserSettings {
+    }
+    class GetUserSettings {
+    }
+}
+
+
+class reactToAMQPMessage << (F,RED) >>{
+    AMQP interface from edeposit.amqp
+    to edeposit.amqp.ftp.
+}
+
+class UserSettings {
+}
+
+SetUserSettings --> reactToAMQPMessage
+GetUserSettings --> reactToAMQPMessage
+reactToAMQPMessage --> UserSettings
