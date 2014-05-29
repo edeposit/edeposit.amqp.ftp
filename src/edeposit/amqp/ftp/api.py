@@ -5,25 +5,27 @@
 #
 # Imports =====================================================================
 """
-ProFTPD manager used to add/remove users to the FTP server.
+ProFTPD_ wrapped used to manage users of the FTP server.
 
-This module manages the ``ftpd.passwd`` file created by ftpasswd_ script from
-profptd_ package.
+This module controls the ``ftpd.passwd`` (:attr:`LOGIN_FILE
+<ftp.settings.LOGIN_FILE>`), creates/removes users directory and so on.
 
 .. _ftpasswd: http://www.proftpd.org/docs/contrib/ftpasswd.html
-.. _proftpd: http://www.proftpd.org
+.. _ProFTPD: http://www.proftpd.org
 
 Warning:
     This API supposes, that it has permissions to read/write to `ProFTPD`
     configuration directory and to `root` directory for users.
 
-    You don't have to set the permissions and everything by hand, there is
-    :mod:`proftpd_init` script, which can do it for you automatically.
+Note:
+    You don't have to set the permissions and everything manually, there is
+    script called :mod:`.initializer`, which can do it for you automatically.
 """
 import re
 import os
 import os.path
 import shutil
+from functools import wraps
 
 import sh
 
@@ -36,6 +38,7 @@ def require_root(fn):
     """
     Decorator to make sure, that user is root.
     """
+    @wraps(fn)
     def xex(*args, **kwargs):
         assert os.geteuid() == 0, \
             "You have to be root to run function '%s'." % fn.__name__
@@ -58,10 +61,12 @@ def recursive_chmod(path, mode=0755):
 
     Args:
         path (str): Path of the directory/file.
-        mode (octal int, default 0755): New mode of the file. Don't forget to
-             add ``0`` at the beginning of the numbers, or Unspeakable HoRrOrS
-             will be awaken from their unholy sleep outside of the reality and
-             they WILL eat your soul (and your files).
+        mode (octal int, default 0755): New mode of the file.
+
+    Warning:
+        Don't forget to add ``0`` at the beginning of the numbers of `mode`, or
+        `Unspeakable hOrRoRs` will be awaken from their unholy sleep outside of
+        the reality and they WILL eat your soul (and your files).
     """
     passwd_reader.set_permissions(path, mode=mode)
     if os.path.isfile(path):
@@ -78,14 +83,19 @@ def _is_valid_username(username):
     Check if username consist from characters "a-zA-Z0-9._-".
 
     Args:
-        username (str): username.
+        username (str): User's name.
     """
     return re.search(r"^[a-zA-Z0-9\.\_\-]*$", username)
 
 
 def create_lock_file(path):
     """
-    Create lock file (:attr:`settings.LOCK_FILE_CONTENT`).
+    Create lock file filled with :attr:`LOCK_FILE_CONTENT
+    <ftp.settings.LOCK_FILE_CONTENT>`.
+
+    Args:
+        path (str): Path to the lock file. Made from users home directory and
+                    :attr:`LOCK_FILENAME <ftp.settings.LOCK_FILENAME>`.
     """
     with open(path, "w") as f:
         f.write(settings.LOCK_FILE_CONTENT)
@@ -96,14 +106,12 @@ def create_lock_file(path):
 @require_root
 def add_user(username, password):
     """
-    Add new user.
-
     Adds record to passwd-like file for ProFTPD, creates home directory and
     sets permissions for important files.
 
     Args:
-        username (str): ..
-        password (str): ..
+        username (str): User's name.
+        password (str): User's password.
     """
     assert _is_valid_username(username), \
             "Invalid format of username '%s'!" % username
@@ -147,7 +155,7 @@ def remove_user(username):
     Remove user, his home directory and so on..
 
     Args:
-        username (str): ..
+        username (str): User's name.
     """
     users = passwd_reader.load_users()
 
@@ -171,8 +179,8 @@ def change_password(username, new_password):
     Change password for given `username`.
 
     Args:
-        username (str): ..
-        new_password (str): ..
+        username (str): User's name.
+        new_password (str): User's new password.
     """
     assert username in passwd_reader.load_users(),\
            "Username '%s' not found!" % username
@@ -192,6 +200,9 @@ def change_password(username, new_password):
 @require_root
 def list_users():
     """
+    List all registered users, which are stored in
+    :attr:`LOGIN_FILE <ftp.settings.LOGIN_FILE>`.
+
     Returns:
         list: of str usernames.
     """

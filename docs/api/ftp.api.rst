@@ -1,5 +1,5 @@
-ftp.api module
-==============
+ProFTPD API
+===========
 
 .. automodule:: ftp.api
     :members:
