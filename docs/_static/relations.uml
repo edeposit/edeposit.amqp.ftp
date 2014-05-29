@@ -1,0 +1,40 @@
+package edeposit.amqp.ftp {
+    class "_​_init__.py" as init {
+    }
+
+    package decoders/ {
+        class "_​_init__.py" as dec_init {
+        }
+        class "parser.py" as parser {
+        }
+        
+        package "" <<Rect>> {
+        class "parser_json.py" as parser_json {
+        }
+        class "parser_csv.py" as parser_csv {
+        }
+        class "parser_yaml.py" as parser_yaml {
+        }
+        class "parser_xml.py" as parser_xml {
+        }
+        }
+        
+        class "meta_exceptions.py" as meta_exceptions {
+        }
+
+        parser ---> parser_json
+        parser ---> parser_csv
+        parser ---> parser_yaml
+        parser ---> parser_xml
+
+        meta_exceptions --> parser_json
+        meta_exceptions --> parser_csv
+        meta_exceptions --> parser_yaml
+        meta_exceptions --> parser_xml
+
+        parser_json -d-> dec_init
+        parser_csv --> dec_init
+        parser_yaml --> dec_init
+        parser_xml --> dec_init
+    }
+}
