@@ -9,6 +9,8 @@ package edeposit.amqp.ftp {
             and exceptions.
         }
         class "parser.py" as parser <<M, Green>>{
+            Validation of given
+            data and so on.
         }
         class "parser_json.py" as parser_json <<M, Green>>{
         }
