@@ -1,40 +1,98 @@
+Title Dependencies of submodules
+
 package edeposit.amqp.ftp {
-    class "_​_init__.py" as init {
-    }
-
     package decoders/ {
-        class "_​_init__.py" as dec_init {
+        class "_​_init__.py" as dec_init <<M, Green>>{
+            Decoders package wrapper.
         }
-        class "parser.py" as parser {
+        class "parser.py" as parser <<M, Green>>{
         }
-        
-        package "" <<Rect>> {
-        class "parser_json.py" as parser_json {
+        class "parser_json.py" as parser_json <<M, Green>>{
         }
-        class "parser_csv.py" as parser_csv {
+        class "parser_csv.py" as parser_csv <<M, Green>>{
         }
-        class "parser_yaml.py" as parser_yaml {
+        class "parser_yaml.py" as parser_yaml <<M, Green>>{
         }
-        class "parser_xml.py" as parser_xml {
-        }
+        class "parser_xml.py" as parser_xml <<M, Green>>{
         }
         
-        class "meta_exceptions.py" as meta_exceptions {
+        class "meta_exceptions.py" as meta_exceptions <<M, Green>>{
         }
 
-        parser ---> parser_json
-        parser ---> parser_csv
-        parser ---> parser_yaml
-        parser ---> parser_xml
+        parser -u-> parser_json
+        parser -u-> parser_csv
+        parser -u-> parser_yaml
+        parser -u-> parser_xml
+        
+        meta_exceptions -u-> parser
 
-        meta_exceptions --> parser_json
-        meta_exceptions --> parser_csv
-        meta_exceptions --> parser_yaml
-        meta_exceptions --> parser_xml
+        meta_exceptions -u--> parser_json
+        meta_exceptions -u--> parser_csv
+        meta_exceptions -u--> parser_yaml
+        meta_exceptions -u--> parser_xml
 
-        parser_json -d-> dec_init
-        parser_csv --> dec_init
-        parser_yaml --> dec_init
-        parser_xml --> dec_init
+        parser_json -u--> dec_init
+        parser_csv -u--> dec_init
+        parser_yaml -u--> dec_init
+        parser_xml -u--> dec_init
+        
+        parser -u--> dec_init
     }
+
+    package Scripts {
+    class "_​_init__.py" as init <<M, Green>>{
+        AMQP interface.
+        
+        reactToAMQPMessage()
+    }
+    class "monitor.py" as monitor <<M, Green>>{
+        Log watcher - script which
+        monitors given source.
+        Used mainly for testing,
+        also it will be used in
+        edeposit.amqp.
+    }
+    class "initializer.py" as initializer <<M, Green>>{
+        Used to initialize ProFTPD,
+        configuration files, logs,
+        permissons, directories.
+    }
+    }
+    class "api.py" as api <<M, Green>>{
+        Used to Add, Remove
+        or Update users to
+        ProFTPD.
+    }
+    class "request_parser.py" as request <<M, Green>>{
+        Provides API to watch
+        the ProFTPD log.
+    }
+    class "passwd_reader.py" as passwd <<M, Green>>{
+        `passwd` file reader/writer.
+    }
+    class "structures.py" as structures <<M, Green>>{
+        Contains all
+        AMQP structures.
+    }
+    class "settings.py" as settings <<M, Green>>{
+        Provides
+        configuration for
+        whole package.
+        
+        Has dependecies to
+        all packages.
+    }
+    
+    api -r-> init
+    structures -l> init
+    structures --> monitor
+    dec_init -u-> structures
+    
+    passwd ---> init
+    
+    request -u-> monitor
+    
+    passwd -l-> request
+    
+    api -u-> initializer
 }
