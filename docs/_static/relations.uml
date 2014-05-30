@@ -42,24 +42,24 @@ package edeposit.amqp.ftp {
         parser -u--> dec_init
     }
 
-    package Scripts {
-    class "_​_init__.py" as init <<M, Green>>{
-        AMQP interface.
-        
-        reactToAMQPMessage()
-    }
-    class "monitor.py" as monitor <<M, Green>>{
-        Log watcher - script which
-        monitors given source.
-        Used mainly for testing,
-        also it will be used in
-        edeposit.amqp.
-    }
-    class "initializer.py" as initializer <<M, Green>>{
-        Used to initialize ProFTPD,
-        configuration files, logs,
-        permissons, directories.
-    }
+    package "Usable scripts" as scripts <<Frame>> {
+        class "_​_init__.py" as init <<M, Green>>{
+            AMQP interface.
+            
+            reactToAMQPMessage()
+        }
+        class "monitor.py" as monitor <<M, Green>>{
+            Log watcher - script which
+            monitors given source.
+            Used mainly for testing,
+            also it will be used in
+            edeposit.amqp.
+        }
+        class "initializer.py" as initializer <<M, Green>>{
+            Used to initialize ProFTPD,
+            configuration files, logs,
+            permissons, directories.
+        }
     }
     class "api.py" as api <<M, Green>>{
         Used to Add, Remove
