@@ -39,6 +39,7 @@ def _get_class_name(line):
 
     return line.strip().split()[0]
 
+
 def _get_type(var_name):
     if not hasattr(ftp.settings, var_name):
         return type(var_name).__name__
@@ -64,9 +65,9 @@ def _get_png(uml):
     return urllib.urlopen(image).read()
 
 
-def process_uml_file(fn):
+def process_uml_file(filename):
     data = None
-    with open(fn) as f:
+    with open(filename) as f:
         data = f.read()
 
     out = []
@@ -91,25 +92,25 @@ def process_uml_file(fn):
         )
 
     uml = "\n".join(out)
-    nfn = fn.replace("template_", "")
+    new_filename = filename.replace("template_", "")
 
-    with open(nfn, "w") as f:
+    with open(new_filename, "w") as f:
         f.write(uml)
 
-    with open(nfn.rsplit(".", 1)[0] + ".png", "wb") as f:
+    with open(new_filename.rsplit(".", 1)[0] + ".png", "wb") as f:
         f.write(_get_png(uml))
 
-    return nfn
+    return new_filename
 
 
 # Main program ================================================================
 if __name__ == '__main__':
-    for fn in os.listdir(STATIC_DIR):
-        fn = STATIC_DIR + "/" + fn
-        if not os.path.isfile(fn):
+    for filename in os.listdir(STATIC_DIR):
+        filename = STATIC_DIR + "/" + filename
+        if not os.path.isfile(filename):
             continue
 
-        if not os.path.basename(fn).startswith("template_"):
+        if not os.path.basename(filename).startswith("template_"):
             continue
 
-        print fn, "-->", process_uml_file(fn)
+        print filename, "-->", process_uml_file(filename)
