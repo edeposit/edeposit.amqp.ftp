@@ -1,9 +1,12 @@
 Title Dependencies of submodules
 
 package edeposit.amqp.ftp {
-    package decoders/ {
+    package edeposit.amqp.ftp.decoders {
         class "_​_init__.py" as dec_init <<M, Green>>{
             Decoders package wrapper.
+            This provides interface
+            to all submodules, validation
+            and exceptions.
         }
         class "parser.py" as parser <<M, Green>>{
         }
