@@ -41,10 +41,15 @@ using JSON configuration files.
 
 Content
 -------
+.. image:: /_static/relations.png
+    :width: 600px
+
+
 Parts of the module can be divided into two subcategories - scripts and parts of
 the API.
 
 Scripts are meant to be used by users, API is there mainly for programmers.
+
 
 Standalone scripts
 ++++++++++++++++++
