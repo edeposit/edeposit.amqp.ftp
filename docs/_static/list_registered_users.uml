@@ -1,4 +1,6 @@
 class ListRegisteredUsers {
+    .count()
+    .index()
 }
 
 
@@ -8,7 +10,9 @@ class reactToAMQPMessage << (F,RED) >>{
 }
 
 class Userlist {
-	users: str
+    .users
+    .count()
+    .index()
 }
 
 ListRegisteredUsers -r-> reactToAMQPMessage
