@@ -89,7 +89,12 @@ def _get_data(clsn, info_dict, path):
         """Pick properties which belongs to `class_name` in module `mod`."""
         out = []
 
-        cls = getattr(mod, class_name)
+        cls = None
+        try:
+            cls = getattr(mod, class_name)
+        except AttributeError:
+            return []
+
         if not cls:
             return []
 
