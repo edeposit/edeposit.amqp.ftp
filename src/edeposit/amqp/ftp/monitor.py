@@ -4,9 +4,10 @@
 # Interpreter version: python 2.7
 #
 """
-ProFTPD monitoring script.
+This script is used to monitor ProFTPD log and to react at certain events
+(deletion of the :attr:`ftp.settings.LOCK_FILENAME`).
 
-This script is used to monitor ProFTPD log and to react at certain events.
+It is also used at API level in :mod:`edeposit.amqp` (see :func:`process_log`).
 """
 # Imports =====================================================================
 import os
@@ -113,6 +114,10 @@ def process_log(file_iterator):
 
 
 def main(filename):
+    """
+    Open `filename` and start processing it line by line. If `filename` is
+    none, process lines from `stdin`.
+    """
     if filename:
         if not os.path.exists(filename):
             logger.error("'%s' doesn't exists!" % filename)

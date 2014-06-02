@@ -1,5 +1,5 @@
-ftp.monitor module
-==================
+Monitor script
+==============
 
 .. automodule:: ftp.monitor
     :members:
