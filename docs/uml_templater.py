@@ -61,11 +61,16 @@ def _get_class_name(line):
     return line.strip().split()[0]
 
 
-def get_data(clsn, info_dict, path):
+def _get_data(clsn, info_dict, path):
+    """
+    Get data for given element.
+    """
     def filter_private(tree):
+        """Filter private AST elements."""
         return filter(lambda x: not x.name.startswith("_"), tree)
 
     def get_func(tree):
+        """Pick functions from AST `tree`."""
         out = []
         tree = filter(lambda x: isinstance(x, ast.FunctionDef), tree)
 
@@ -76,10 +81,12 @@ def get_data(clsn, info_dict, path):
         return out
 
     def get_classes(tree):
+        """Pick classes from AST `tree`."""
         tree = filter(lambda x: isinstance(x, ast.ClassDef), tree)
         return map(lambda x: "class " + x.name, tree)
 
     def get_properties(class_name, mod):
+        """Pick properties which belongs to `class_name` in module `mod`."""
         out = []
 
         cls = getattr(mod, class_name)
@@ -104,7 +111,6 @@ def get_data(clsn, info_dict, path):
 
         return out
 
-    # print clsn, ":", info_dict
     out = []
 
     fn = path + "/" + info_dict["fn"]
@@ -145,6 +151,7 @@ def process_uml_file(filename, path):
                 "spacer": line.split("class")[0] + "    "
             } 
 
+        # user configuration in form ala $templater:struct:structures
         if class_stack and line.strip().startswith("$templater"):
             parsed = line.strip().split(":")
             class_info[class_stack[-1]]["type"] = parsed[1]
@@ -156,7 +163,7 @@ def process_uml_file(filename, path):
 
             # spacer is in class_info everytime, but rest is not
             if clsn in class_info and len(class_info[clsn].items()) > 1:
-                data = get_data(clsn, class_info[clsn], path)
+                data = _get_data(clsn, class_info[clsn], path)
 
                 # apply spacer
                 data = map(lambda x: class_info[clsn]["spacer"] + x, data)
@@ -166,17 +173,16 @@ def process_uml_file(filename, path):
 
         out.append(line)
 
-
     uml = "\n".join(out)
     new_filename = filename.replace("template_", "")
 
-    print uml
+    # write new uml to new file
+    with open(new_filename, "w") as f:
+        f.write(uml)
 
-    # with open(new_filename, "w") as f:
-    #     f.write(uml)
-
-    # with open(new_filename.rsplit(".", 1)[0] + ".png", "wb") as f:
-    #     f.write(_get_png(uml))
+    # create image
+    with open(new_filename.rsplit(".", 1)[0] + ".png", "wb") as f:
+        f.write(_get_png(uml))
 
     return new_filename
 
@@ -210,5 +216,4 @@ if __name__ == '__main__':
         if not os.path.basename(filename).startswith("template_"):
             continue
 
-        # print filename, "-->", process_uml_file(filename)
-        process_uml_file(filename, args.ipath)
+        print filename, "-->", process_uml_file(filename, args.ipath)
