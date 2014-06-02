@@ -89,12 +89,14 @@ def _get_data(clsn, info_dict, path):
         """Pick properties which belongs to `class_name` in module `mod`."""
         out = []
 
+        # look into module for given class_name
         cls = None
         try:
             cls = getattr(mod, class_name)
         except AttributeError:
             return []
 
+        # well, this is useless, but you never know..
         if not cls:
             return []
 
@@ -118,6 +120,7 @@ def _get_data(clsn, info_dict, path):
 
     out = []
 
+    # convert module path to file path
     fn = path + "/" + info_dict["fn"]
     if not info_dict["fn"].endswith(".py"):
         fn += ".py"
