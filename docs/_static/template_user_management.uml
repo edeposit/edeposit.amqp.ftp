@@ -1,9 +1,12 @@
 package "structures.py" as UMR {
     class AddUser {
+        $templater:struct:structures
     }
     class ChangePassword {
+        $templater:struct:structures
     }
     class RemoveUser {
+        $templater:struct:structures
     } 
 }
 

@@ -1,14 +1,20 @@
 package "structures.py" as UMR {
     class AddUser {
-    	username: str
-    	password: str
+        .password
+        .username
+        .count()
+        .index()
     }
     class ChangePassword {
-    	username: str
-    	new_password: str
+        .new_password
+        .username
+        .count()
+        .index()
     }
     class RemoveUser {
-    	username: str
+        .username
+        .count()
+        .index()
     } 
 }
 
