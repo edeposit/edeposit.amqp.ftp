@@ -1,14 +1,18 @@
 package "structures.py" as UMR {
     class SetUserSettings {
-    	username: str
-    	SAME_NAME_DIR_PAIRING: bool
-    	SAME_DIR_PAIRING: bool
-    	ISBN_PAIRING: bool
-    	CREATE_IMPORT_LOG: bool
-    	LEAVE_BAD_FILES: bool
+        .CREATE_IMPORT_LOG
+        .ISBN_PAIRING
+        .LEAVE_BAD_FILES
+        .SAME_DIR_PAIRING
+        .SAME_NAME_DIR_PAIRING
+        .username
+        .count()
+        .index()
     }
     class GetUserSettings {
-    	username: str
+        .username
+        .count()
+        .index()
     }
 }
 
@@ -19,12 +23,14 @@ class reactToAMQPMessage << (F,RED) >>{
 }
 
 class UserSettings {
-	username: str
-	SAME_NAME_DIR_PAIRING: bool
-	SAME_DIR_PAIRING: bool
-	ISBN_PAIRING: bool
-	CREATE_IMPORT_LOG: bool
-	LEAVE_BAD_FILES: bool
+    .CREATE_IMPORT_LOG
+    .ISBN_PAIRING
+    .LEAVE_BAD_FILES
+    .SAME_DIR_PAIRING
+    .SAME_NAME_DIR_PAIRING
+    .username
+    .count()
+    .index()
 }
 
 SetUserSettings --> reactToAMQPMessage

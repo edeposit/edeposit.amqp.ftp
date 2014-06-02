@@ -1,7 +1,9 @@
 package "structures.py" as UMR {
     class SetUserSettings {
+        $templater:struct:structures
     }
     class GetUserSettings {
+        $templater:struct:structures
     }
 }
 
@@ -12,6 +14,7 @@ class reactToAMQPMessage << (F,RED) >>{
 }
 
 class UserSettings {
+    $templater:struct:structures
 }
 
 SetUserSettings --> reactToAMQPMessage
