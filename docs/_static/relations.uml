@@ -8,29 +8,33 @@ package edeposit.amqp.ftp {
             to all submodules, validation
             and exceptions.
 
-            $templater:module:decoders/__init__
+            parse_meta(filename, data)
         }
         class "parser.py" as parser <<M, Green>>{
             Validation of given
             data and so on.
             ---
-            $templater:module:decoders/parser
+            convert_to_dict(data)
+            check_structure(data)
+            class Field
+            class FieldParser
         }
         class "parser_json.py" as parser_json <<M, Green>>{
-            $templater:module:decoders/parser_json
+            decode(data)
         }
         class "parser_csv.py" as parser_csv <<M, Green>>{
-            $templater:module:decoders/parser_csv
+            remove_quotes(word)
+            decode(data)
         }
         class "parser_yaml.py" as parser_yaml <<M, Green>>{
-            $templater:module:decoders/parser_yaml
+            decode(data)
         }
         class "parser_xml.py" as parser_xml <<M, Green>>{
-            $templater:module:decoders/parser_xml
+            decode(data)
         }
         
         class "meta_exceptions.py" as meta_exceptions <<M, Green>>{
-            $templater:module:decoders/meta_exceptions
+            class MetaParsingException
         }
 
         parser -u-> parser_json
@@ -57,7 +61,7 @@ package edeposit.amqp.ftp {
         class "_​_init__.py" as init <<M, Green>>{
             AMQP interface.
 
-            $templater:module:__init__
+            reactToAMQPMessage(message, UUID)
         }
         class "monitor.py" as monitor <<M, Green>>{
             Log watcher - script which
@@ -66,14 +70,15 @@ package edeposit.amqp.ftp {
             also it will be used in
             edeposit.amqp.
 
-            $templater:module:monitor
+            process_log(file_iterator)
+            main(filename)
         }
         class "initializer.py" as initializer <<M, Green>>{
             Used to initialize ProFTPD,
             configuration files, logs,
             permissons, directories.
 
-            $templater:module:initializer
+            add_or_update(data, item, value)
         }
     }
     class "api.py" as api <<M, Green>>{
@@ -81,24 +86,46 @@ package edeposit.amqp.ftp {
         or Update users to
         ProFTPD.
 
-        $templater:module:api
+        require_root(fn)
+        reload_configuration()
+        recursive_chmod(path, mode)
+        create_lock_file(path)
+        add_user(username, password)
+        remove_user(username)
+        change_password(username, new_password)
+        list_users()
     }
     class "request_parser.py" as request <<M, Green>>{
         Provides API to watch
         the ProFTPD log.
 
-        $templater:module:request_parser
+        process_import_request(username, path, timestamp, logger_handler)
     }
     class "passwd_reader.py" as passwd <<M, Green>>{
         `passwd` file reader/writer.
 
-        $templater:module:passwd_reader
+        load_users(path)
+        save_users(users, path)
+        set_permissions(filename, uid, gid, mode)
+        read_user_config(username, path)
+        save_user_config(username, conf_dict, path)
     }
     class "structures.py" as structures <<M, Green>>{
         Contains all
         AMQP structures.
         ___
-        $templater:module:structures
+        class AddUser
+        class RemoveUser
+        class ChangePassword
+        class ListRegisteredUsers
+        class SetUserSettings
+        class GetUserSettings
+        class Userlist
+        class UserSettings
+        class ImportRequest
+        class MetadataFile
+        class EbookFile
+        class DataPair
     }
     class "settings.py" as settings <<M, Green>>{
         Provides
@@ -108,7 +135,9 @@ package edeposit.amqp.ftp {
         Has dependecies to
         all packages.
 
-        $templater:module:settings
+        conf_merger(user_dict, variable)
+        get_all_constants()
+        substitute_globals(config_dict)
     }
     
     api -r-> init
