@@ -1,5 +1,5 @@
-ftp.decoders.parser_json module
-===============================
+JSON decoder
+============
 
 .. automodule:: ftp.decoders.parser_json
     :members:
