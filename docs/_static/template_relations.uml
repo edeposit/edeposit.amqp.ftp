@@ -77,15 +77,13 @@ package edeposit.amqp.ftp {
         }
     }
     class "api.py" as api <<M, Green>>{
-        Used to Add, Remove
-        or Update users to
+        Used to Add, Remove or Update users to
         ProFTPD.
 
         $templater:module:api
     }
     class "request_parser.py" as request <<M, Green>>{
-        Provides API to watch
-        the ProFTPD log.
+        Provides API to watch the ProFTPD log.
 
         $templater:module:request_parser
     }
@@ -95,18 +93,15 @@ package edeposit.amqp.ftp {
         $templater:module:passwd_reader
     }
     class "structures.py" as structures <<M, Green>>{
-        Contains all
-        AMQP structures.
+        Contains all AMQP structures.
         ___
         $templater:module:structures
     }
     class "settings.py" as settings <<M, Green>>{
-        Provides
-        configuration for
-        whole package.
+        Provides configuration for whole
+        package.
         
-        Has dependecies to
-        all packages.
+        Has dependecies to all packages.
 
         $templater:module:settings
     }

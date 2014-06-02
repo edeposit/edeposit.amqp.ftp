@@ -82,8 +82,7 @@ package edeposit.amqp.ftp {
         }
     }
     class "api.py" as api <<M, Green>>{
-        Used to Add, Remove
-        or Update users to
+        Used to Add, Remove or Update users to
         ProFTPD.
 
         require_root(fn)
@@ -96,8 +95,7 @@ package edeposit.amqp.ftp {
         list_users()
     }
     class "request_parser.py" as request <<M, Green>>{
-        Provides API to watch
-        the ProFTPD log.
+        Provides API to watch the ProFTPD log.
 
         process_import_request(username, path, timestamp, logger_handler)
     }
@@ -111,8 +109,7 @@ package edeposit.amqp.ftp {
         save_user_config(username, conf_dict, path)
     }
     class "structures.py" as structures <<M, Green>>{
-        Contains all
-        AMQP structures.
+        Contains all AMQP structures.
         ___
         class AddUser
         class RemoveUser
@@ -128,12 +125,10 @@ package edeposit.amqp.ftp {
         class DataPair
     }
     class "settings.py" as settings <<M, Green>>{
-        Provides
-        configuration for
-        whole package.
+        Provides configuration for whole
+        package.
         
-        Has dependecies to
-        all packages.
+        Has dependecies to all packages.
 
         conf_merger(user_dict, variable)
         get_all_constants()
