@@ -1,5 +1,5 @@
-ftp.decoders.meta_exceptions module
-===================================
+Decoders exceptions
+===================
 
 .. automodule:: ftp.decoders.meta_exceptions
     :members:
