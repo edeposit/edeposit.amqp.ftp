@@ -41,7 +41,7 @@ See :doc:`/api/required` for list of required fields.
 #= Imports ====================================================================
 import json
 
-import parser
+import validator
 from meta_exceptions import MetaParsingException
 
 
@@ -62,6 +62,6 @@ def decode(data):
     except Exception, e:
         raise MetaParsingException("Can't parse your JSON data: %s" % e.message)
 
-    decoded = parser.check_structure(decoded)
+    decoded = validator.check_structure(decoded)
 
     return decoded

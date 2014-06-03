@@ -24,7 +24,7 @@ See :doc:`/api/required` for list of required fields.
 #= Imports ====================================================================
 import yaml
 
-import parser
+import validator
 from meta_exceptions import MetaParsingException
 
 
@@ -46,6 +46,6 @@ def decode(data):
         e = e.message if e.message else str(e)
         raise MetaParsingException("Can't parse your YAML data: %s" % e)
 
-    decoded = parser.check_structure(decoded)
+    decoded = validator.check_structure(decoded)
 
     return decoded

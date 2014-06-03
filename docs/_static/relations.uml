@@ -10,11 +10,10 @@ package edeposit.amqp.ftp {
 
             parse_meta(filename, data)
         }
-        class "parser.py" as parser <<M, Green>>{
+        class "validator.py" as validator <<M, Green>>{
             Validation of given
             data and so on.
             ---
-            convert_to_dict(data)
             check_structure(data)
             class Field
             class FieldParser
@@ -23,7 +22,6 @@ package edeposit.amqp.ftp {
             decode(data)
         }
         class "parser_csv.py" as parser_csv <<M, Green>>{
-            remove_quotes(word)
             decode(data)
         }
         class "parser_yaml.py" as parser_yaml <<M, Green>>{
@@ -37,12 +35,12 @@ package edeposit.amqp.ftp {
             class MetaParsingException
         }
 
-        parser -u-> parser_json
-        parser -u-> parser_csv
-        parser -u-> parser_yaml
-        parser -u-> parser_xml
+        validator -u-> parser_json
+        validator -u-> parser_csv
+        validator -u-> parser_yaml
+        validator -u-> parser_xml
         
-        meta_exceptions -u-> parser
+        meta_exceptions -u-> validator
 
         meta_exceptions -u--> parser_json
         meta_exceptions -u--> parser_csv
@@ -54,7 +52,7 @@ package edeposit.amqp.ftp {
         parser_yaml -u--> dec_init
         parser_xml -u--> dec_init
         
-        parser -u--> dec_init
+        validator -u--> dec_init
     }
 
     package "Usable scripts" as scripts <<Frame>> {

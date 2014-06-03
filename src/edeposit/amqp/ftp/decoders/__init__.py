@@ -4,7 +4,7 @@
 # Interpreter version: python 2.7
 #
 #= Imports ====================================================================
-import parser
+import validator
 import parser_csv
 import parser_xml
 import parser_yaml
@@ -34,7 +34,7 @@ def parse_meta(filename, data):
     if suffix not in SUPPORTED_FILES:
         raise MetaParsingException("Can't parse file of type '%s'!" % suffix)
 
-    fp = parser.FieldParser()
+    fp = validator.FieldParser()
     for key, val in SUPPORTED_FILES[suffix](data).items():
         fp.process(key, val)
 

@@ -5,7 +5,7 @@
 #
 #= Imports ====================================================================
 import edeposit.amqp.ftp.decoders as decoders
-from edeposit.amqp.ftp.decoders import parser
+from edeposit.amqp.ftp.decoders import validator
 
 
 #= Functions & objects ========================================================
@@ -25,32 +25,32 @@ def assert_exc(data, fn, exc=decoders.MetaParsingException):
 #= Tests ======================================================================
 class TestParser:
     def test__all_correct_list(self):
-        assert parser._all_correct_list([])
-        assert parser._all_correct_list([[1, 2], [1, 2], [1, 2]])
-        assert not parser._all_correct_list(1)
-        assert not parser._all_correct_list([[1], [1]])
-        assert not parser._all_correct_list([1, [1, 2]])
-        assert not parser._all_correct_list([[]])
+        assert validator._all_correct_list([])
+        assert validator._all_correct_list([[1, 2], [1, 2], [1, 2]])
+        assert not validator._all_correct_list(1)
+        assert not validator._all_correct_list([[1], [1]])
+        assert not validator._all_correct_list([1, [1, 2]])
+        assert not validator._all_correct_list([[]])
 
     def test_convert_to_dict(self):
-        assert parser._convert_to_dict([1, 2]) == {1: 2}
-        assert parser._convert_to_dict({1: 2}) == {1: 2}
+        assert validator._convert_to_dict([1, 2]) == {1: 2}
+        assert validator._convert_to_dict({1: 2}) == {1: 2}
 
-        assert_exc([[1, 2], 2, 3], parser._convert_to_dict, TypeError)
-        assert_exc(bool, parser._convert_to_dict)
+        assert_exc([[1, 2], 2, 3], validator._convert_to_dict, TypeError)
+        assert_exc(bool, validator._convert_to_dict)
 
     def test_check_structure(self):
-        assert parser.check_structure([1, 2, 3, 4]) == {1: 2, 3: 4}
-        assert parser.check_structure({1: 2, 3: 4}) == {1: 2, 3: 4}
+        assert validator.check_structure([1, 2, 3, 4]) == {1: 2, 3: 4}
+        assert validator.check_structure({1: 2, 3: 4}) == {1: 2, 3: 4}
 
-        assert_exc(bool, parser.check_structure)
-        assert_exc([1, 2, [3], 4], parser.check_structure)
-        assert_exc([1, 2, {}, 4], parser.check_structure)
-        assert_exc([1, 2, {}, {}], parser.check_structure)
-        assert_exc({True: {}, 3: 4}, parser.check_structure)
+        assert_exc(bool, validator.check_structure)
+        assert_exc([1, 2, [3], 4], validator.check_structure)
+        assert_exc([1, 2, {}, 4], validator.check_structure)
+        assert_exc([1, 2, {}, {}], validator.check_structure)
+        assert_exc({True: {}, 3: 4}, validator.check_structure)
 
     def test_field(self):
-        f = parser.Field("isbn", "ISBN of the book", "ISBN")
+        f = validator.Field("isbn", "ISBN of the book", "ISBN")
         assert not f.is_valid()
 
         assert not f.check("ehlo", "xex")
@@ -63,7 +63,7 @@ class TestParser:
         assert f.epub == "ISBN"
 
     def test_field_parser(self):
-        f = parser.FieldParser()
+        f = validator.FieldParser()
 
         assert len(f.fields) > 0
 

@@ -1,7 +1,7 @@
-Parser
+Validator
 ======
 
-.. automodule:: ftp.decoders.parser
+.. automodule:: ftp.decoders.validator
     :members:
     :undoc-members:
     :show-inheritance:
