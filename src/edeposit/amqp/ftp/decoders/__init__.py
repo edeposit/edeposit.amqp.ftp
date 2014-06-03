@@ -3,6 +3,10 @@
 #
 # Interpreter version: python 2.7
 #
+"""
+Decoders module used to parser metadata file into :class:`EPublication
+<edeposit.amqp.aleph.datastructures.epublication.EPublication>` structure.
+"""
 #= Imports ====================================================================
 import validator
 import parser_csv
@@ -24,6 +28,16 @@ SUPPORTED_FILES = {
 
 #= Functions & objects ========================================================
 def parse_meta(filename, data):
+    """
+    Parse `data` to EPublication.
+
+    Args:
+        filename (str): Used to choose right parser based at suffix.
+        data (str): Content of the metadata file.
+
+    Returns:
+        EPublication: object.
+    """
     if "." not in filename:
         raise MetaParsingException(
             "Can't recognize type of your metadata ('%s')!" % filename
