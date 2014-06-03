@@ -3,6 +3,22 @@
 #
 # Interpreter version: python 2.7
 #
+"""
+This submodule is used to parse metadata from ``.yaml`` files.
+
+Example of the valid data::
+
+    ISBN knihy: 80-86056-31-7
+    Vazba knihy: brož.
+    Nazev knihy: 80-86056-31-7.json
+    Misto vydani: Praha
+    Nakladatel: Garda
+    Datum vydani: 09/2012
+    Poradi vydani: 1
+    Zpracovatel zaznamu: Franta Putsalek
+
+See :doc:`/api/required` for list of required fields.
+"""
 #= Imports ====================================================================
 import yaml
 
@@ -12,6 +28,7 @@ from meta_exceptions import MetaParsingException
 
 #= Functions & objects ========================================================
 def decode(data):
+    """Handles decoding of the YAML `data`."""
     decoded = None
     try:
         decoded = yaml.load(data)

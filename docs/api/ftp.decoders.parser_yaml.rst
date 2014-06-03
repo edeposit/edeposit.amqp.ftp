@@ -1,5 +1,5 @@
-ftp.decoders.parser_yaml module
-===============================
+YAML decoder
+============
 
 .. automodule:: ftp.decoders.parser_yaml
     :members:
