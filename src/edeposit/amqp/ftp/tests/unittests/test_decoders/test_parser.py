@@ -33,11 +33,11 @@ class TestParser:
         assert not parser._all_correct_list([[]])
 
     def test_convert_to_dict(self):
-        assert parser.convert_to_dict([1, 2]) == {1: 2}
-        assert parser.convert_to_dict({1: 2}) == {1: 2}
+        assert parser._convert_to_dict([1, 2]) == {1: 2}
+        assert parser._convert_to_dict({1: 2}) == {1: 2}
 
-        assert_exc([[1, 2], 2, 3], parser.convert_to_dict, TypeError)
-        assert_exc(bool, parser.convert_to_dict)
+        assert_exc([[1, 2], 2, 3], parser._convert_to_dict, TypeError)
+        assert_exc(bool, parser._convert_to_dict)
 
     def test_check_structure(self):
         assert parser.check_structure([1, 2, 3, 4]) == {1: 2, 3: 4}

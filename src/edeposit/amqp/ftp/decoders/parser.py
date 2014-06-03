@@ -240,7 +240,7 @@ def _all_correct_list(array):
     return True
 
 
-def convert_to_dict(data):
+def _convert_to_dict(data):
     """
     Convert `data` to dictionary.
 
@@ -287,7 +287,7 @@ def check_structure(data):
     """
     if not isinstance(data, dict):
         try:
-            data = convert_to_dict(data)
+            data = _convert_to_dict(data)
         except MetaParsingException:
             raise
         except:
