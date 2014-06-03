@@ -4,7 +4,9 @@
 # Interpreter version: python 2.7
 #
 """
-This submodule is used to parse metadata from ``.yaml`` files.
+This submodule is used to parse metadata from YAML_ (``.yaml``) files.
+
+.. _YAML: https://en.wikipedia.org/wiki/YAML
 
 Example of the valid data::
 

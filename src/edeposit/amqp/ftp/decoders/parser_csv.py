@@ -4,7 +4,9 @@
 # Interpreter version: python 2.7
 #
 """
-This submodule is used to parse metadata from ``.csv`` files.
+This submodule is used to parse metadata from CSV_ (``.csv``) files.
+
+.. _CSV: https://en.wikipedia.org/wiki/Comma-separated_values
 
 Example of the valid data::
 

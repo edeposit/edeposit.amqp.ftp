@@ -4,7 +4,9 @@
 # Interpreter version: python 2.7
 #
 """
-This submodule is used to parse metadata from ``.json`` files.
+This submodule is used to parse metadata from JSON_ (``.json``) files.
+
+.. _JSON: https://en.wikipedia.org/wiki/JSON
 
 Metadata can be stored either in dictionary or in flat array.
 

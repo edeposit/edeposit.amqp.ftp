@@ -4,7 +4,9 @@
 # Interpreter version: python 2.7
 #
 """
-This submodule is used to parse metadata from ``.xml`` files.
+This submodule is used to parse metadata from XML_ (``.xml``) files.
+
+.. _XML: https://en.wikipedia.org/wiki/XML
 
 Format schema::
 
