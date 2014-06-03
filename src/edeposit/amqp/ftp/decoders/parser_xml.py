@@ -4,6 +4,8 @@
 # Interpreter version: python 2.7
 #
 """
+This submodule is used to parse metadata from ``.xml`` files.
+
 Format schema::
 
     <root>
@@ -11,18 +13,20 @@ Format schema::
     </root>
 
 
-Example::
+Example of valid data::
 
     <root>
         <item key="ISBN knihy">80-86056-31-7</item>
         <item key="Vazba knihy">brož.</item>
         <item key="Nazev knihy">standalone2.xml</item>
         <item key="Misto vydani">Praha</item>
-        <item key="Nakladatel": >Garda</item>
+        <item key="Nakladatel">Garda</item>
         <item key="Datum vydani">09/2012</item>
         <item key="Poradi vydani">1</item>
         <item key="Zpracovatel zaznamu">Franta Putsalek</item>
     </root>
+
+See :doc:`/api/required` for list of required fields.
 """
 #= Imports ====================================================================
 import dhtmlparser
@@ -33,6 +37,7 @@ from meta_exceptions import MetaParsingException
 
 #= Functions & objects ========================================================
 def decode(data):
+    """Handles decoding of the XML `data`."""
     dom = None
     try:
         dom = dhtmlparser.parseString(data)
