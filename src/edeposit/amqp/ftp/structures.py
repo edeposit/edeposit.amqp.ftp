@@ -146,7 +146,7 @@ class MetadataFile(namedtuple("MetadataFile", ["filename",
             parsed_data
         )
 
-    def parse(self):
+    def _parse(self):
         """
         Parse :attr:`raw_data`.
 
@@ -160,7 +160,7 @@ class MetadataFile(namedtuple("MetadataFile", ["filename",
             decoders.parse_meta(self.filename, self.raw_data)
         )
 
-    def get_filenames(self):
+    def _get_filenames(self):
         """
         Returns:
             list: of filenames (usually list with one filename).
@@ -179,7 +179,7 @@ class EbookFile(namedtuple("EbookFile", ["filename", "raw_data"])):
 
         return super(EbookFile, self).__new__(self, filename, raw_data)
 
-    def get_filenames(self):
+    def _get_filenames(self):
         """
         Returns:
             list: of filenames (usually list with one filename).
@@ -195,16 +195,16 @@ class DataPair(namedtuple("DataPair", ["metadata_file", "ebook_file"])):
         metadata_file (MetadataFile): Metadata.
         ebook_file (EbookFile): Data.
     """
-    def parse(self):
+    def _parse(self):
         """
         Parse metadata file inside.
 
         Returns:
             DataPair: New data pair (namedtuples are immutable).
         """
-        return DataPair(self.metadata_file.parse(), self.ebook_file)
+        return DataPair(self.metadata_file._parse(), self.ebook_file)
 
-    def get_filenames(self):
+    def _get_filenames(self):
         """
         Returns:
             list: of filenames from objects in this container.

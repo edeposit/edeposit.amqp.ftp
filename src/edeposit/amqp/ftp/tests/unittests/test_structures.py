@@ -32,15 +32,15 @@ def test_parse_MetadataFile():
     assert mf.filename == "filename.json"
     assert mf.raw_data == JSON_DATA
     assert mf.parsed_data is None
-    assert mf.get_filenames() == ["filename.json"]
+    assert mf._get_filenames() == ["filename.json"]
 
-    mf = mf.parse()
+    mf = mf._parse()
 
     assert mf.parsed_data.ISBN == "80-86056-31-7"
 
     mf = structures.MetadataFile("filename.csv", JSON_DATA)
     with pytest.raises(decoders.MetaParsingException):
-        mf.parse()
+        mf._parse()
 
 
 def test_parse_EbookFile():
@@ -48,7 +48,7 @@ def test_parse_EbookFile():
 
     assert ef.filename == "asd.data"
     assert ef.raw_data == "some_data"
-    assert ef.get_filenames() == ["asd.data"]
+    assert ef._get_filenames() == ["asd.data"]
 
 
 def test_parse_DataPair():
@@ -57,17 +57,17 @@ def test_parse_DataPair():
         structures.EbookFile("asd.data", "some_data")
     )
 
-    # test .get_filenames()
-    assert len(dp.get_filenames()) == 2
-    assert "filename.json" in dp.get_filenames()
-    assert "asd.data" in dp.get_filenames()
+    # test ._get_filenames()
+    assert len(dp._get_filenames()) == 2
+    assert "filename.json" in dp._get_filenames()
+    assert "asd.data" in dp._get_filenames()
 
     assert dp.metadata_file.filename == "filename.json"
     assert dp.ebook_file.filename == "asd.data"
 
     assert dp.metadata_file.parsed_data is None
 
-    dp = dp.parse()
+    dp = dp._parse()
 
     assert dp
     assert dp.metadata_file.filename == "filename.json"

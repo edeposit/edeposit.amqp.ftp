@@ -359,10 +359,10 @@ def _process_items(items, user_conf, error_protocol):
     """
     def process_meta(item, error_protocol):
         try:
-            return item.parse()
+            return item._parse()
         except Exception, e:
             error_protocol.append(
-                "Can't parse %s: %s" % (item.get_filenames()[0], e.message)
+                "Can't parse %s: %s" % (item._get_filenames()[0], e.message)
             )
 
             if isinstance(item, DataPair):
@@ -381,7 +381,7 @@ def _process_items(items, user_conf, error_protocol):
     fn_pool = []
     soon_removed = out if conf_merger(user_conf, "LEAVE_BAD_FILES") else items
     for item in soon_removed:
-        fn_pool.extend(item.get_filenames())
+        fn_pool.extend(item._get_filenames())
 
     _remove_files(fn_pool)
 
