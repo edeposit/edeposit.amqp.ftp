@@ -41,7 +41,15 @@ def _remove_quotes(word):
 
 
 def decode(data):
-    """Handles decoding of the CSV `data`."""
+    """
+    Handles decoding of the CSV `data`.
+
+    Args:
+        data (str): Data which will be decoded.
+
+    Returns:
+        dict: Dictionary with decoded data.
+    """
     # try to guess dialect of the csv file
     dialect = None
     try:

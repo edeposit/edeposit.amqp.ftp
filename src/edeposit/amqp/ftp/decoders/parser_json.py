@@ -45,7 +45,15 @@ from meta_exceptions import MetaParsingException
 
 #= Functions & objects ========================================================
 def decode(data):
-    """Handles decoding of the JSON `data`."""
+    """
+    Handles decoding of the JSON `data`.
+
+    Args:
+        data (str): Data which will be decoded.
+
+    Returns:
+        dict: Dictionary with decoded data.
+    """
     decoded = None
     try:
         decoded = json.loads(data)
