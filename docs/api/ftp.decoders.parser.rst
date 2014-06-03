@@ -1,5 +1,5 @@
-ftp.decoders.parser module
-==========================
+Parser
+======
 
 .. automodule:: ftp.decoders.parser
     :members:

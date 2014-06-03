@@ -3,6 +3,11 @@
 #
 # Interpreter version: python 2.7
 #
+"""
+This module provides highlevel checking of parsed data for lowlevel decoders.
+
+It handles the unicode in keys, builds dicts from flat arrays and so on.
+"""
 # Imports =====================================================================
 import unicodedata
 
@@ -17,7 +22,7 @@ from meta_exceptions import MetaParsingException
 
 
 # Variables ===================================================================
-ALLOWED_TYPES = [
+_ALLOWED_TYPES = [
     str,
     unicode,
     int,
@@ -25,7 +30,7 @@ ALLOWED_TYPES = [
     long
 ]
 
-ITERABLE_TYPES = [
+_ITERABLE_TYPES = [
     list,
     tuple
 ]
@@ -33,13 +38,51 @@ ITERABLE_TYPES = [
 
 # Functions & objects =========================================================
 class Field:
+    """
+    This class is used to represent and parse specific "key: val" pair.
+
+    When you create the object, `keyword` and `descr` is specified. Optionally
+    also `epub` parameter, which is corresponding key in :class:`EPublication
+    <edeposit.amqp.aleph.datastructures.epublication.EPublication>` structure.
+
+    Assingning value to the class is done by calling :meth:`check`, which
+    sets the :attr:`value`, if the `key` parameter matches :attr:`keyword`.
+
+    Args:
+        keyword (str): Key for the data pair.
+        descr (str): Description of the data pair. Used in exceptions.
+        epub (str, default None): Corresponding keyword in EPublication
+                                  structure.
+    """
     def __init__(self, keyword, descr, epub=None):
+        #: Keyword agains :meth:`check` will try to match.
         self.keyword = keyword
+
+        #: Description of the data pair.
         self.descr = descr
+
+        #: Internal value. Set when :meth:`check` successfully matched the
+        #: keyword.
         self.value = None
+
+        #: Corresponding key in :class:`EPublication
+        #: <edeposit.amqp.aleph.datastructures.epublication.EPublication>`
+        #: structure.
         self.epub = epub if epub is not None else self.keyword
 
     def check(self, key, value):
+        """
+        Check whether `key` matchs the :attr:`keyword`. If so, set the
+        :attr:`value` to `value`.
+
+        Args:
+            key (str): Key which will be matched with :attr:`keyword`.
+            value (str): Value which will be assigned to :attr:`value` if keys
+                         matches.
+
+        Returns:
+            True/False: Whether the key matched :attr:`keyword`.
+        """
         key = key.lower().strip()
 
         # try unicode conversion
@@ -48,7 +91,7 @@ class Field:
         except UnicodeEncodeError:
             pass
 
-        key = self.remove_accents(key)
+        key = self._remove_accents(key)
 
         if self.keyword in key.split():
             self.value = value
@@ -58,14 +101,14 @@ class Field:
 
     def is_valid(self):
         """
-        Return True if :attr:`self.value` is set.
+        Return ``True`` if :attr:`value` is set.
 
         Note:
-            Value is set by calling :method:`check` with proper `key`.
+            :attr:`value` is set by calling :meth:`check` with proper `key`.
         """
         return self.value is not None
 
-    def remove_accents(self, input_str):
+    def _remove_accents(self, input_str):
         """
         Convert unicode string to ASCII.
 
@@ -76,6 +119,11 @@ class Field:
 
 
 class FieldParser:
+    """
+    Class used to make sure, that all fields in metadata are present.
+
+    See :doc:`/api/required` for list of required fields.
+    """
     def __init__(self):
         self.fields = [
             Field(keyword="isbn", descr="ISBN", epub="ISBN"),
@@ -108,6 +156,10 @@ class FieldParser:
         ]
 
     def process(self, key, val):
+        """
+        Try to look for `key` in all required and optional fields. If found,
+        set the `val`.
+        """
         for field in self.fields:
             if field.check(key, val):
                 return
@@ -117,6 +169,10 @@ class FieldParser:
                 return
 
     def is_valid(self):
+        """
+        Returns:
+            True/False whether ALL required fields are set.
+        """
         for field in self.fields:
             if not field.is_valid():
                 return False
@@ -124,6 +180,13 @@ class FieldParser:
         return True
 
     def get_epublication(self):
+        """
+        Returns:
+            EPublication: Structure when the object :meth:`is_valid`.
+
+        Raises:
+            MetaParsingException: When the object is not valid.
+        """
         if not self.is_valid():
             bad_fields = filter(lambda x: not x.is_valid(), self.fields)
             bad_fields = map(
@@ -140,6 +203,8 @@ class FieldParser:
 
         epub_dict = dict(map(lambda x: (x.epub, x.value), relevant_fields))
 
+        # make sure, that all fields present in EPublication has values also
+        # in epub_dict
         for epublication_part in EPublication._fields:
             if epublication_part not in epub_dict:
                 epub_dict[epublication_part] = None
@@ -153,11 +218,20 @@ class FieldParser:
 
 
 def _all_correct_list(array):
-    if type(array) not in ITERABLE_TYPES:
+    """
+    Make sure, that all items in `array` has good type and size.
+
+    Args:
+        array (list): Array of python types.
+
+    Returns:
+        True/False
+    """
+    if type(array) not in _ITERABLE_TYPES:
         return False
 
     for item in array:
-        if not type(item) in ITERABLE_TYPES:
+        if not type(item) in _ITERABLE_TYPES:
             return False
 
         if len(item) != 2:
@@ -167,6 +241,20 @@ def _all_correct_list(array):
 
 
 def convert_to_dict(data):
+    """
+    Convert `data` to dictionary.
+
+    Tries to get sense in multidimensional arrays.
+
+    Args:
+        data: List/dict/tuple of variable dimension.
+
+    Returns:
+        dict: If the data can be converted to dictionary.
+
+    Raises:
+        MetaParsingException: When the data are unconvertible to dict.
+    """
     if isinstance(data, dict):
         return data
 
@@ -184,7 +272,18 @@ def convert_to_dict(data):
 
 def check_structure(data):
     """
-    Check whether the structure is flat dictionary.
+    Check whether the structure is flat dictionary. If not, try to convert it
+    to dictionary.
+
+    Args:
+        data: Whatever data you have (dict/tuple/list).
+
+    Returns:
+        dict: When the conversion was successful or `data` was already `good`.
+
+    Raises:
+        MetaParsingException: When the data couldn't be converted or had `bad`
+                              structure.
     """
     if not isinstance(data, dict):
         try:
@@ -197,13 +296,13 @@ def check_structure(data):
             )
 
     for key, val in data.iteritems():
-        if type(key) not in ALLOWED_TYPES:
+        if type(key) not in _ALLOWED_TYPES:
             raise MetaParsingException(
                 "Can't decode the meta file - invalid type of keyword '" +
                 str(key) +
                 "'!"
             )
-        if type(val) not in ALLOWED_TYPES:
+        if type(val) not in _ALLOWED_TYPES:
             raise MetaParsingException(
                 "Can't decode the meta file - invalid type of keyword '" +
                 str(key) +
