@@ -23,7 +23,8 @@ extensions = [
 
 intersphinx_mapping = {
     'python': ('http://docs.python.org/2.7', None),
-    'amqp': ("http://edeposit-amqp.readthedocs.org/en/latest/", None)
+    'amqp': ("http://edeposit-amqp.readthedocs.org/en/latest/", None),
+    'aleph': ("http://edeposit-amqp-aleph.readthedocs.org/en/latest/", None)
 }
 
 # Napoleon settings
