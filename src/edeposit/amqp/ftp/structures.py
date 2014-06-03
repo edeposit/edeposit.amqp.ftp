@@ -171,6 +171,10 @@ class MetadataFile(namedtuple("MetadataFile", ["filename",
 class EbookFile(namedtuple("EbookFile", ["filename", "raw_data"])):
     """
     Structure used to represent data (ebook) files.
+
+    Attributes:
+        filename (str): Path to the ebook file.
+        raw_data (str): Content of the file.
     """
     def __new__(self, filename, raw_data=None):
         if not raw_data:

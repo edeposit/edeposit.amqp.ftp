@@ -35,6 +35,9 @@ Responses
 
 Import request
 --------------
+Import request are sent by :mod:`.monitor` itself, without need of programmer
+interaction.
+
 .. autoclass:: ftp.structures.ImportRequest
     :members:
 
