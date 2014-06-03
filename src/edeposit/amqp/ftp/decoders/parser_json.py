@@ -4,7 +4,7 @@
 # Interpreter version: python 2.7
 #
 """
-This submodule is used to parse metadata from .json files.
+This submodule is used to parse metadata from ``.json`` files.
 
 Metadata can be stored either in dictionary or in flat array.
 
@@ -45,9 +45,7 @@ from meta_exceptions import MetaParsingException
 
 #= Functions & objects ========================================================
 def decode(data):
-    """
-    Handles decoding of the json `data`.
-    """
+    """Handles decoding of the JSON `data`."""
     decoded = None
     try:
         decoded = json.loads(data)
