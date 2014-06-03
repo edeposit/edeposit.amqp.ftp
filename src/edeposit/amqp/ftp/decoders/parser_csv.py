@@ -3,6 +3,22 @@
 #
 # Interpreter version: python 2.7
 #
+"""
+This submodule is used to parse metadata from ``.csv`` files.
+
+Example of the valid data::
+
+    ISBN knihy;978-80-87270-99-8
+    Vazba knihy;brož.
+    Nazev knihy;whatever.csv
+    Misto vydani;Praha
+    Nakladatel;Garda
+    Datum vydani;IX.12
+    Poradi vydani;1
+    Zpracovatel zaznamu;Franta Putsalek
+
+See :doc:`/api/required` for list of required fields.
+"""
 #= Imports ====================================================================
 import csv
 
@@ -11,7 +27,7 @@ from meta_exceptions import MetaParsingException
 
 
 #= Functions & objects ========================================================
-def remove_quotes(word):
+def _remove_quotes(word):
     """
     Remove quotes from `word` if the word starts and ands with quotes (" or ').
     """
@@ -25,6 +41,7 @@ def remove_quotes(word):
 
 
 def decode(data):
+    """Handles decoding of the CSV `data`."""
     # try to guess dialect of the csv file
     dialect = None
     try:
@@ -57,7 +74,7 @@ def decode(data):
         usable_data = map(lambda x: x.strip().decode("utf-8"), usable_data)
 
         # remove quotes if the csv.Sniffer failed to decode right `dialect`
-        usable_data = map(lambda x: remove_quotes(x), usable_data)
+        usable_data = map(lambda x: _remove_quotes(x), usable_data)
 
         decoded.append(usable_data)
 

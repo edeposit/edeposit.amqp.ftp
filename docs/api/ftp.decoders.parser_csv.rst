@@ -1,5 +1,5 @@
-ftp.decoders.parser_csv module
-==============================
+CSV decoder
+===========
 
 .. automodule:: ftp.decoders.parser_csv
     :members:
