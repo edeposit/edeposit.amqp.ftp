@@ -19,7 +19,7 @@ Example of the valid data::
     Poradi vydani: 1
     Zpracovatel zaznamu: Franta Putsalek
 
-See :doc:`/api/required` for list of required fields.
+See :doc:`/workflow/required` for list of required fields.
 """
 #= Imports ====================================================================
 import yaml

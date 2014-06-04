@@ -36,7 +36,7 @@ or::
         "Zpracovatel zaznamu", "Franta Putsalek"
     ]
 
-See :doc:`/api/required` for list of required fields.
+See :doc:`/workflow/required` for list of required fields.
 """
 #= Imports ====================================================================
 import json

@@ -28,7 +28,7 @@ Example of valid data::
         <item key="Zpracovatel zaznamu">Franta Putsalek</item>
     </root>
 
-See :doc:`/api/required` for list of required fields.
+See :doc:`/workflow/required` for list of required fields.
 """
 #= Imports ====================================================================
 import dhtmlparser
