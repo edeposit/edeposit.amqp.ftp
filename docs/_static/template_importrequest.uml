@@ -1,0 +1,24 @@
+class ImportRequest {
+    Data holder containing
+    all metadata/data iformation
+    in .requests property.
+    ---
+    $templater:struct:structures
+}
+
+class MetadataFile {
+    $templater:struct:structures
+}
+class EbookFile {
+    $templater:struct:structures
+}
+class DataPair {
+    $templater:struct:structures
+}
+
+MetadataFile "0..*" -d-o "1" ImportRequest: contains
+EbookFile "0..*" -d-o "1" ImportRequest: contains
+DataPair "0..*" -d-o "1" ImportRequest: contains
+
+MetadataFile "1" -r-o "1" DataPair: contains
+EbookFile "1" -l-o "1" DataPair: contains

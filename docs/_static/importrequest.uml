@@ -1,0 +1,39 @@
+class ImportRequest {
+    Data holder containing
+    all metadata/data iformation
+    in .requests property.
+    ---
+    .error_log
+    .import_log
+    .requests
+    .username
+    .count()
+    .index()
+}
+
+class MetadataFile {
+    .filename
+    .parsed_data
+    .raw_data
+    .count()
+    .index()
+}
+class EbookFile {
+    .filename
+    .raw_data
+    .count()
+    .index()
+}
+class DataPair {
+    .ebook_file
+    .metadata_file
+    .count()
+    .index()
+}
+
+MetadataFile "0..*" -d-o "1" ImportRequest: contains
+EbookFile "0..*" -d-o "1" ImportRequest: contains
+DataPair "0..*" -d-o "1" ImportRequest: contains
+
+MetadataFile "1" -r-o "1" DataPair: contains
+EbookFile "1" -l-o "1" DataPair: contains
