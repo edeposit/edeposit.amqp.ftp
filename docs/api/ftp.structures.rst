@@ -1,5 +1,5 @@
-ftp.structures module
-=====================
+AMQP messages/structures
+========================
 .. automodule:: ftp.structures
 
 
