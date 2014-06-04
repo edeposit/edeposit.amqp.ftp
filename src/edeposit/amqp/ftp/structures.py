@@ -114,8 +114,8 @@ class ImportRequest(namedtuple("ImportRequest",
         username (str): Name of the user who sent an import request.
         requests (list): List of :class:`MetadataFile`/:class:`EbookFile`/
                          :class:`DataPair` objects.
-        import_log (list of str): Protocol about import.
-        error_log (list of str): Protocol about errors.
+        import_log (str): Protocol about import.
+        error_log (str): Protocol about errors.
     """
     pass
 
