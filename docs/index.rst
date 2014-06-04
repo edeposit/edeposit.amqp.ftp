@@ -55,8 +55,8 @@ Standalone scripts
 ++++++++++++++++++
 .. toctree::
 
-    /api/ftp.monitor
     /api/ftp.initializer
+    /api/ftp.monitor
 
 
 API

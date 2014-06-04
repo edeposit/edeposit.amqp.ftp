@@ -3,6 +3,13 @@
 #
 # Interpreter version: python 2.7
 #
+"""
+This script is used to initialize ProFTPD and set configuration required by
+edeposit.amqp.ftp module.
+
+It changes/creates ProFTPD configuration file, password file and extened log
+file. Also user directory is created and correct permissions is set.
+"""
 # Imports ====================================================================
 import os
 import os.path
@@ -174,7 +181,7 @@ def add_or_update(data, item, value):
         value (str): Value of option.
 
     Returns:
-        (string): updated configuration
+        str: updated configuration
     """
     data = data.splitlines()
 

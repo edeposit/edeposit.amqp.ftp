@@ -1,5 +1,5 @@
-ftp.initializer module
-======================
+Initializer script
+==================
 
 .. automodule:: ftp.initializer
     :members:
