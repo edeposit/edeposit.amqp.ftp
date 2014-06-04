@@ -3,18 +3,18 @@
 #
 # Interpreter version: python 2.7
 #
-#= Imports ====================================================================
+# Imports ====================================================================
 import os
 import os.path
 import sys
 from pwd import getpwnam
 
-from settings import *
-from api import reload_configuration
+from settings import CONF_PATH, CONF_FILE, DATA_PATH, LOGIN_FILE, LOG_FILE
+from api import reload_configuration, require_root
 
 
-#= Variables ==================================================================
-DEFAULT_PROFTPD_CONF = """
+# Variables ==================================================================
+DEFAULT_PROFTPD_CONF = r"""
 #
 # /etc/proftpd/proftpd.conf -- This is a basic ProFTPD configuration file.
 # To really apply changes, reload proftpd after modifications, if
@@ -163,7 +163,7 @@ AuthUserFile /etc/proftpd/ftpd.passwd
 """
 
 
-#= Functions & objects ========================================================,
+# Functions & objects ========================================================,
 def add_or_update(data, item, value):
     """
     Add or update value in configuration file format used by proftpd.
@@ -191,10 +191,10 @@ def add_or_update(data, item, value):
     else:
         # search for the item in commented values, if found, uncomment it
         comments = filter(
-            lambda x: x.strip().startswith("#") and
-                    len(x.split("#")) >= 2 and
-                    x.split("#")[1].split() and
-                    x.split("#")[1].split()[0] == item,
+            lambda x: x.strip().startswith("#")
+                      and len(x.split("#")) >= 2
+                      and x.split("#")[1].split()
+                      and x.split("#")[1].split()[0] == item,
             data
         )
 
@@ -207,17 +207,16 @@ def add_or_update(data, item, value):
     return "\n".join(map(lambda x: str(x), data))  # convert back to string
 
 
-#= Main program ===============================================================
-if __name__ == '__main__':
-    if os.geteuid() != 0:
-        sys.stderr.write("You have to be root (uid 0) to use this program.\n")
-        sys.exit(1)
-
+@require_root
+def main():
+    """
+    Used to create configuration files, set permissions and so on.
+    """
     if not os.path.exists(CONF_PATH):
         pass  # TODO: create/unpack default configuration
 
     # check existence of proftpd.conf
-    if not os.path.exists(CONF_PATH + CONF_FILE):
+    if not os.path.exists(CONF_FILE):
         with open(CONF_FILE, "w") as f:
             f.write(DEFAULT_PROFTPD_CONF)
 
@@ -232,18 +231,17 @@ if __name__ == '__main__':
     os.chown(LOGIN_FILE, getpwnam('proftpd').pw_uid, -1)
     os.chmod(LOGIN_FILE, 0400)
 
-    # change important configuration values in protpd conf
+    # load values from protpd conf file
     data = ""
     with open(CONF_FILE) as f:
         data = f.read()
 
-    # set user file
+    # set path to passwd file
     data = add_or_update(
         data,
         "AuthUserFile",
         LOGIN_FILE
     )
-
     data = add_or_update(data, "RequireValidShell", "off")
     data = add_or_update(data, "DefaultRoot", "~")
 
@@ -255,7 +253,13 @@ if __name__ == '__main__':
         LOG_FILE + " WRITE paths"
     )
 
-    with open(CONF_FILE, "wt") as f:
+    # save changed file
+    with open(CONF_FILE, "w") as f:
         f.write(data)
 
     reload_configuration()
+
+
+# Main program ===============================================================
+if __name__ == '__main__':
+    main()
