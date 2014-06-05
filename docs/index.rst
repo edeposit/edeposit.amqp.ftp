@@ -64,6 +64,7 @@ API
 .. toctree::
     :maxdepth: 1
 
+    /api/ftp
     /api/ftp.request_parser
     /api/ftp.api
     /api/ftp.passwd_reader
