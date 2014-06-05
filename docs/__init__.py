@@ -1,3 +1,6 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
 def allSame(s):
     return not filter(lambda x: x != s[0], s)
 
