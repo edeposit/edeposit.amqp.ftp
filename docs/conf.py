@@ -93,7 +93,7 @@ htmlhelp_basename = 'ftp'
 def maybe_skip_member(app, what, name, obj, skip, options):
     if what == "class" and name.startswith("_") or name in ["index", "count"]:
         return True
-    return False
+    return skip
 
 def setup(app):
     app.connect('autodoc-skip-member', maybe_skip_member)
