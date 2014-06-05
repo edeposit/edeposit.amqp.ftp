@@ -1,3 +1,5 @@
 include CONTRIBUTORS.rst CHANGES.rst README.rst LICENSE
-recursive-include src/edeposit/amqp/ftp/tests *
+recursive-exclude src/edeposit/amqp/ftp/tests *
+recursive-exclude src/edeposit/amqp/ftp/aleph *
+recursive-exclude src/edeposit/amqp/ftp/decoders/aleph *
 recursive-include html_docs *

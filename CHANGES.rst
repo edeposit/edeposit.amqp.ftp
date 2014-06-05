@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.4.0
+-----
+    - Added almost all documentation.
+    - Added a lot of unittests.
+    - Project is almost ready for release version.
+    - Created PYPI package.
+
 0.3.0
 -----
     - Json metadata parser is working.
