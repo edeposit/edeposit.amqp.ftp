@@ -39,6 +39,12 @@ all necessary files and directories.
 You may also want to check :mod:`.settings` module, to change some of the paths
 using JSON configuration files.
 
+Usage
+-----
+There is guide how to use the package from user perspective:
+
+- :doc:`/workflow/workflow`
+
 Content
 -------
 .. image:: /_static/relations.png
