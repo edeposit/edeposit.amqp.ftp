@@ -6,7 +6,7 @@ Required fields
 Every metadata file has to contain following fields:
 
 - ``isbn`` (ISBN)
-- ``vazba`` (Vazba/forma)
+- ``vazba`` (binding/format)
 - ``nazev`` (name of the book)
 - ``misto`` (city/place where the book was published) 
 - ``nakladatel`` (publisher)
