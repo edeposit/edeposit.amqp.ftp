@@ -4,7 +4,7 @@ V dokumentaci zatím bylo uvedeno jak modul nainstalovat a jak použít jednotli
 vrstvy API, které poskytuje.
 
 Nyní se zaměřím na poslední část, kterou je nutné popsat - jakým způsobem
-vlastně uživatel Edepositu může modul tento využívat.
+vlastně uživatel Edepositu může tento modul využívat.
 
 Motivace
 --------
