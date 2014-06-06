@@ -4,6 +4,7 @@ Changelog
 0.5.0
 -----
     - Added Czech and English workflow examples.
+    - Added readme.
 
 0.4.0
 -----
