@@ -102,8 +102,11 @@ Metadata details
 Every data file (ebook) should have metadata. It is not required, but it can
 save you a lot of work later in web interface.
 
-So far, the program has support for four formats of metadata - JSON, CSV, XML
-and YAML.
+So far, the program has support for four formats of metadata - 
+:doc:`JSON </api/ftp.decoders.parser_json>`,
+:doc:`CSV </api/ftp.decoders.parser_csv>`,
+:doc:`XML </api/ftp.decoders.parser_xml>`,
+and :doc:`YAML </api/ftp.decoders.parser_yaml>`.
 
 Metadata are recognized by their suffix - ``.json`` for JSON files, ``.csv`` for
 CSV, ``.xml`` for XML and ``.yaml`` for YAML files.
