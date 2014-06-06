@@ -9,8 +9,8 @@ can use this module.
 
 Why
 ---
-First of all - you may ask "why should I use the FTP interface to upload files to the
-Edeposit project?"
+First of all - you may ask "why should I use the FTP interface to upload files
+to the Edeposit project?"
 
 Answer is simple: it can save you a lot of work. Data uploaded over FTP are
 automatically paired with metadata, you can use batch uploads and there is only
@@ -46,7 +46,7 @@ delete this file, nothing happens, except that the file is there again.
 .. image:: /_static/lock.gif
     :width: 400px
 
-It all right, don't worry about the file so far, it will be explained later.
+It all right, don't worry about it now, it will be explained later.
 
 Step 3: Pairing the data
 ------------------------
@@ -85,9 +85,9 @@ As you can see at example animation, when I've uploaded the files and triggered
 import, not only the `lock` file was created, but also the file named
 ``import.log.txt``.
 
-This is may be important file for automation of the upload, because you will
-get overall information at first line (``Status: Ok/Error``) and details of
-processing each file in lines under the `status`.
+This is important part of the communication API for automation of the upload,
+because you get overall information at first line (``Status: Ok/Error``)
+and details of processing each file in lines under the `status`.
 
 In case of bad metadata files, error log is created and bad files are left where
 they were found:
