@@ -18,6 +18,9 @@ few steps compared with process in web interface.
 
 You can make the whole process automatic and forget about it, if you want.
 
+Usage
+=====
+
 Step 1: Configuration
 ---------------------
 Before you can use this module, you need to allow FTP access and set password
@@ -37,6 +40,13 @@ have.
 .. _FileZilla: https://filezilla-project.org/
 
 .. image:: /_static/filezilla.png
+    :width: 400px
+
+Following pictures and animation uses the ``caja`` FTP client from
+`Linux Mint <http://www.linuxmint.com/>`_. You can use Explorer from Windows in
+similar way by typing ``ftp://user@address`` to navigation bar.
+
+.. image:: /_static/explorer.png
     :width: 400px
 
 When you connect to your account, you will probably notice that there is already
@@ -62,7 +72,9 @@ three different ways:
   suffix (for example ``babicka.json`` and ``babicka.pdf``). There can be
   multiple samenamed pairs in one directory.
 - Create two files named as `ISBN` of the book they are describing. No matter
-  where the files will be in directory structure, they will be paired.
+  where the files will be in directory structure, they will be paired. For
+  example ``/metadata/80-86056-31-7.json`` and
+  ``/ebooky/80-86056-31-7.pdf``
 
 All methods of pairing can be disabled in your user account.
 
@@ -102,14 +114,17 @@ Metadata details
 Every data file (ebook) should have metadata. It is not required, but it can
 save you a lot of work later in web interface.
 
-So far, the program has support for four formats of metadata - 
-:doc:`JSON </api/ftp.decoders.parser_json>`,
-:doc:`CSV </api/ftp.decoders.parser_csv>`,
-:doc:`XML </api/ftp.decoders.parser_xml>`,
-and :doc:`YAML </api/ftp.decoders.parser_yaml>`.
+So far, the program has support for four formats of metadata:
+
+- :doc:`JSON </api/ftp.decoders.parser_json>`
+- :doc:`CSV </api/ftp.decoders.parser_csv>`
+- :doc:`XML </api/ftp.decoders.parser_xml>`
+- :doc:`YAML </api/ftp.decoders.parser_yaml>`
 
 Metadata are recognized by their suffix - ``.json`` for JSON files, ``.csv`` for
 CSV, ``.xml`` for XML and ``.yaml`` for YAML files.
+
+Warning: **All metadata files should be encoded in UTF-8 encoding!**
 
 Every metadata file has to contain few required fields and may contain also few
 optional. Description and list of the fields can be found here:
