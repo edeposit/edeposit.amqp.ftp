@@ -43,7 +43,8 @@ Usage
 -----
 There is guide how to use the package from user perspective:
 
-- :doc:`/workflow/workflow`
+- :doc:`/workflow/workflow` (english version)
+- :doc:`/workflow/pouziti` (czech version)
 
 Content
 -------
