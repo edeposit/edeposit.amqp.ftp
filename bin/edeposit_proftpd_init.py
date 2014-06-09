@@ -12,14 +12,24 @@ file. Also user directory is created and correct permissions is set.
 """
 # Imports ====================================================================
 import os
+import sys
 import shutil
 import os.path
 import logging
 import argparse
 
-from api import reload_configuration, require_root
-from passwd_reader import get_ftp_uid
-from settings import CONF_PATH, CONF_FILE, DATA_PATH, LOGIN_FILE, LOG_FILE
+# if the module wasn't yet installed at this system
+try:
+    import edeposit.amqp.ftp
+except ImportError:
+    sys.path.insert(0, os.path.abspath('../src/edeposit/amqp'))
+    import ftp
+    sys.modules["edeposit.amqp.ftp"] = ftp
+
+from edeposit.amqp.ftp.api import reload_configuration, require_root
+from edeposit.amqp.ftp.passwd_reader import get_ftp_uid
+from edeposit.amqp.ftp.settings import CONF_PATH, CONF_FILE, DATA_PATH
+from edeposit.amqp.ftp.settings import LOGIN_FILE, LOG_FILE
 
 
 # Variables ==================================================================
@@ -330,8 +340,8 @@ def main(overwrite):
 # Main program ===============================================================
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description="""This script will modify your ProFTPD installation for use
-                       edeposit.amqp.ftp package."""
+        description="""This script will modify your ProFTPD installation for
+                       use with edeposit.amqp.ftp package."""
     )
     parser.add_argument(
         "-o",
