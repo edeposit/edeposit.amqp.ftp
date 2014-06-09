@@ -99,6 +99,13 @@ def save_users(users, path=settings.LOGIN_FILE):
 
 
 def get_ftp_uid():
+    """
+    Returns:
+        int: UID of the proftpd/ftp user.
+
+    Raises:
+        KeyError: When ``proftpd`` and ``ftp`` user is not found.
+    """
     try:
         return getpwnam('proftpd').pw_uid
     except KeyError:
@@ -117,7 +124,7 @@ def set_permissions(filename, uid=None, gid=None, mode=0775):
         mode (int, default 0775): unix access mode
     """
     if uid is None:
-        uid = getpwnam('proftpd').pw_uid
+        uid = get_ftp_uid()
 
     if gid is None:
         gid = -1
