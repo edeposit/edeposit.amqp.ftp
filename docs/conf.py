@@ -6,10 +6,11 @@ import sys
 import urllib
 import os.path
 
-sys.path.insert(
-    0,
-    os.path.normpath(os.path.abspath('.') + '/../src/edeposit/amqp')
-)
+sys.path.insert(0, os.path.abspath('../src/edeposit/amqp'))
+sys.path.insert(0, os.path.abspath('../bin'))
+
+import ftp
+sys.modules["edeposit.amqp.ftp"] = ftp
 
 extensions = [
     'sphinx.ext.autodoc',
@@ -55,7 +56,7 @@ copyright = u'2014 E-deposit team'
 # The full version, including alpha/beta/rc tags.
 try:
     # read data from CHANGES.rst
-    sys.path.insert(0, os.path.normpath(os.path.abspath('.') + '/..'))
+    sys.path.insert(0, os.path.abspath('../'))
     from docs import getVersion
     release = getVersion(open("../CHANGES.rst").read())
 except:

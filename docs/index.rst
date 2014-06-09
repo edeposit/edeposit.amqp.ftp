@@ -33,7 +33,7 @@ OpenSuse::
 Initialization
 ++++++++++++++
 After installation of the ``ProFTPD`` and ``edeposit.amqp.ftp``, run the
-:mod:`init script <ftp.initializer>`, which will configure ProFTPD and create
+:doc:`init script </initializer>`, which will configure ProFTPD and create
 all necessary files and directories.
 
 You may also want to check :mod:`.settings` module, to change some of the paths
@@ -62,7 +62,7 @@ Standalone scripts
 ++++++++++++++++++
 .. toctree::
 
-    /api/ftp.initializer
+    /initializer
     /api/ftp.monitor
 
 
