@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.6.1
+-----
+    - Small bugfix in initializer paths.
+
 0.6.0
 -----
     - initializer is now standalone script named as edeposit_proftpd_init.py.

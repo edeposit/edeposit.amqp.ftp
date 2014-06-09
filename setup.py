@@ -72,7 +72,7 @@ setup(
     packages=find_packages('src'),
     package_dir={'': 'src'},
 
-    scripts=['bin/abclinuxu_uploader.py'],
+    scripts=['bin/edeposit_proftpd_init.py'],
 
     namespace_packages=['edeposit', 'edeposit.amqp'],
     include_package_data=True,
