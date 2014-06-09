@@ -330,6 +330,34 @@ def add_or_update(data, item, value):
     return "\n".join(map(lambda x: str(x), data))  # convert back to string
 
 
+def comment(data, what):
+    """
+    Comments line containing `what` in string `data`.
+
+    Args:
+        data (str): Configuration file in string.
+        what (str): Line which will be commented out.
+
+    Returns:
+        str: Configuration file with commented `what`.
+    """
+    data = data.splitlines()
+
+    data = map(
+        lambda x: "#" + x if x.strip().split() == what.split() else x,
+        data
+    )
+
+    return "\n".join(data)
+
+
+def _is_deb_system():
+    """
+    Badly written test whether the system is deb/apt based or not.
+    """
+    return os.path.exists("/etc/apt")
+
+
 def _write_conf_file():
     """
     Write configuration file as it is defined in settings.
@@ -374,11 +402,10 @@ def main(overwrite):
         _write_conf_file()
 
     logger.debug("Checking existence of the '%s' file.", MODULES_FILE)
-    if not os.path.exists(MODULES_FILE):
+    if not os.path.exists(MODULES_FILE) and _is_deb_system():
         with open(MODULES_FILE, "w") as f:
             f.write(DEFAULT_MODULES_CONF)
             logger.debug("Modules file not found. Created '%s'.", MODULES_FILE)
-
 
     # create data directory, where the user informations will be stored
     logger.debug("Checking existence of user's directory '%s'.", DATA_PATH)
@@ -430,8 +457,14 @@ def main(overwrite):
         LOG_FILE + " WRITE paths"
     )
 
+    if not _is_deb_system():
+        logger.debug("Detected non debian based linux. Aplying SUSE changes.")
+        data = comment(data, "IdentLookups off")
+        data = comment(data, "Include /etc/proftpd/modules.conf")
+        data = add_or_update(data, "User", "ftp")
+
     # save changed file
-    logger.debug("Saving into config gile..")
+    logger.debug("Saving into config file..")
     with open(CONF_FILE, "w") as f:
         f.write(data)
         logger.debug("Done.")

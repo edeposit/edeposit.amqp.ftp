@@ -33,8 +33,11 @@ OpenSuse::
 Initialization
 ++++++++++++++
 After installation of the ``ProFTPD`` and ``edeposit.amqp.ftp``, run the
-:doc:`init script </initializer>`, which will configure ProFTPD and create
-all necessary files and directories.
+:doc:`edeposit_proftpd_init.py </initializer>` script (should be in your path),
+which will configure ProFTPD and create all necessary files and directories.
+
+Depending at which system are you using, you may need to restart/reload the
+``proftpd`` daemon.
 
 You may also want to check :mod:`.settings` module, to change some of the paths
 using JSON configuration files.

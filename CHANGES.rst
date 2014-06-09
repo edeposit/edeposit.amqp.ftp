@@ -1,21 +1,16 @@
 Changelog
 =========
 
-0.6.3
+0.6.4
 -----
-    - Added checking of the /etc/proftpd/modules.conf file.
+    - Into initializer were added checks for linux type - suse requires different settings than ubuntu.
 
-0.6.2
------
-    - Fixed bug in passwd_reader.py: missing call to get_ftp_uid().
-
-0.6.1
------
+0.6.0 - 0.6.3
+-------------
     - Small bugfix in initializer paths.
-
-0.6.0
------
     - initializer is now standalone script named as edeposit_proftpd_init.py.
+    - Fixed bug in passwd_reader.py: missing call to get_ftp_uid().
+    - Added checking of the /etc/proftpd/modules.conf file.
 
 0.5.0
 -----
