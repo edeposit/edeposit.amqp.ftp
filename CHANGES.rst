@@ -3,8 +3,9 @@ Changelog
 
 0.5.0
 -----
-    - Added Czech and English workflow examples.
     - Added readme.
+    - Added Czech and English workflow examples.
+    - Fixed bugs in initializer.py.
 
 0.4.0
 -----
