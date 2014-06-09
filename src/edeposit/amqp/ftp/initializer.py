@@ -12,8 +12,10 @@ file. Also user directory is created and correct permissions is set.
 """
 # Imports ====================================================================
 import os
+import shutil
 import os.path
-import sys
+import logging
+import argparse
 
 from api import reload_configuration, require_root
 from passwd_reader import get_ftp_uid
@@ -21,6 +23,10 @@ from settings import CONF_PATH, CONF_FILE, DATA_PATH, LOGIN_FILE, LOG_FILE
 
 
 # Variables ==================================================================
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+
+
 DEFAULT_PROFTPD_CONF = r"""
 #
 # /etc/proftpd/proftpd.conf -- This is a basic ProFTPD configuration file.
@@ -214,46 +220,92 @@ def add_or_update(data, item, value):
     return "\n".join(map(lambda x: str(x), data))  # convert back to string
 
 
+def _write_conf_file():
+    with open(CONF_FILE, "w") as f:
+        f.write(DEFAULT_PROFTPD_CONF)
+        logger.debug("'%s' created.", CONF_FILE)
+
+
 @require_root
-def main():
+def main(update):
     """
     Used to create configuration files, set permissions and so on.
     """
+    logger.debug("Checking existence of '%s'.", CONF_PATH)
     if not os.path.exists(CONF_PATH):
-        pass  # TODO: create/unpack default configuration
+        logger.debug("Directory %s not found! Panicking.." % CONF_PATH)
+        raise NotImplementedError("Not implemented yet!")  # TODO: fixnout
 
     # check existence of proftpd.conf
+    logger.debug("Checking existence of configuration file '%s'.", CONF_FILE)
     if not os.path.exists(CONF_FILE):
-        with open(CONF_FILE, "w") as f:
-            f.write(DEFAULT_PROFTPD_CONF)
+        logger.debug("Configuration file not found, creating..")
+        _write_conf_file()
+    else:
+        logger.debug("Found.")
+
+        if not os.path.exists(CONF_FILE + "_"):
+            logger.debug(
+                "Backing up the configuration file '%s' -> '%s'.",
+                CONF_FILE,
+                CONF_FILE + "_"
+            )
+            shutil.copyfile(CONF_FILE, CONF_FILE + "_")
+        else:
+            logger.debug(
+                "Backup already exists. '%s' will be overwritten.",
+                CONF_FILE
+            )
+
+    if not update:
+        logger.debug("--update switch not found, overwriting conf file")
+        _write_conf_file()
+
 
     # create data directory, where the user informations will be stored
+    logger.debug("Checking existence of user's directory '%s'.", DATA_PATH)
     if not os.path.exists(DATA_PATH):
+        logger.debug("Directory '%s' not found, creating..", DATA_PATH)
+
         os.makedirs(DATA_PATH, 0777)
 
+        logger.debug("Done. '%s' created.", DATA_PATH)
+
     # create user files if they doesn't exists
+    logger.debug("Checking existence of passwd file '%s'.", LOGIN_FILE)
     if not os.path.exists(LOGIN_FILE):
+        logger.debug("passwd file not found, creating..")
+
         open(LOGIN_FILE, "a").close()
 
+        logger.debug("Done. '%s' created.")
+
+    logger.debug("Setting permissions..")
     os.chown(LOGIN_FILE, get_ftp_uid(), -1)
     os.chmod(LOGIN_FILE, 0400)
 
     # load values from protpd conf file
+    logger.debug("Switching and adding options..")
     data = ""
     with open(CONF_FILE) as f:
         data = f.read()
 
     # set path to passwd file
+    logger.debug("\tAuthUserFile")
     data = add_or_update(
         data,
         "AuthUserFile",
         LOGIN_FILE
     )
+    logger.debug("\tRequireValidShell")
     data = add_or_update(data, "RequireValidShell", "off")
+    logger.debug("\tDefaultRoot")
     data = add_or_update(data, "DefaultRoot", "~")
 
     # http://www.proftpd.org/docs/modules/mod_log.html
+    logger.debug("\tLogFormat")
     data = add_or_update(data, "LogFormat", 'paths "%f, %u, %m, %{%s}t"')
+    logger.debug("\tExtendedLog")
     data = add_or_update(
         data,
         "ExtendedLog",
@@ -261,12 +313,42 @@ def main():
     )
 
     # save changed file
+    logger.debug("Saving into config gile..")
     with open(CONF_FILE, "w") as f:
         f.write(data)
+        logger.debug("Done.")
 
+    logger.debug("Sending proftpd signal to reload configuration..")
     reload_configuration()
+    logger.debug("Done.")
+    logger.info("All set.")
 
 
 # Main program ===============================================================
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(
+        description="""This script will modify your ProFTPD installation for use
+                       edeposit.amqp.ftp package."""
+    )
+    parser.add_argument(
+        "-u",
+        '--update',
+        action="store_true",
+        help="""Only update configuration file. By default, own configuration
+                file is used and old ono is stored in $name_."""
+    )
+    parser.add_argument(
+        "-v",
+        '--verbose',
+        action="store_true",
+        help="Print debug output."
+    )
+    args = parser.parse_args()
+
+    if args.verbose:
+        logger.setLevel(logging.DEBUG)
+        logger.debug("Logger set to debug level.")
+    else:
+        logger.setLevel(logging.INFO)
+
+    main(args.update)
