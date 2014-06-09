@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.6.3
+-----
+    - Added checking of the /etc/proftpd/modules.conf file.
+
 0.6.2
 -----
     - Fixed bug in passwd_reader.py: missing call to get_ftp_uid().

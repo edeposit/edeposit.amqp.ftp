@@ -29,7 +29,7 @@ except ImportError:
 from edeposit.amqp.ftp.api import reload_configuration, require_root
 from edeposit.amqp.ftp.passwd_reader import get_ftp_uid
 from edeposit.amqp.ftp.settings import CONF_PATH, CONF_FILE, DATA_PATH
-from edeposit.amqp.ftp.settings import LOGIN_FILE, LOG_FILE
+from edeposit.amqp.ftp.settings import LOGIN_FILE, LOG_FILE, MODULES_FILE
 
 
 # Variables ==================================================================
@@ -185,6 +185,106 @@ Include /etc/proftpd/conf.d/
 AuthUserFile /etc/proftpd/ftpd.passwd
 """
 
+DEFAULT_MODULES_CONF = r"""
+# This file is used to manage DSO modules and features.
+#
+
+# This is the directory where DSO modules reside
+
+ModulePath /usr/lib/proftpd
+
+# Allow only user root to load and unload modules, but allow everyone
+# to see which modules have been loaded
+
+ModuleControlsACLs insmod,rmmod allow user root
+ModuleControlsACLs lsmod allow user *
+
+LoadModule mod_ctrls_admin.c
+LoadModule mod_tls.c
+
+# Install one of proftpd-mod-mysql, proftpd-mod-pgsql or any other
+# SQL backend engine to use this module and the required backend.
+# This module must be mandatory loaded before anyone of
+# the existent SQL backeds.
+#LoadModule mod_sql.c
+
+# Install proftpd-mod-ldap to use this
+#LoadModule mod_ldap.c
+
+#
+# 'SQLBackend mysql' or 'SQLBackend postgres' (or any other valid backend)
+# directives are required to have SQL authorization working. You can also
+# comment out the unused module here, in alternative.
+#
+
+# Install proftpd-mod-mysql and decomment the previous
+# mod_sql.c module to use this.
+#LoadModule mod_sql_mysql.c
+
+# Install proftpd-mod-pgsql and decomment the previous
+# mod_sql.c module to use this.
+#LoadModule mod_sql_postgres.c
+
+# Install proftpd-mod-sqlite and decomment the previous
+# mod_sql.c module to use this
+#LoadModule mod_sql_sqlite.c
+
+# Install proftpd-mod-odbc and decomment the previous
+# mod_sql.c module to use this
+#LoadModule mod_sql_odbc.c
+
+# Install one of the previous SQL backends and decomment
+# the previous mod_sql.c module to use this
+#LoadModule mod_sql_passwd.c
+
+LoadModule mod_radius.c
+LoadModule mod_quotatab.c
+LoadModule mod_quotatab_file.c
+
+# Install proftpd-mod-ldap to use this
+#LoadModule mod_quotatab_ldap.c
+
+# Install one of the previous SQL backends and decomment
+# the previous mod_sql.c module to use this
+#LoadModule mod_quotatab_sql.c
+LoadModule mod_quotatab_radius.c
+LoadModule mod_wrap.c
+LoadModule mod_rewrite.c
+#LoadModule mod_sql_odbcad.c
+LoadModule mod_ban.c
+LoadModule mod_wrap2.c
+LoadModule mod_wrap2_file.c
+# Install one of the previous SQL backends and decomment
+# the previous mod_sql.c module to use this
+#LoadModule mod_wrap2_sql.c
+LoadModule mod_dynmasq.c
+LoadModule mod_exec.c
+LoadModule mod_shaper.c
+LoadModule mod_ratio.c
+LoadModule mod_site_misc.c
+
+LoadModule mod_sftp.c
+LoadModule mod_sftp_pam.c
+# Install one of the previous SQL backends and decomment
+# the previous mod_sql.c module to use this
+#LoadModule mod_sftp_sql.c
+
+LoadModule mod_facl.c
+LoadModule mod_unique_id.c
+LoadModule mod_copy.c
+LoadModule mod_deflate.c
+LoadModule mod_ifversion.c
+LoadModule mod_tls_memcache.c
+
+# Install proftpd-mod-geoip to use the GeoIP feature
+#LoadModule mod_geoip.c
+
+#LoadModule mod_log.c
+
+# keep this module the last one
+LoadModule mod_ifsession.c
+"""
+
 
 # Functions & objects ========================================================,
 def add_or_update(data, item, value):
@@ -269,10 +369,15 @@ def main(overwrite):
                 "Backup already exists. '%s' will be overwritten.",
                 CONF_FILE
             )
-
     if overwrite:
         logger.debug("--update switch not found, overwriting conf file")
         _write_conf_file()
+
+    logger.debug("Checking existence of the '%s' file.", MODULES_FILE)
+    if not os.path.exists(MODULES_FILE):
+        with open(MODULES_FILE, "w") as f:
+            f.write(DEFAULT_MODULES_CONF)
+            logger.debug("Modules file not found. Created '%s'.", MODULES_FILE)
 
 
     # create data directory, where the user informations will be stored

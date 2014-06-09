@@ -53,6 +53,8 @@ CONF_FILE = CONF_PATH + "proftpd.conf"
 #: dirname).
 LOGIN_FILE = CONF_PATH + "ftpd.passwd"
 
+MODULES_FILE = CONF_PATH + "modules.conf"
+
 #: File where the extended logs are stored (LOG_PATH is used as dirname).
 LOG_FILE = LOG_PATH + "extended.log"
 
