@@ -221,13 +221,16 @@ def add_or_update(data, item, value):
 
 
 def _write_conf_file():
+    """
+    Write configuration file as it is defined in settings.
+    """
     with open(CONF_FILE, "w") as f:
         f.write(DEFAULT_PROFTPD_CONF)
         logger.debug("'%s' created.", CONF_FILE)
 
 
 @require_root
-def main(update):
+def main(overwrite):
     """
     Used to create configuration files, set permissions and so on.
     """
@@ -257,7 +260,7 @@ def main(update):
                 CONF_FILE
             )
 
-    if not update:
+    if overwrite:
         logger.debug("--update switch not found, overwriting conf file")
         _write_conf_file()
 
@@ -331,11 +334,11 @@ if __name__ == '__main__':
                        edeposit.amqp.ftp package."""
     )
     parser.add_argument(
-        "-u",
-        '--update',
+        "-o",
+        '--overwrite',
         action="store_true",
-        help="""Only update configuration file. By default, own configuration
-                file is used and old ono is stored in $name_."""
+        help="""Overwrite ProFTPD configuration file with edeposit.amqp.ftp
+                default configuration."""
     )
     parser.add_argument(
         "-v",
@@ -351,4 +354,4 @@ if __name__ == '__main__':
     else:
         logger.setLevel(logging.INFO)
 
-    main(args.update)
+    main(args.overwrite)
