@@ -14,10 +14,10 @@ file. Also user directory is created and correct permissions is set.
 import os
 import os.path
 import sys
-from pwd import getpwnam
 
-from settings import CONF_PATH, CONF_FILE, DATA_PATH, LOGIN_FILE, LOG_FILE
 from api import reload_configuration, require_root
+from passwd_reader import get_ftp_uid
+from settings import CONF_PATH, CONF_FILE, DATA_PATH, LOGIN_FILE, LOG_FILE
 
 
 # Variables ==================================================================
@@ -235,7 +235,7 @@ def main():
     if not os.path.exists(LOGIN_FILE):
         open(LOGIN_FILE, "a").close()
 
-    os.chown(LOGIN_FILE, getpwnam('proftpd').pw_uid, -1)
+    os.chown(LOGIN_FILE, get_ftp_uid(), -1)
     os.chmod(LOGIN_FILE, 0400)
 
     # load values from protpd conf file

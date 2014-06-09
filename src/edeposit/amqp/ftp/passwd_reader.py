@@ -98,6 +98,13 @@ def save_users(users, path=settings.LOGIN_FILE):
             fh.write(pass_line + "\n")
 
 
+def get_ftp_uid():
+    try:
+        return getpwnam('proftpd').pw_uid
+    except KeyError:
+        return getpwnam('ftp').pw_uid
+
+
 def set_permissions(filename, uid=None, gid=None, mode=0775):
     """
     Set pemissions for given `filename`.

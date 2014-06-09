@@ -77,6 +77,7 @@ package edeposit.amqp.ftp {
             permissons, directories.
 
             add_or_update(data, item, value)
+            main()
         }
     }
     class "api.py" as api <<M, Green>>{
@@ -102,6 +103,7 @@ package edeposit.amqp.ftp {
 
         load_users(path)
         save_users(users, path)
+        get_ftp_uid()
         set_permissions(filename, uid, gid, mode)
         read_user_config(username, path)
         save_user_config(username, conf_dict, path)
