@@ -364,4 +364,8 @@ if __name__ == '__main__':
     else:
         logger.setLevel(logging.INFO)
 
-    main(args.overwrite)
+    try:
+        main(args.overwrite)
+    except AssertionError, e:
+        sys.stderr.write("Only root can run this script!\n")
+        sys.exit(1)
