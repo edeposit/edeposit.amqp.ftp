@@ -374,8 +374,12 @@ def main(overwrite):
     """
     logger.debug("Checking existence of '%s'.", CONF_PATH)
     if not os.path.exists(CONF_PATH):
-        logger.debug("Directory %s not found! Panicking.." % CONF_PATH)
-        raise NotImplementedError("Not implemented yet!")  # TODO: fixnout
+        logger.debug("Directory %s not found! Panicking..", CONF_PATH)
+        raise UserWarning(
+            "Can't find '%s' - it looks like ProFTPD is not installed!" % (
+                CONF_PATH,
+            )
+        )
 
     # check existence of proftpd.conf
     logger.debug("Checking existence of configuration file '%s'.", CONF_FILE)
@@ -504,6 +508,6 @@ if __name__ == '__main__':
 
     try:
         main(args.overwrite)
-    except AssertionError, e:
-        sys.stderr.write("Only root can run this script!\n")
+    except (AssertionError, UserWarning) as e:
+        sys.stderr.write(e.message + "\n")
         sys.exit(1)
