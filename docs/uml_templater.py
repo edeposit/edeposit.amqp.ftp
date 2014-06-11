@@ -197,7 +197,12 @@ def process_uml_file(filename, path):
 
 # Main program ================================================================
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="""PlantUML method filler.""")
+    parser = argparse.ArgumentParser(
+        description="""PlantUML method filler.
+                       This script expects directory with template_* named
+                       PlantUML files, which are converted to png.
+                       $templater:type:modulename is replaced by content of
+                       modulename. Type can be 'struct' or 'module'.""")
     parser.add_argument(
         "-i",
         "--ipath",
@@ -210,7 +215,7 @@ if __name__ == '__main__':
         "static_dir",
         type=str,
         metavar="STATIC_DIR",
-        help="Import path to your project."
+        help="Path to the _static directory for sphinx."
     )
     args = parser.parse_args()
 
