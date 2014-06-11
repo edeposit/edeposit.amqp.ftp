@@ -64,6 +64,7 @@ Scripts are meant to be used by users, API is there mainly for programmers.
 Standalone scripts
 ++++++++++++++++++
 .. toctree::
+    :maxdepth: 1
 
     /initializer
     /api/ftp.monitor
