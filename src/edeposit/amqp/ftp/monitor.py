@@ -7,7 +7,10 @@
 This script is used to monitor ProFTPD log and to react at certain events
 (deletion of the :attr:`ftp.settings.LOCK_FILENAME`).
 
-It is also used at API level in :mod:`edeposit.amqp` (see :func:`process_log`).
+It is also used at API level in :mod:`edeposit.amqp` (see :func:`process_log`
+and :mod:`.ftp_managerd`).
+
+Details of parsing are handled by :mod:`.request_parser`.
 """
 # Imports =====================================================================
 import os
@@ -46,10 +49,24 @@ def _read_stdin():
 
 
 def _parse_line(line):
-    # typical line looks like this;
-    # /home/ftp/xex/asd bsd.dat, xex, STOR, 1398351777
-    # filename may contain ',' character, so I am rsplitting the line from the
-    # end to the beginning
+    """
+    Convert one line from the extended log to dict.
+
+    Args:
+        line (str): Line which will be converted.
+
+    Returns:
+        dict: dict with ``timestamp``, ``command``, ``username`` and ``path`` \
+              keys.
+
+    Note:
+        Typical line looks like this::
+
+            /home/ftp/xex/asd bsd.dat, xex, STOR, 1398351777
+
+        Filename may contain ``,`` character, so I am ``rsplitting`` the line
+        from the end to the beginning.
+    """
     line, timestamp = line.rsplit(",", 1)
     line, command = line.rsplit(",", 1)
     path, username = line.rsplit(",", 1)
@@ -68,7 +85,7 @@ def process_log(file_iterator):
 
     Args:
         file_iterator (file): any file-like iterator for reading the log or
-                              stdin (see :funkc:`_read_stdin`).
+                              stdin (see :func:`_read_stdin`).
 
     Yields:
         ImportRequest: with each import.
