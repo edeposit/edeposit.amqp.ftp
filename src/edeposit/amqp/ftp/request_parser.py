@@ -207,6 +207,11 @@ def _process_directory(files, user_conf, error_protocol):
 
         logger.debug("Processing '%s'." % fn)
 
+        if fn.endswith(settings.USER_IMPORT_LOG) or \
+           fn.endswith(settings.USER_ERROR_LOG):
+            logger.debug("Skipping log file '%s'.", fn)
+            continue
+
         # get files with same names (ignore paths and suffixes)
         if conf_merger(user_conf, "SAME_NAME_DIR_PAIRING"):
             same_names = _same_named(fn, files)  # returns (index, name)
