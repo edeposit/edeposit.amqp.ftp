@@ -105,6 +105,9 @@ def test_monitor():
     assert 'standalone_meta.yaml' in standalone_names
     assert "standalone_meta.xml" in standalone_names
 
+    ftp = get_ftp_handler()
+    assert not ftp.path.isfile("example_data/advanced/bad.json")
+
 
 def test_isbn_pairing():
     settings.SAME_NAME_DIR_PAIRING = False
@@ -166,6 +169,20 @@ def test_same_name_dir_pairing():
     assert d_fn == "samename"
 
     assert pair[0].metadata_file.parsed_data.nazev == "samename.json"
+
+
+def test_leave_bad_files():
+    settings.LEAVE_BAD_FILES = False
+    reload(request_parser)
+
+    ftp = get_ftp_handler()
+    upload_files()
+    remove_lock()
+    process_files()
+
+    assert not ftp.path.isfile("example_data/advanced/bad.json")
+
+    settings.LEAVE_BAD_FILES = True
 
 
 def test_import_log_disabled():
