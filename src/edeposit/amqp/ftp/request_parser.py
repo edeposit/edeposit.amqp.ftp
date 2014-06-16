@@ -195,6 +195,9 @@ def _process_directory(files, user_conf, error_protocol):
     """
     items = []
 
+    banned = [settings.USER_IMPORT_LOG, settings.USER_ERROR_LOG]
+    files = filter(lambda x: not os.path.basename(x) in banned, files)
+
     if len(files) == 2 and conf_merger(user_conf, "SAME_DIR_PAIRING"):
         logger.debug("There are only two files.")
 
@@ -206,11 +209,6 @@ def _process_directory(files, user_conf, error_protocol):
         fn = files.pop()
 
         logger.debug("Processing '%s'." % fn)
-
-        if fn.endswith(settings.USER_IMPORT_LOG) or \
-           fn.endswith(settings.USER_ERROR_LOG):
-            logger.debug("Skipping log file '%s'.", fn)
-            continue
 
         # get files with same names (ignore paths and suffixes)
         if conf_merger(user_conf, "SAME_NAME_DIR_PAIRING"):
