@@ -1,0 +1,12 @@
+Status: Error
+
+Error: Import only partially successful.
+See 'error.log.txt' for details.
+
+--- Errors ---
+Can't parse /home/ftp/xex/example_data/advanced/bad.json: Can't parse your JSON data: No JSON object could be decoded
+
+--- Successfully imported files ---
+Ebook file '/home/ftp/xex/setup.py' successfully imported.
+Ebook file '/home/ftp/xex/setup.py' successfully imported.
+Ebook file '/home/ftp/xex/setup.py' successfully imported.

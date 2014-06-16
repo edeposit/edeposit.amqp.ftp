@@ -1,0 +1,1 @@
+Can't parse /home/ftp/xex/example_data/advanced/bad.json: Can't parse your JSON data: No JSON object could be decoded
