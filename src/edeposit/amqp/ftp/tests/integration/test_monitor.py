@@ -86,7 +86,7 @@ def test_monitor():
     out = process_files()
 
     reqs = out.requests
-    assert len(reqs) >= 4, "Didn't received expected amount of items!"
+    assert len(reqs) == 8, "Didn't received expected amount of items!"
 
     pairs = filter(lambda x: isinstance(x, structures.DataPair), reqs)
     assert pairs
