@@ -80,6 +80,15 @@ def process_files():
     return out
 
 
+def test_server():
+    msg = "Try to run the initializer script first."
+    assert os.path.exists(settings.CONF_PATH), msg
+    assert os.path.exists(settings.LOGIN_FILE), msg
+    assert os.path.exists(settings.DATA_PATH), msg
+    assert os.path.exists(settings.LOG_PATH), msg
+    assert os.path.exists(settings.LOG_FILE), msg
+
+
 def test_monitor():
     upload_files()
     remove_lock()
