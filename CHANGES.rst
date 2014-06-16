@@ -1,12 +1,16 @@
 Changelog
 =========
 
-0.6.4
+1.0.0
 -----
-    - Into initializer were added checks for linux type - suse requires different settings than ubuntu.
+    - Added some missing tests.
+    - Fixed internal log bug.
+    - First release version.
 
-0.6.0 - 0.6.3
+
+0.6.0 - 0.6.4
 -------------
+    - Into initializer were added checks for linux type - suse requires different settings than ubuntu.
     - Small bugfix in initializer paths.
     - initializer is now standalone script named as edeposit_proftpd_init.py.
     - Fixed bug in passwd_reader.py: missing call to get_ftp_uid().
