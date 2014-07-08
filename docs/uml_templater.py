@@ -23,7 +23,7 @@ def _add_import_path(path):
     if path not in sys.path:
         sys.path.insert(
             0,
-            os.path.normpath(os.path.abspath('.') + "/" + path)
+            os.path.abspath(path)
         )
 
 
@@ -124,6 +124,8 @@ def _get_data(clsn, info_dict, path):
     fn = path + "/" + info_dict["fn"]
     if not info_dict["fn"].endswith(".py"):
         fn += ".py"
+
+    fn = fn.replace("_​_", "__")
 
     if not os.path.exists(fn):
         sys.stderr.write("'%s' doesn't exists!\n" % fn)
