@@ -1,12 +1,15 @@
 Changelog
 =========
 
+1.0.1
+-----
+    - Minor changes and improvements.
+
 1.0.0
 -----
     - Added some missing tests.
     - Fixed internal log bug.
     - First release version.
-
 
 0.6.0 - 0.6.4
 -------------
