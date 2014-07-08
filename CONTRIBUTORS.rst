@@ -1,4 +1,4 @@
 Contributors
 ============
 
-- Bystroushaak <bystrousak@kitakitsune.org>, Developer
+- Bystroushaak <bystrousak[a]kitakitsune.org>, Developer
