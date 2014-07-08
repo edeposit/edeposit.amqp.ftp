@@ -61,16 +61,17 @@ def _instanceof(instance, cls):
 # Main function ===============================================================
 def reactToAMQPMessage(message, UUID):
     """
-    React to given (AMQP) message. `message` is usually expected to be
-    :py:func:`collections.namedtuple` structure filled with all necessary data.
+    React to given (AMQP) message. `message` is expected to be
+    :py:func:`collections.namedtuple` structure from :mod:`.structures` filled
+    with all necessary data.
 
     Args:
-        message (.. class): TODO: ..
-
-        UUID (str):                unique ID of received message
+        message (object): One of the request objects defined in
+                          :mod:`.structures`.
+        UUID (str): Unique ID of received message.
 
     Returns:
-        : response TODO: comment when the protocol will be ready
+        object: Response class from :mod:`structures`.
 
     Raises:
         ValueError: if bad type of `message` structure is given.
@@ -80,7 +81,7 @@ def reactToAMQPMessage(message, UUID):
             username=message.username,
             password=message.password
         )
-        return True  # TODO: předělat na něco užitečnějšího? je to zapotřebí?
+        return True
     elif _instanceof(message, structures.RemoveUser):
         api.remove_user(message.username)
         return True
