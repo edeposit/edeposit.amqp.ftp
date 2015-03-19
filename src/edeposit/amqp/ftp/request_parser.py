@@ -20,12 +20,7 @@ import os
 import shutil
 from collections import namedtuple
 
-
-try:
-    from aleph import isbn
-except ImportError:
-    from edeposit.amqp.aleph import isbn
-
+import isbn_validator
 
 import decoders
 import passwd_reader
@@ -299,7 +294,7 @@ def _isbn_pairing(items):
     while metas:
         meta = metas.pop()
 
-        if not isbn.is_valid_isbn(meta.name):
+        if not isbn_validator.is_valid_isbn(meta.name):
             continue
 
         if not ebooks:

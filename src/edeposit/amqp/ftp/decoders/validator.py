@@ -11,11 +11,11 @@ It handles the unicode in keys, builds dicts from flat arrays and so on.
 # Imports =====================================================================
 import unicodedata
 
+from isbn_validator import is_valid_isbn
+
 try:
-    from aleph.isbn import is_valid_isbn
     from aleph.datastructures.epublication import EPublication
 except ImportError:
-    from edeposit.amqp.aleph.isbn import is_valid_isbn
     from edeposit.amqp.aleph.datastructures.epublication import EPublication
 
 from meta_exceptions import MetaParsingException

@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.0.3
+-----
+    - isbn.py is no longer part of the edeposit.amqp.aleph, but `standalone module <https://github.com/edeposit/isbn_validator>`_.
+
 1.0.2
 -----
     - ``reactToAMQPMessage()`` parameters modified.
