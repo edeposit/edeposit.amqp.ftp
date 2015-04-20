@@ -1,23 +1,18 @@
 Changelog
 =========
 
-1.0.3
+1.0.4
 -----
-    - isbn.py is no longer part of the edeposit.amqp.aleph, but `standalone module <https://github.com/edeposit/isbn_validator>`_.
+    - Removed ump_templater.py and update_uml.py. Scripts were moved to own repo: https://github.com/edeposit/uml_templater
 
-1.0.2
------
-    - ``reactToAMQPMessage()`` parameters modified.
-
-1.0.1
------
-    - Minor changes and improvements.
-
-1.0.0
------
+1.0.0 - 1.0.3
+-------------
     - Added some missing tests.
     - Fixed internal log bug.
     - First release version.
+    - Minor changes and improvements.
+    - ``reactToAMQPMessage()`` parameters modified.
+    - isbn.py is no longer part of the edeposit.amqp.aleph, but `standalone module <https://github.com/edeposit/isbn_validator>`_.
 
 0.6.0 - 0.6.4
 -------------
